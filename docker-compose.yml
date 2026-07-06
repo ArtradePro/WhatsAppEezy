@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: freight-backend-service
+    restart: always
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - uploads-data:/app/uploads
+    networks:
+      - freight-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: freight-frontend-service
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - freight-network
+
+volumes:
+  uploads-data:
+    driver: local
+
+networks:
+  freight-network:
+    driver: bridge

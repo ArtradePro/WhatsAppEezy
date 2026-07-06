@@ -1,0 +1,276 @@
+/* Carrier Upload Dashboard Premium Styling */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg-gradient-start: #0b0f19;
+  --bg-gradient-end: #111827;
+  --panel-bg: rgba(17, 24, 39, 0.75);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --brand-primary: #8b5cf6;
+  --brand-secondary: #06b6d4;
+  --brand-gradient: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+  --danger: #f87171;
+  --success: #34d399;
+  --input-bg: rgba(31, 41, 55, 0.5);
+}
+
+.carrier-container {
+  font-family: 'Outfit', sans-serif;
+  background: radial-gradient(circle at top right, #1e1b4b 0%, var(--bg-gradient-start) 60%), var(--bg-gradient-end);
+  min-height: 100vh;
+  color: var(--text-primary);
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.carrier-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  max-width: 700px;
+}
+
+.carrier-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(to right, #ffffff, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.carrier-header p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 1200px;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-layout {
+    grid-template-columns: 460px 1fr;
+  }
+}
+
+/* Glassmorphism Upload Panel */
+.carrier-dashboard {
+  background: var(--panel-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--panel-border);
+  border-radius: 1.25rem;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  height: fit-content;
+}
+
+.carrier-dashboard h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.carrier-dashboard h2::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 20px;
+  background: var(--brand-gradient);
+  border-radius: 2px;
+}
+
+.carrier-dashboard p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Form Styles */
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.file-input-wrapper {
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 1rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(31, 41, 55, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+}
+
+.file-input-wrapper:hover, .file-input-wrapper.active {
+  border-color: var(--brand-primary);
+  background: rgba(139, 92, 246, 0.08);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+}
+
+.upload-icon {
+  font-size: 3rem;
+  opacity: 0.7;
+}
+
+.file-input-hidden {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.file-specs {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.selected-file-badge {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  word-break: break-all;
+}
+
+.remove-btn {
+  background: transparent;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.remove-btn:hover {
+  background: rgba(248, 113, 113, 0.1);
+}
+
+/* Submit Action Button */
+.upload-submit-btn {
+  width: 100%;
+  padding: 0.9rem;
+  background: var(--brand-gradient);
+  border: none;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.upload-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+}
+
+.upload-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Feedback message banner styling */
+.message-banner {
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.message-banner.error {
+  background: rgba(248, 113, 113, 0.15);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: #fca5a5;
+}
+
+.message-banner.success {
+  background: rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  color: #a7f3d0;
+}
+
+/* Rates matrix view dashboard */
+.matrix-panel {
+  background: var(--panel-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--panel-border);
+  border-radius: 1.25rem;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+}
+
+.rates-table-container {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.rates-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.rates-table th {
+  padding: 1rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.rates-table td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.rates-table tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.rate-badge {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}

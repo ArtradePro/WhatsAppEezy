@@ -1,0 +1,9 @@
+# Local Git Ignore
+node_modules/
+.env
+.env.*
+.env.local
+uploads/
+npm-debug.log*
+yarn-error.log*
+.system_generated/

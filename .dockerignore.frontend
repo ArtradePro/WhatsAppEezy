@@ -1,0 +1,20 @@
+# Frontend Docker Ignore
+# Prevents uploading local builds and modules to the container build context
+
+node_modules/
+dist/
+build/
+.env
+.env.*
+.env.local
+
+# Git configurations
+.git
+.gitignore
+.github
+
+# Container config files
+Dockerfile*
+.dockerignore*
+nginx.conf*
+README.md

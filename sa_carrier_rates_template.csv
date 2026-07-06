@@ -1,0 +1,19 @@
+Origin Zone,Destination Zone,Max Weight (kg),Base Rate (ZAR),Per Kg Rate (ZAR)
+Gauteng Hub,Western Cape Hub,500,1500.00,4.20
+Gauteng Hub,Western Cape Hub,2000,2500.00,3.80
+Gauteng Hub,Western Cape Hub,10000,5000.00,3.20
+Gauteng Hub,KwaZulu-Natal Hub,500,1200.00,3.10
+Gauteng Hub,KwaZulu-Natal Hub,2000,2000.00,2.70
+Gauteng Hub,KwaZulu-Natal Hub,10000,4000.00,2.20
+Western Cape Hub,KwaZulu-Natal Hub,500,1800.00,4.90
+Western Cape Hub,KwaZulu-Natal Hub,2000,3000.00,4.40
+Western Cape Hub,KwaZulu-Natal Hub,10000,6000.00,3.80
+Gauteng Hub,Eastern Cape Zone,500,1400.00,3.90
+Gauteng Hub,Eastern Cape Zone,2000,2200.00,3.50
+Gauteng Hub,Eastern Cape Zone,10000,4500.00,2.95
+Western Cape Hub,Eastern Cape Zone,500,1100.00,3.20
+Western Cape Hub,Eastern Cape Zone,2000,1800.00,2.80
+Western Cape Hub,Eastern Cape Zone,10000,3800.00,2.40
+Gauteng Hub,Free State Zone,500,850.00,2.10
+Gauteng Hub,Free State Zone,2000,1400.00,1.80
+Gauteng Hub,Free State Zone,10000,3000.00,1.45

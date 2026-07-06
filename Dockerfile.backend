@@ -1,0 +1,25 @@
+# Multi-stage/Build environment optimization for Node API
+FROM node:18-alpine AS base
+
+# Create App Directory
+WORKDIR /usr/src/app
+
+# Copy dependency configs
+COPY package*.json ./
+
+# Install production dependencies only (ignores devDependencies)
+RUN npm ci --only=production
+
+# Copy application source files
+COPY rating_engine_controller.js ./
+COPY rate_upload_service.js ./
+# COPY index.js ./ # Standard entry point in production
+
+# Security optimization: execute application using a non-root system user
+USER node
+
+# Expose internal API gateway port
+EXPOSE 3000
+
+# Execute server
+CMD ["node", "rating_engine_controller.js"]

@@ -1,0 +1,319 @@
+/* Carrier Dashboard Premium Styling */
+
+:root {
+  --bg-gradient-start: #0b0f19;
+  --bg-gradient-end: #111827;
+  --panel-bg: rgba(17, 24, 39, 0.75);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --brand-primary: #8b5cf6;
+  --brand-secondary: #06b6d4;
+  --brand-gradient: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+  --danger: #f87171;
+  --success: #34d399;
+  --input-bg: rgba(31, 41, 55, 0.5);
+}
+
+.carrier-container {
+  font-family: 'Outfit', sans-serif;
+  background: radial-gradient(circle at top left, #1e1b4b 0%, var(--bg-gradient-start) 60%), var(--bg-gradient-end);
+  min-height: 100vh;
+  color: var(--text-primary);
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.carrier-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  max-width: 700px;
+}
+
+.carrier-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(to right, #f3f4f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.carrier-header p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 1200px;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-layout {
+    grid-template-columns: 460px 1fr;
+  }
+}
+
+/* Glassmorphism Upload Panel */
+.upload-panel {
+  background: var(--panel-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--panel-border);
+  border-radius: 1.25rem;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  height: fit-content;
+}
+
+.panel-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.panel-section-title::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 20px;
+  background: var(--brand-gradient);
+  border-radius: 2px;
+}
+
+/* Drag and Drop Zone */
+.dropzone {
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 1rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(31, 41, 55, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dropzone:hover, .dropzone.active {
+  border-color: var(--brand-primary);
+  background: rgba(139, 92, 246, 0.08);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+}
+
+.upload-icon {
+  font-size: 3rem;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+
+.dropzone:hover .upload-icon {
+  transform: translateY(-4px);
+}
+
+.file-specs {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* Selected File Preview Box */
+.file-preview-card {
+  background: rgba(139, 92, 246, 0.06);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.file-name {
+  font-weight: 500;
+  font-size: 0.95rem;
+  word-break: break-all;
+}
+
+.file-size {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.remove-file-btn {
+  background: transparent;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.remove-file-btn:hover {
+  background: rgba(248, 113, 113, 0.1);
+}
+
+/* Error and Success Banners */
+.alert-banner {
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.alert-banner.error {
+  background: rgba(248, 113, 113, 0.15);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: #fca5a5;
+}
+
+.alert-banner.success {
+  background: rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  color: #a7f3d0;
+}
+
+/* Preview Row Validation Tables */
+.validation-summary-card {
+  margin-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 1.5rem;
+}
+
+.summary-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--panel-border);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.stat-val {
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: block;
+}
+
+.stat-lbl {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.row-error-list {
+  background: rgba(248, 113, 113, 0.05);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: 0.5rem;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 0.5rem 1rem;
+  list-style-type: none;
+  font-size: 0.8rem;
+  color: #fca5a5;
+}
+
+.row-error-list li {
+  margin-bottom: 0.25rem;
+}
+
+/* Action Button */
+.upload-action-btn {
+  width: 100%;
+  padding: 0.9rem;
+  background: var(--brand-gradient);
+  border: none;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.upload-action-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+}
+
+.upload-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Rates Dashboard Matrix Panel */
+.matrix-panel {
+  background: var(--panel-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--panel-border);
+  border-radius: 1.25rem;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+}
+
+.rates-table-container {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.rates-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.rates-table th {
+  padding: 1rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.rates-table td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.rates-table tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.rate-badge {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}

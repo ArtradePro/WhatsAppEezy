@@ -1,0 +1,29 @@
+# Docker Ignore file
+# Prevents copying local build files, development packages, and environment secrets into the image
+
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Environment variables and secrets
+.env
+.env.*
+.env.local
+
+# Git version control files
+.git
+.gitignore
+.github
+
+# Testing scripts and verification files
+test_*.js
+*.log
+uploads/
+
+# Configuration files
+Dockerfile
+.dockerignore
+docker-compose*
+README.md
+knexfile.js
+migrations/
