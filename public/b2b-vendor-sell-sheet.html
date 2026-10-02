@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cargo-Dash MoR — 1-Page B2B Vendor & Contractor Acquisition Sell-Sheet</title>
+  <style>
+    :root {
+      --slate-950: #090d16;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --emerald-600: #059669;
+      --emerald-500: #10b981;
+      --emerald-50: #ecfdf5;
+      --sky-600: #0284c7;
+      --sky-50: #f0f9ff;
+      --amber-600: #d97706;
+      --amber-50: #fffbeb;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+      background: #e2e8f0;
+      color: var(--slate-900);
+      line-height: 1.4;
+      padding: 24px;
+    }
+
+    .toolbar {
+      max-width: 210mm;
+      margin: 0 auto 16px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--slate-900);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .badge-live {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid #10b981;
+      color: #6ee7b7;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .btn-print {
+      background: var(--emerald-600);
+      color: #fff;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-print:hover {
+      background: var(--emerald-500);
+    }
+
+    /* A4 1-Page Sheet Container */
+    .sheet {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 14mm 15mm;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-top: 8px solid var(--emerald-600);
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid var(--slate-900);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+
+    .brand-kicker {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--emerald-600);
+      margin-bottom: 3px;
+    }
+
+    .brand-title {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: var(--slate-950);
+    }
+
+    .brand-subtitle {
+      font-size: 12.5px;
+      color: var(--slate-600);
+      margin-top: 3px;
+      font-weight: 500;
+    }
+
+    .header-meta {
+      text-align: right;
+      font-size: 11px;
+      color: var(--slate-700);
+    }
+
+    .header-meta strong {
+      display: block;
+      font-size: 13px;
+      color: var(--slate-950);
+    }
+
+    .mor-pill {
+      display: inline-block;
+      margin-top: 4px;
+      background: var(--emerald-50);
+      border: 1px solid var(--emerald-600);
+      color: var(--emerald-600);
+      font-weight: 800;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    /* Hero Value Banner */
+    .hero-box {
+      background: var(--slate-900);
+      color: #ffffff;
+      padding: 14px 18px;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      display: grid;
+      grid-template-columns: 1.55fr 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .hero-box h2 {
+      font-size: 16.5px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 5px;
+    }
+
+    .hero-box p {
+      font-size: 11.5px;
+      color: #cbd5e1;
+      line-height: 1.45;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 8px 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-card .val {
+      font-size: 16px;
+      font-weight: 900;
+      color: #34d399;
+      display: block;
+    }
+
+    .stat-card .lbl {
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #cbd5e1;
+    }
+
+    /* Two Industry Verticals */
+    .verticals-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .vertical-card {
+      border: 1.5px solid var(--slate-200);
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: #fff;
+    }
+
+    .vertical-card.yard {
+      border-top: 4px solid var(--emerald-600);
+    }
+
+    .vertical-card.salon {
+      border-top: 4px solid var(--sky-600);
+    }
+
+    .vertical-tag {
+      font-size: 9.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 7px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 5px;
+    }
+
+    .yard .vertical-tag {
+      background: var(--emerald-50);
+      color: var(--emerald-600);
+    }
+
+    .salon .vertical-tag {
+      background: var(--sky-50);
+      color: var(--sky-600);
+    }
+
+    .vertical-card h3 {
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: var(--slate-950);
+    }
+
+    .vertical-list {
+      list-style: none;
+      font-size: 11px;
+      color: var(--slate-700);
+    }
+
+    .vertical-list li {
+      margin-bottom: 4px;
+      padding-left: 14px;
+      position: relative;
+    }
+
+    .vertical-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--emerald-600);
+      font-weight: 900;
+    }
+
+    /* 4-Step Zero-Data Workflow */
+    .section-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--slate-600);
+      margin-bottom: 8px;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .step-box {
+      background: var(--slate-100);
+      border: 1px solid var(--slate-200);
+      border-radius: 8px;
+      padding: 9px 10px;
+    }
+
+    .step-num {
+      font-size: 10px;
+      font-weight: 900;
+      color: var(--emerald-600);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .step-box h4 {
+      font-size: 11.5px;
+      font-weight: 800;
+      margin-bottom: 3px;
+      color: var(--slate-950);
+    }
+
+    .step-box p {
+      font-size: 10px;
+      color: var(--slate-600);
+    }
+
+    /* QR Live Demo Section */
+    .qr-section {
+      border: 2px solid var(--slate-900);
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: #f8fafc;
+      margin-bottom: 14px;
+    }
+
+    .qr-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .qr-header h3 {
+      font-size: 13.5px;
+      font-weight: 900;
+      color: var(--slate-950);
+    }
+
+    .qr-header span {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--emerald-600);
+    }
+
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .qr-card {
+      background: #ffffff;
+      border: 1px solid var(--slate-200);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .qr-box {
+      width: 74px;
+      height: 74px;
+      flex-shrink: 0;
+      border: 1px solid var(--slate-200);
+      border-radius: 6px;
+      padding: 4px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-info h4 {
+      font-size: 11.5px;
+      font-weight: 800;
+      color: var(--slate-950);
+      margin-bottom: 2px;
+    }
+
+    .qr-info .phone {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--emerald-600);
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .qr-info p {
+      font-size: 9.5px;
+      color: var(--slate-600);
+      margin-bottom: 4px;
+    }
+
+    .qr-link {
+      font-size: 9.5px;
+      font-weight: 800;
+      color: var(--slate-900);
+      text-decoration: underline;
+    }
+
+    /* Transparent MoR Pricing Table */
+    .pricing-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-bottom: 12px;
+    }
+
+    .pricing-table th {
+      background: var(--slate-900);
+      color: #ffffff;
+      text-align: left;
+      padding: 7px 10px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pricing-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--slate-200);
+      color: var(--slate-800);
+    }
+
+    .pricing-table tr.highlight td {
+      background: var(--emerald-50);
+      font-weight: 700;
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1.5px solid var(--slate-200);
+      padding-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: var(--slate-600);
+    }
+
+    .footer strong {
+      color: var(--slate-900);
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        padding: 0;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .sheet {
+        width: 100%;
+        min-height: auto;
+        box-shadow: none;
+        padding: 8mm 10mm;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar no-print">
+    <div class="toolbar-left">
+      <span class="badge-live">Go-Live Collateral</span>
+      <span>1-Page B2B Contractor &amp; Service Studio Acquisition Sell-Sheet (A4 Print-Ready)</span>
+    </div>
+    <button class="btn-print" onclick="window.print()">🖨️ Print / Save 1-Page PDF</button>
+  </div>
+
+  <main class="sheet">
+    <div>
+      <!-- Top Brand Header -->
+      <header class="header">
+        <div>
+          <div class="brand-kicker">Dedicated Virtual WhatsApp Storefront &amp; Automated MoR Settlement</div>
+          <h1 class="brand-title">CARGO-DASH PRO</h1>
+          <div class="brand-subtitle">Turn Any Materials Yard, Hardware Depot, or Service Studio Into an Instant WhatsApp Checkout Store</div>
+        </div>
+        <div class="header-meta">
+          <strong>Merchant of Record (MoR) Platform</strong>
+          <span>Capitec Pay • Instant EFT • Card • Apple Pay</span>
+          <span class="mor-pill">Zero Data Required for Yard &amp; Drivers</span>
+        </div>
+      </header>
+
+      <!-- Hero Pitch -->
+      <section class="hero-box">
+        <div>
+          <h2>Stop Losing Orders to Slow Quotes &amp; Unverified EFT Screenshots.</h2>
+          <p>
+            We provision your business its own <strong>dedicated WhatsApp Virtual Number &amp; isolated Meta Product Catalog</strong>.
+            Customers browse, drop a GPS pin (or pick an appointment slot), and pay instantly via PayFast. You receive verified
+            dispatch slips on WhatsApp and automated Friday EFT payouts to your FNB, Capitec, Standard Bank, Nedbank, or ABSA account.
+          </p>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-card">
+            <span class="val">60 Sec</span>
+            <span class="lbl">WhatsApp Onboarding</span>
+          </div>
+          <div class="stat-card">
+            <span class="val">R0 Data</span>
+            <span class="lbl">Works on WhatsApp Bundles</span>
+          </div>
+          <div class="stat-card">
+            <span class="val">100%</span>
+            <span class="lbl">Verified PayFast ITN</span>
+          </div>
+          <div class="stat-card">
+            <span class="val">Weekly</span>
+            <span class="lbl">Automated Bank EFT</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dual Vertical Capabilities -->
+      <section class="verticals-grid">
+        <div class="vertical-card yard">
+          <span class="vertical-tag">Vertical A • Builders, Aggregates &amp; Retail Delivery</span>
+          <h3>🚚 Building Materials Yards &amp; Tipper Fleets</h3>
+          <ul class="vertical-list">
+            <li><strong>PostGIS GPS Pin Haulage:</strong> Automatic per-km tipper delivery fee calculation &amp; geofence radius check.</li>
+            <li><strong>Snap-a-Photo AI Catalog:</strong> WhatsApp a photo of bricks, sand, or stone — auto-cropped to a 1024×1024 studio card for your 1-tap approval.</li>
+            <li><strong>Driver Loading Slips &amp; Live ETA:</strong> Instant WhatsApp dispatch alerts &amp; SABS-compliant printable waybills.</li>
+          </ul>
+        </div>
+
+        <div class="vertical-card salon">
+          <span class="vertical-tag">Vertical B • Salons, Spas &amp; Trade Callouts</span>
+          <h3>📅 Hair Studios, Wellness Spas &amp; Trade Services</h3>
+          <ul class="vertical-list">
+            <li><strong>Interactive Slot Picker:</strong> Real-time WhatsApp availability list returning your next 3 open appointment slots.</li>
+            <li><strong>10-Min Slot Hold + Deposit:</strong> Locks the calendar slot while the client settles their deposit via Capitec Pay / Instant EFT.</li>
+            <li><strong>Zero Delivery Fee Bypass:</strong> Automatically sets delivery to R0.00 and sends 1-tap WhatsApp appointment reminders.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 4-Step Vendor Workflow -->
+      <div class="section-title">How It Works — 100% Inside WhatsApp (No App Downloads or Website Needed)</div>
+      <section class="steps-grid">
+        <div class="step-box">
+          <div class="step-num">Step 01</div>
+          <h4>Text ONBOARD</h4>
+          <p>Send a single WhatsApp text with your business name &amp; bank details. Your isolated virtual number goes live in 60s.</p>
+        </div>
+        <div class="step-box">
+          <div class="step-num">Step 02</div>
+          <h4>Snap Product Photos</h4>
+          <p>WhatsApp a photo + price (e.g. <em>"Building Sand R550 per m3"</em>). Tap <strong>[Approve &amp; Publish]</strong> on the preview card.</p>
+        </div>
+        <div class="step-box">
+          <div class="step-num">Step 03</div>
+          <h4>Instant PayFast Checkout</h4>
+          <p>Customers order &amp; pay via Capitec Pay / Instant EFT. Our MoR engine verifies the payment cryptographically.</p>
+        </div>
+        <div class="step-box">
+          <div class="step-num">Step 04</div>
+          <h4>Dispatch &amp; Friday EFT</h4>
+          <p>Receive an instant WhatsApp dispatch/booking alert. Net funds settle directly into your bank account every Friday.</p>
+        </div>
+      </section>
+
+      <!-- Live Interactive WhatsApp QR Demo Links -->
+      <section class="qr-section">
+        <div class="qr-header">
+          <h3>📱 Scan with Your Phone Camera to Test the Live WhatsApp Storefronts Right Now</h3>
+          <span>100% Isolated Multi-Tenant Virtual Numbers</span>
+        </div>
+        <div class="qr-grid">
+          <!-- QR 1: Materials Yard Demo -->
+          <div class="qr-card">
+            <div class="qr-box">
+              <svg viewBox="0 0 29 29" width="64" height="64" shape-rendering="crispEdges" aria-label="Materials Yard Demo QR">
+                <rect width="29" height="29" fill="#ffffff"/>
+                <path fill="#0f172a" d="M0,0h7v7h-7z M1,1v5h5v-5z M2,2h3v3h-3z M22,0h7v7h-7z M23,1v5h5v-5z M24,2h3v3h-3z M0,22h7v7h-7z M1,23v5h5v-5z M2,24h3v3h-3z M8,0h2v1h-2z M11,0h3v2h-3z M16,0h2v1h-2z M19,0h2v2h-2z M8,2h1v3h-1z M10,3h2v2h-2z M14,2h3v1h-3z M18,3h2v2h-2z M8,6h13v1h-13z M0,8h1v2h-1z M2,8h3v1h-3z M6,8h1v13h-1z M8,8h2v2h-2z M12,8h3v2h-3z M17,8h2v3h-2z M21,8h2v2h-2z M25,8h4v1h-4z M0,11h2v3h-2z M3,10h2v2h-2z M9,11h4v2h-4z M14,11h2v4h-2z M18,12h3v2h-3z M22,11h3v2h-3z M26,11h3v2h-3z M1,15h4v2h-4z M8,14h3v3h-3z M12,15h2v2h-2z M17,15h4v2h-4z M23,14h2v3h-2z M26,15h2v3h-2z M0,18h3v2h-3z M4,18h2v3h-2z M9,18h2v3h-2z M13,18h5v2h-5z M20,18h5v5h-5z M21,19v3h3v-3z M22,20h1v1h-1z M8,22h2v3h-2z M11,21h3v2h-3z M15,21h3v3h-3z M26,20h3v2h-3z M8,26h3v3h-3z M12,24h4v2h-4z M17,25h3v4h-3z M21,24h3v3h-3z M25,24h4v2h-4z M26,27h3v2h-3z"/>
+              </svg>
+            </div>
+            <div class="qr-info">
+              <h4>1. Materials Yard Demo</h4>
+              <span class="phone">+27 60 010 4001</span>
+              <p>Test BrickDirect catalog, GPS pin drop &amp; tipper haulage quote.</p>
+              <a class="qr-link" href="https://wa.me/27600104001?text=hi" target="_blank" rel="noopener">wa.me/27600104001?text=hi</a>
+            </div>
+          </div>
+
+          <!-- QR 2: Salon & Service Studio Demo -->
+          <div class="qr-card">
+            <div class="qr-box">
+              <svg viewBox="0 0 29 29" width="64" height="64" shape-rendering="crispEdges" aria-label="Service Studio Demo QR">
+                <rect width="29" height="29" fill="#ffffff"/>
+                <path fill="#0284c7" d="M0,0h7v7h-7z M1,1v5h5v-5z M2,2h3v3h-3z M22,0h7v7h-7z M23,1v5h5v-5z M24,2h3v3h-3z M0,22h7v7h-7z M1,23v5h5v-5z M2,24h3v3h-3z M9,0h3v2h-3z M14,0h2v2h-2z M18,1h3v2h-3z M8,3h2v2h-2z M12,3h4v2h-4z M17,4h3v2h-3z M6,8h1v13h-1z M8,6h13v1h-13z M0,8h3v2h-3z M4,9h2v2h-2z M9,8h3v3h-3z M14,8h2v2h-2z M18,8h4v2h-4z M24,8h5v2h-5z M1,12h3v2h-3z M8,12h2v3h-2z M11,11h5v2h-5z M17,11h3v3h-3z M22,11h4v2h-4z M27,12h2v3h-2z M0,15h2v3h-2z M3,15h3v2h-3z M10,15h4v2h-4z M15,14h3v3h-3z M19,15h3v2h-3z M24,14h3v3h-3z M2,19h3v2h-3z M8,18h4v3h-4z M13,18h3v2h-3z M20,18h5v5h-5z M21,19v3h3v-3z M22,20h1v1h-1z M26,19h3v3h-3z M8,23h3v2h-3z M12,21h4v3h-4z M17,22h2v4h-2z M9,26h4v3h-4z M14,25h3v3h-3z M20,25h4v3h-4z M25,24h4v5h-4z"/>
+              </svg>
+            </div>
+            <div class="qr-info">
+              <h4>2. Salon Booking Demo</h4>
+              <span class="phone">+27 60 010 4003</span>
+              <p>Test Aura Luxe 3-slot picker, 10-min hold &amp; R0 delivery checkout.</p>
+              <a class="qr-link" href="https://wa.me/27600104003?text=hi" target="_blank" rel="noopener">wa.me/27600104003?text=hi</a>
+            </div>
+          </div>
+
+          <!-- QR 3: Instant Vendor Self-Onboarding -->
+          <div class="qr-card">
+            <div class="qr-box">
+              <svg viewBox="0 0 29 29" width="64" height="64" shape-rendering="crispEdges" aria-label="Vendor Self-Onboarding QR">
+                <rect width="29" height="29" fill="#ffffff"/>
+                <path fill="#059669" d="M0,0h7v7h-7z M1,1v5h5v-5z M2,2h3v3h-3z M22,0h7v7h-7z M23,1v5h5v-5z M24,2h3v3h-3z M0,22h7v7h-7z M1,23v5h5v-5z M2,24h3v3h-3z M8,0h2v2h-2z M12,0h4v1h-4z M18,0h3v2h-3z M9,3h3v2h-3z M14,2h3v3h-3z M19,3h2v2h-2z M8,6h13v1h-13z M6,8h1v13h-1z M0,9h2v3h-2z M3,8h2v3h-2z M8,8h4v2h-4z M13,9h3v2h-3z M17,8h3v3h-3z M22,8h3v2h-3z M26,8h3v3h-3z M1,13h4v2h-4z M9,11h3v3h-3z M13,12h4v2h-4z M19,12h4v2h-4z M24,11h3v3h-3z M0,16h3v3h-3z M4,16h2v2h-2z M8,15h3v3h-3z M12,15h5v2h-5z M18,15h3v2h-3z M23,15h5v2h-5z M2,20h3v1h-3z M9,19h4v2h-4z M15,18h4v3h-4z M20,18h5v5h-5z M21,19v3h3v-3z M22,20h1v1h-1z M26,18h3v4h-3z M8,22h3v3h-3z M12,22h4v2h-4z M17,23h2v3h-2z M8,26h2v3h-2z M11,25h4v4h-4z M16,27h4v2h-4z M21,24h3v4h-3z M25,25h4v4h-4z"/>
+              </svg>
+            </div>
+            <div class="qr-info">
+              <h4>3. Onboard Your Business</h4>
+              <span class="phone">Text ONBOARD Command</span>
+              <p>Auto-provision your virtual number, catalog &amp; bank payout profile.</p>
+              <a class="qr-link" href="https://wa.me/27600104001?text=ONBOARD%20My%20Business%20%7C%20retail_delivery%20%7C%20pro%20%7C%20Capitec%201688990011" target="_blank" rel="noopener">Launch Instant Onboarding</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Transparent SaaS & MoR Settlement Tiers -->
+      <div class="section-title">Transparent Merchant-of-Record (MoR) Pricing — Monthly Fee Auto-Deducted from Unsettled Earnings</div>
+      <table class="pricing-table">
+        <thead>
+          <tr>
+            <th>Plan Tier</th>
+            <th>Monthly SaaS Fee (Set-Off)</th>
+            <th>Platform Commission</th>
+            <th>PayFast Gateway Rate</th>
+            <th>Best For</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Starter Yard / Studio</strong></td>
+            <td>R299 / month</td>
+            <td>7.0% per order</td>
+            <td>3.2% + R2.00</td>
+            <td>Independent salons, plumbers &amp; local hardware stores (&lt; R45k/mo)</td>
+          </tr>
+          <tr class="highlight">
+            <td><strong>Pro Fleet / Multi-Chair (Recommended)</strong></td>
+            <td>R599 / month</td>
+            <td>5.0% per order</td>
+            <td>2.9% + R2.00</td>
+            <td>Active building supply yards, aggregate depots &amp; busy studios</td>
+          </tr>
+          <tr>
+            <td><strong>Enterprise Aggregates</strong></td>
+            <td>R999 / month</td>
+            <td>3.5% per order</td>
+            <td>2.5% + R1.50</td>
+            <td>High-volume brick/sand yards &amp; multi-branch trade groups (&gt; R150k/mo)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Bottom Contact & Activation Footer -->
+    <footer class="footer">
+      <div>
+        <strong>Cargo-Dash Multi-Tenant WhatsApp Commerce Aggregator</strong> • Master WABA: <code>waba_master_cargodash_001</code>
+      </div>
+      <div>
+        <strong>Quick Command Cheat-Sheet:</strong> <code>ADD [Title] | R[Price] | [Unit]</code> • <code>HOURS MON-SAT 08:00-17:00 60M</code> • <code>BALANCE</code>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>

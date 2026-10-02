@@ -1,0 +1,21 @@
+node_modules
+npm-debug.log
+dist
+coverage
+.git
+.gitignore
+.env
+.env.local
+.env.*.local
+*.log
+
+# Dashboard sub-project build artifacts
+dashboard/node_modules
+dashboard/.next
+dashboard/out
+
+# IDE & OS files
+.vscode
+.idea
+.DS_Store
+Thumbs.db

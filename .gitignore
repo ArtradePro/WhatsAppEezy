@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+dashboard/node_modules/
+
+# Build outputs
+dist/
+dashboard/.next/
+dashboard/out/
+
+# Environment & Secrets (Never commit)
+.env
+.env.*
+!.env.example
+dashboard/.env
+dashboard/.env.*
+!dashboard/.env.example
+
+# Logs & OS files
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
