@@ -160,6 +160,16 @@ export function createApp(): Application {
     adaptFastifyController((req, reply) => whatsAppWebhookController.handleInboundEvents(req, reply))
   );
 
+  // Gupshup WhatsApp API Webhook Handshake & Normalized Ingestion (v2 JSON & v3 Meta Pass-Through)
+  app.get(
+    '/api/webhooks/gupshup',
+    adaptFastifyController((req, reply) => whatsAppWebhookController.handleGupshupWebhook(req, reply))
+  );
+  app.post(
+    '/api/webhooks/gupshup',
+    adaptFastifyController((req, reply) => whatsAppWebhookController.handleGupshupWebhook(req, reply))
+  );
+
   // PayFast Instant Transaction Notification (ITN) Webhook & Live Sandbox Runner
   app.post(
     '/api/webhooks/payfast/itn',

@@ -60,10 +60,100 @@ export class WhatsAppWebhookController {
     // Immediate non-blocking response to satisfy Meta <500ms requirement
     reply.status(200).send({ status: 'EVENT_RECEIVED' });
 
-    const payload = req.body as WhatsAppWebhookPayload;
+    const payload = req.body as any;
     if (payload?.object === 'whatsapp_business_account') {
       // Hand off to queue worker asynchronously
-      await whatsAppQueueWorker.enqueueWebhook(payload);
+      await whatsAppQueueWorker.enqueueWebhook(payload as WhatsAppWebhookPayload);
+    } else if (payload?.app && payload?.type === 'message') {
+      const normalized = this.normalizeGupshupPayload(payload);
+      if (normalized) {
+        await whatsAppQueueWorker.enqueueWebhook(normalized);
+      }
+    }
+  }
+
+  /**
+   * Gupshup Webhook Handshake & Event Ingestion (GET/POST /api/webhooks/gupshup)
+   * Supports both Gupshup v2 JSON format and Gupshup v3 Meta Cloud Pass-Through format
+   */
+  async handleGupshupWebhook(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+    reply.status(200).send({ status: 'GUPSHUP_EVENT_RECEIVED' });
+
+    const body = req.body as any;
+    if (!body) return;
+
+    if (body.object === 'whatsapp_business_account') {
+      await whatsAppQueueWorker.enqueueWebhook(body as WhatsAppWebhookPayload);
+      return;
+    }
+
+    if (body.type === 'message' && body.payload) {
+      const normalized = this.normalizeGupshupPayload(body);
+      if (normalized) {
+        await whatsAppQueueWorker.enqueueWebhook(normalized);
+      }
+    }
+  }
+
+  private normalizeGupshupPayload(gupshupBody: any): WhatsAppWebhookPayload | null {
+    try {
+      const p = gupshupBody.payload || {};
+      const fromPhone = String(p.source || p.sender?.phone || '').replace(/^\+/, '');
+      const senderName = p.sender?.name || 'WhatsApp Customer';
+      const destinationPhone = String(p.destination || config.WHATSAPP_PHONE_NUMBER_ID || '27600104005').replace(/^\+/, '');
+      const msgId = p.id || `gup_${Date.now()}`;
+      const msgType = p.type || 'text';
+
+      const messageObj: any = {
+        from: fromPhone,
+        id: msgId,
+        timestamp: String(Math.floor((gupshupBody.timestamp || Date.now()) / 1000)),
+        type: msgType === 'location' ? 'location' : 'text',
+      };
+
+      if (msgType === 'location' && p.payload) {
+        messageObj.location = {
+          latitude: Number(p.payload.latitude || -26.1467),
+          longitude: Number(p.payload.longitude || 28.0416),
+          name: p.payload.name || 'Pinned Delivery Site',
+          address: p.payload.address || '',
+        };
+      } else {
+        messageObj.text = {
+          body: p.payload?.text || p.payload?.title || String(p.payload?.body || 'hi'),
+        };
+      }
+
+      return {
+        object: 'whatsapp_business_account',
+        entry: [
+          {
+            id: gupshupBody.app || 'whatsappeezy-gupshup',
+            changes: [
+              {
+                field: 'messages',
+                value: {
+                  messaging_product: 'whatsapp',
+                  metadata: {
+                    display_phone_number: destinationPhone,
+                    phone_number_id: destinationPhone,
+                  },
+                  contacts: [
+                    {
+                      profile: { name: senderName },
+                      wa_id: fromPhone,
+                    },
+                  ],
+                  messages: [messageObj],
+                },
+              },
+            ],
+          },
+        ],
+      };
+    } catch (err) {
+      console.error('⚠️ Failed to normalize Gupshup webhook payload:', err);
+      return null;
     }
   }
 }
