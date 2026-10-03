@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -24,6 +24,7 @@
       background-color: #0B141A;
       color: #F8FAFC;
       font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
     }
     h1, h2, h3, .font-display {
       font-family: 'Space Grotesk', sans-serif;
@@ -54,21 +55,29 @@
     .wa-btn:hover {
       background: linear-gradient(135deg, #34E574 0%, #17A595 100%);
     }
+    .whatsapp-dark-wallpaper {
+      background-color: #0b141a;
+      background-image: radial-gradient(rgba(37, 211, 102, 0.07) 1px, transparent 0);
+      background-size: 18px 18px;
+    }
   </style>
 </head>
 <body class="wa-canvas min-h-screen flex flex-col">
-  <!-- Top Official WhatsApp Teal Banner -->
+  <!-- 1. Top Official WhatsApp Teal Banner -->
   <div class="bg-gradient-to-r from-[#075E54] via-[#128C7E] to-[#075E54] border-b border-[#25D366]/30 text-xs font-mono">
     <div class="max-w-7xl mx-auto px-6 py-2 flex flex-wrap items-center justify-between gap-2">
-      <span class="text-white font-bold">⚡ WHATSAPPEEZY.COM // OFFICIAL SOUTH AFRICAN WHATSAPP COMMERCE & PAYFAST MoR ENGINE</span>
+      <div class="flex items-center gap-2 text-white font-bold">
+        <span class="w-2 h-2 rounded-full bg-[#25D366] animate-ping"></span>
+        <span>WHATSAPPEEZY.COM // SOUTH AFRICA'S #1 WHATSAPP COMMERCE & PAYFAST MoR ENGINE</span>
+      </div>
       <span class="text-[#DCF8C6] font-bold">100% Verified ITN Split • Zero App Downloads</span>
     </div>
   </div>
 
-  <!-- Header -->
+  <!-- 2. Sticky Navigation Header -->
   <header class="sticky top-0 z-40 bg-[#111B21]/95 backdrop-blur-xl border-b border-[#25D366]/20">
     <div class="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
+      <a href="#" class="flex items-center gap-3">
         <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#25D366] to-[#128C7E] flex items-center justify-center text-[#06130E] font-black text-xl shadow-lg">
           W
         </div>
@@ -79,62 +88,126 @@
           </div>
           <p class="text-[11px] text-slate-400 font-mono">AI Photo Catalog • PayFast MoR • Instant Dispatch</p>
         </div>
-      </div>
+      </a>
+
+      <nav class="hidden md:flex items-center gap-6 text-xs font-bold uppercase tracking-wider text-slate-300">
+        <a href="#how-it-works" class="hover:text-[#25D366] transition">How It Works</a>
+        <a href="#industries" class="hover:text-[#25D366] transition">Live Industry Demo</a>
+        <a href="#pricing" class="hover:text-[#25D366] transition">Pricing & Payouts</a>
+        <a href="#onboard" class="hover:text-[#25D366] transition">Get Started</a>
+      </nav>
 
       <div class="flex items-center gap-3">
-        <a href="#pricing" class="px-4 py-2 rounded-xl bg-[#1F2C34] text-[#DCF8C6] text-xs font-bold border border-[#25D366]/30">Pricing & Payouts</a>
+        <a href="#pricing" class="hidden sm:inline-flex px-4 py-2 rounded-xl bg-[#1F2C34] text-[#DCF8C6] text-xs font-bold border border-[#25D366]/30">Plans from R299/mo</a>
         <a href="https://wa.me/27600104001?text=Hi%20WhatsAppeezy%2C%20I%20want%20to%20load%20my%20business%20catalog" class="wa-btn px-4 py-2.5 rounded-xl text-xs font-extrabold">💬 Start Live WhatsApp Demo</a>
       </div>
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <main class="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+  <!-- 3. Hero Section with Interactive Phone Simulator -->
+  <main id="industries" class="max-w-7xl mx-auto px-6 py-14 sm:py-20 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
     <div class="lg:col-span-7 space-y-6">
       <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#005C4B] border border-[#25D366]/40 text-[#DCF8C6] text-xs font-mono">
         ✨ Powered by Gemini Flash Vision + Official Meta WhatsApp Cloud API
       </span>
       <h1 class="text-4xl sm:text-6xl font-extrabold text-white font-display leading-[1.08]">
-        Turn Any WhatsApp Into an <span class="text-[#25D366]">AI Store, Instant Checkout & Dispatch Engine.</span>
+        Turn Any WhatsApp Into an <span class="text-[#25D366]">AI Store, PayFast Checkout & Dispatch Engine.</span>
       </h1>
       <p class="text-base sm:text-lg text-slate-300 leading-relaxed">
-        We load your catalog right on the spot with <strong>AI-enhanced 1024×1024 studio photos</strong>, process customer payments via <strong>PayFast & Capitec Pay</strong> into our Master Merchant Account, and fire instant <strong>Kitchen Order Tickets (KOT), Hygiene Dispatch Slips, or Tipper Waybills</strong>.
+        No apps to download. With <strong>WhatsAppeezy.com</strong>, we load your catalog on the spot with <strong class="text-[#25D366]">AI-enhanced 1024×1024 studio photos</strong>, collect 100% verified <strong class="text-[#25D366]">PayFast & Capitec Pay</strong> payments into our Master Merchant Account, and fire instant <strong>Kitchen Order Tickets (KOT), Hygiene Slips, or Tipper Waybills</strong>.
       </p>
+
+      <!-- Interactive Industry Switcher Buttons -->
+      <div class="space-y-2 pt-1">
+        <div class="text-[11px] font-mono uppercase tracking-wider text-[#25D366] font-bold">
+          👇 Click an industry below to test the live WhatsApp experience on the phone:
+        </div>
+        <div class="flex flex-wrap gap-2" id="industry-buttons">
+          <button onclick="selectVertical(0)" id="btn-0" class="px-3.5 py-2 rounded-xl text-xs font-bold transition border bg-[#25D366] text-[#06130E] border-[#25D366] shadow-lg">
+            🧴 Hygiene & Commercial (Higiene)
+          </button>
+          <button onclick="selectVertical(1)" id="btn-1" class="px-3.5 py-2 rounded-xl text-xs font-bold transition border bg-[#111B21] text-slate-300 border-[#1F2C34] hover:border-[#25D366]/50">
+            🍔 Restaurants & Burgers
+          </button>
+          <button onclick="selectVertical(2)" id="btn-2" class="px-3.5 py-2 rounded-xl text-xs font-bold transition border bg-[#111B21] text-slate-300 border-[#1F2C34] hover:border-[#25D366]/50">
+            🧱 Sand, Bricks & Yards
+          </button>
+          <button onclick="selectVertical(3)" id="btn-3" class="px-3.5 py-2 rounded-xl text-xs font-bold transition border bg-[#111B21] text-slate-300 border-[#1F2C34] hover:border-[#25D366]/50">
+            💇‍♀️ Salons & Appointments
+          </button>
+        </div>
+      </div>
+
       <div class="flex flex-wrap gap-3 pt-2">
-        <a href="https://wa.me/27600104001?text=Book%20WhatsAppeezy%20Demo" class="wa-btn px-6 py-3.5 rounded-2xl text-sm font-extrabold">🚀 Book On-The-Spot AI Catalog Demo</a>
-        <a href="#pricing" class="px-5 py-3.5 rounded-2xl bg-[#1F2C34] text-white border border-[#25D366]/30 text-sm font-bold">View Monthly Plans (From R299/mo)</a>
+        <a href="#onboard" class="wa-btn px-6 py-3.5 rounded-2xl text-sm font-extrabold">🚀 Sign Up Your Business on WhatsAppeezy</a>
+        <a href="#pricing" class="px-5 py-3.5 rounded-2xl bg-[#1F2C34] text-white border border-[#25D366]/30 text-sm font-bold">Calculate Your Weekly Payout</a>
+      </div>
+
+      <!-- Trust Metrics -->
+      <div class="grid grid-cols-3 gap-4 pt-4 border-t border-[#1F2C34]">
+        <div>
+          <div class="text-2xl font-extrabold text-[#25D366] font-display">100%</div>
+          <div class="text-xs text-slate-400">Verified PayFast ITN Split (Zero Pop Fraud)</div>
+        </div>
+        <div>
+          <div class="text-2xl font-extrabold text-white font-display">1024×1024</div>
+          <div class="text-xs text-slate-400">Instant Gemini AI Photo Studio Enhancement</div>
+        </div>
+        <div>
+          <div class="text-2xl font-extrabold text-[#DCF8C6] font-display">&lt; 3 Sec</div>
+          <div class="text-xs text-slate-400">From Payment to Kitchen KOT or Yard Slip</div>
+        </div>
       </div>
     </div>
 
-    <!-- WhatsApp Phone Mockup -->
+    <!-- Interactive WhatsApp Phone Mockup -->
     <div class="lg:col-span-5 flex justify-center">
-      <div class="w-full max-w-[370px] rounded-[36px] p-3 bg-gradient-to-b from-[#1F2C34] to-[#075E54] border-2 border-[#25D366]/50 shadow-2xl">
+      <div class="w-full max-w-[380px] rounded-[36px] p-3 bg-gradient-to-b from-[#1F2C34] via-[#111B21] to-[#075E54] border-2 border-[#25D366]/50 shadow-2xl">
         <div class="rounded-[26px] overflow-hidden bg-[#0B141A]">
           <div class="bg-[#075E54] px-4 py-3.5 flex items-center justify-between">
             <div>
-              <div class="text-xs font-bold text-white">WhatsAppeezy Verified Store ✓</div>
-              <div class="text-[10px] text-[#DCF8C6] font-mono">Online • Instant PayFast Checkout</div>
+              <div id="phone-biz-name" class="text-xs font-bold text-white">Higiene Commercial Hygiene (Pty) Ltd ✓</div>
+              <div id="phone-wa-num" class="text-[10px] text-[#DCF8C6] font-mono">WhatsAppeezy Verified • +27 60 010 4005</div>
             </div>
             <span class="px-2 py-0.5 rounded bg-[#25D366] text-[#06130E] text-[10px] font-mono font-bold">LIVE</span>
           </div>
-          <div class="p-4 space-y-3 text-xs">
-            <div class="bg-[#1F2C34] p-3 rounded-xl border border-white/10">
-              <div class="text-[10px] font-mono text-[#25D366] font-bold">✨ 1024×1024 AI STUDIO CARD</div>
-              <div class="font-bold text-white mt-0.5">Higiene 5L SABS Surface Sanitizer</div>
-              <div class="text-[#25D366] font-mono font-bold">R 420.00 / 5L drum</div>
+
+          <div class="whatsapp-dark-wallpaper p-4 space-y-3 text-xs">
+            <!-- Catalog Card -->
+            <div class="bg-[#1F2C34] p-2.5 rounded-xl border border-white/10 flex gap-3 items-center">
+              <img id="phone-img" src="https://images.unsplash.com/photo-1584813470613-5b1c1cad3d69?auto=format&fit=crop&w=600&q=80" alt="Product" class="w-16 h-16 rounded-lg object-cover bg-white border border-[#25D366]/40 shrink-0" />
+              <div class="min-w-0 flex-1">
+                <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#005C4B] text-[#DCF8C6]">✨ 1024×1024 AI ENHANCED</span>
+                <div id="phone-prod-title" class="font-bold text-white truncate mt-1">Higiene 5L SABS Surface Sanitizer</div>
+                <div id="phone-prod-price" class="text-[#25D366] font-mono font-bold mt-0.5">R 420.00 / per 5L drum</div>
+              </div>
             </div>
-            <div class="ml-auto bg-[#005C4B] text-white p-3 rounded-xl max-w-[85%]">
-              <div class="font-bold">🛒 Order: 4 × Higiene 5L Sanitizer</div>
-              <div class="text-[11px] text-[#DCF8C6] mt-0.5">📍 Pin Dropped: 6.2 km • Delivery R85.00</div>
+
+            <!-- Customer Order Bubble -->
+            <div class="ml-auto bg-[#005C4B] text-white p-3 rounded-xl rounded-tr-none max-w-[88%] shadow">
+              <div id="phone-order-line" class="font-bold">🛒 Order: 4 × Higiene 5L SABS Surface Sanitizer</div>
+              <div id="phone-pin-line" class="text-[11px] text-[#DCF8C6] mt-1">📍 Pin: Unit 8, Montague Gardens (6.2 km)</div>
             </div>
-            <div class="bg-[#1F2C34] p-3.5 rounded-xl border border-[#25D366]/40 space-y-2">
+
+            <!-- PayFast MoR Checkout Bubble -->
+            <div class="bg-[#1F2C34] p-3.5 rounded-xl rounded-tl-none border border-[#25D366]/40 space-y-2 shadow-lg">
               <div class="flex justify-between font-mono text-[10px] text-[#25D366] font-bold">
-                <span>⚡ PAYFAST MoR VERIFIED</span>
-                <span>TOTAL: R 1,765.00</span>
+                <span>⚡ WHATSAPPEEZY PAYFAST MoR</span>
+                <span>100% VERIFIED ITN</span>
               </div>
-              <div class="w-full py-2 rounded-lg bg-[#25D366] text-[#06130E] font-extrabold text-center">
+              <div class="text-[11px] font-mono text-slate-300 space-y-0.5">
+                <div class="flex justify-between"><span>Items Subtotal:</span><span id="phone-subtotal">R 1,680.00</span></div>
+                <div class="flex justify-between"><span>GPS Delivery / Slot Fee:</span><span id="phone-delivery">R 85.00</span></div>
+                <div class="flex justify-between font-bold text-white border-t border-white/10 pt-1 text-xs">
+                  <span>Total Instant EFT:</span><span id="phone-total" class="text-[#25D366]">R 1,765.00</span>
+                </div>
+              </div>
+              <div id="phone-ticket" class="p-2 rounded-lg bg-[#0B141A] border border-[#25D366]/20 text-[10px] text-[#DCF8C6]">
+                🖨️ Auto-Fires: Commercial Dispatch & Batch Certificate Slip
+              </div>
+              <a href="#onboard" class="block w-full py-2.5 rounded-xl bg-[#25D366] hover:bg-[#34E574] text-[#06130E] font-extrabold text-center transition">
                 Pay via Capitec Pay / Instant EFT →
-              </div>
+              </a>
             </div>
           </div>
         </div>
@@ -142,25 +215,206 @@
     </div>
   </main>
 
-  <!-- Pricing Section -->
-  <section id="pricing" class="py-14 bg-[#111B21]/90 border-t border-[#25D366]/20">
-    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="wa-card rounded-2xl p-6 space-y-3">
-        <div class="text-xs font-mono text-[#25D366] font-bold">STARTER STORE</div>
-        <div class="text-3xl font-extrabold text-white font-display">R299<span class="text-xs text-slate-400 font-normal"> / month</span></div>
-        <p class="text-xs text-slate-300">8.0% MoR Commission • Dedicated WhatsApp Virtual Number • AI 1024×1024 Photo Enhancer • Printable Kitchen/Dispatch Tickets.</p>
+  <!-- 4. How It Works (4 Steps) -->
+  <section id="how-it-works" class="py-16 max-w-7xl mx-auto px-6 space-y-10 border-t border-[#25D366]/15">
+    <div class="text-center max-w-3xl mx-auto space-y-2">
+      <span class="text-xs font-mono font-bold uppercase tracking-widest text-[#25D366]">HOW WHATSAPPEEZY.COM WORKS</span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-white font-display">From In-Person Demo to Automated Dispatch in 4 Steps</h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+      <div class="wa-card rounded-2xl p-6 space-y-2.5">
+        <span class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-[#005C4B] text-[#DCF8C6]">STEP 01</span>
+        <h3 class="text-base font-bold text-white font-display">Snap & AI-Enhance Catalog</h3>
+        <p class="text-xs text-slate-300 leading-relaxed">Upload raw photos during your demo or via WhatsApp. Gemini AI extracts prices & normalizes photos onto a 1024×1024 #F8F9FA studio canvas.</p>
       </div>
-      <div class="wa-card rounded-2xl p-6 space-y-3 border-2 border-[#25D366]">
-        <div class="text-xs font-mono text-[#25D366] font-bold">PRO BUSINESS (MOST POPULAR)</div>
-        <div class="text-3xl font-extrabold text-white font-display">R599<span class="text-xs text-slate-400 font-normal"> / month</span></div>
-        <p class="text-xs text-slate-300">6.5% MoR Commission • Automated GPS Distance Delivery Pricing • Weekly Friday EFT Bank Payouts (FNB, Capitec, Standard Bank, Nedbank, ABSA).</p>
+      <div class="wa-card rounded-2xl p-6 space-y-2.5">
+        <span class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-[#005C4B] text-[#DCF8C6]">STEP 02</span>
+        <h3 class="text-base font-bold text-white font-display">Customer Orders + GPS Pin</h3>
+        <p class="text-xs text-slate-300 leading-relaxed">Customers browse your WhatsApp Catalog, choose items, and drop their WhatsApp GPS location pin for automatic road-distance delivery pricing.</p>
       </div>
-      <div class="wa-card rounded-2xl p-6 space-y-3">
-        <div class="text-xs font-mono text-[#25D366] font-bold">ENTERPRISE DEPOT</div>
-        <div class="text-3xl font-extrabold text-white font-display">R999<span class="text-xs text-slate-400 font-normal"> / month</span></div>
-        <p class="text-xs text-slate-300">5.0% MoR Commission • Lowest Gateway Fee Spread • Multi-Truck & Multi-Branch Dispatch Queue + Weighbridge Waybills.</p>
+      <div class="wa-card rounded-2xl p-6 space-y-2.5">
+        <span class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-[#005C4B] text-[#DCF8C6]">STEP 03</span>
+        <h3 class="text-base font-bold text-white font-display">100% Verified PayFast ITN</h3>
+        <p class="text-xs text-slate-300 leading-relaxed">Customer pays via Capitec Pay or Instant EFT into the WhatsAppeezy Master Merchant Account—eliminating fake Proof-of-Payment fraud forever.</p>
+      </div>
+      <div class="wa-card rounded-2xl p-6 space-y-2.5">
+        <span class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-[#005C4B] text-[#DCF8C6]">STEP 04</span>
+        <h3 class="text-base font-bold text-white font-display">Instant Kitchen or Yard Slip</h3>
+        <p class="text-xs text-slate-300 leading-relaxed">Your kitchen immediately receives a Hot-Pass Burger/Pizza Ticket (KOT) or your supply yard receives a SABS Weighbridge Tipper Loading Slip.</p>
       </div>
     </div>
   </section>
+
+  <!-- 5. Pricing & Interactive Monthly Payout Calculator -->
+  <section id="pricing" class="py-16 bg-[#111B21]/90 border-y border-[#25D366]/20">
+    <div class="max-w-7xl mx-auto px-6 space-y-10">
+      <div class="text-center max-w-3xl mx-auto space-y-2">
+        <span class="text-xs font-mono font-bold uppercase tracking-widest text-[#25D366]">TRANSPARENT PLANS & WEEKLY FRIDAY EFT PAYOUTS</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white font-display">Simple Monthly Plans + Automated Escrow Set-Off</h2>
+        <p class="text-xs sm:text-sm text-slate-400">Your monthly subscription is automatically deducted from your collected sales before your weekly Friday payout to FNB, Capitec, Standard Bank, Nedbank, or ABSA.</p>
+      </div>
+
+      <!-- Interactive Slider -->
+      <div class="wa-card rounded-2xl p-6 max-w-3xl mx-auto space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-mono uppercase text-slate-300 font-bold">Simulate Monthly WhatsApp Sales Volume:</span>
+          <span id="gmv-display" class="text-2xl font-extrabold text-[#25D366] font-mono">R 120,000 / mo</span>
+        </div>
+        <input id="gmv-slider" type="range" min="20000" max="600000" step="10000" value="120000" oninput="updateGmv(this.value)" class="w-full accent-[#25D366] cursor-pointer" />
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="wa-card rounded-2xl p-6 space-y-4">
+          <div class="text-xs font-mono text-[#25D366] font-bold">STARTER STORE</div>
+          <div class="text-4xl font-extrabold text-white font-display">R299<span class="text-xs text-slate-400 font-normal"> / mo + 8.0% comm</span></div>
+          <div class="p-3 rounded-xl bg-[#0B141A] border border-[#25D366]/25">
+            <div class="text-[10px] font-mono text-slate-400">EST. NET MONTHLY PAYOUT:</div>
+            <div id="net-starter" class="text-lg font-extrabold text-[#25D366] font-mono">R 106,621 / mo</div>
+          </div>
+          <p class="text-xs text-slate-300">Dedicated WhatsApp Storefront • AI 1024×1024 Photo Enhancer • PayFast Instant EFT & Capitec Pay • Printable Kitchen KOT & Delivery Slips.</p>
+        </div>
+
+        <div class="wa-card rounded-2xl p-6 space-y-4 border-2 border-[#25D366]">
+          <div class="text-xs font-mono text-[#25D366] font-bold">PRO BUSINESS (MOST POPULAR)</div>
+          <div class="text-4xl font-extrabold text-white font-display">R599<span class="text-xs text-slate-400 font-normal"> / mo + 6.5% comm</span></div>
+          <div class="p-3 rounded-xl bg-[#0B141A] border border-[#25D366]/25">
+            <div class="text-[10px] font-mono text-slate-400">EST. NET MONTHLY PAYOUT:</div>
+            <div id="net-pro" class="text-lg font-extrabold text-[#25D366] font-mono">R 108,121 / mo</div>
+          </div>
+          <p class="text-xs text-slate-300">Reduced 6.5% Commission • Automated PostGIS GPS Distance Pricing • Weekly Friday Bank CSV Payouts (FNB, Capitec, Standard Bank, Nedbank, ABSA).</p>
+        </div>
+
+        <div class="wa-card rounded-2xl p-6 space-y-4">
+          <div class="text-xs font-mono text-[#25D366] font-bold">ENTERPRISE DEPOT</div>
+          <div class="text-4xl font-extrabold text-white font-display">R999<span class="text-xs text-slate-400 font-normal"> / mo + 5.0% comm</span></div>
+          <div class="p-3 rounded-xl bg-[#0B141A] border border-[#25D366]/25">
+            <div class="text-[10px] font-mono text-slate-400">EST. NET MONTHLY PAYOUT:</div>
+            <div id="net-ent" class="text-lg font-extrabold text-[#25D366] font-mono">R 109,521 / mo</div>
+          </div>
+          <p class="text-xs text-slate-300">Lowest 5.0% Commission • Lowest Gateway Fee Rate • Multi-Truck & Multi-Branch Dispatch Queue + SABS Weighbridge Waybills.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Instant Onboarding CTA -->
+  <section id="onboard" class="py-16 max-w-4xl mx-auto px-6">
+    <div class="wa-card rounded-3xl p-8 sm:p-10 border-2 border-[#25D366]/50 text-center space-y-5">
+      <span class="px-3.5 py-1 rounded-full bg-[#005C4B] text-[#DCF8C6] text-xs font-mono font-bold">🚀 ONBOARD YOUR BUSINESS TODAY</span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-white font-display">Ready to Launch Your WhatsAppeezy Store?</h2>
+      <p class="text-sm text-slate-300 max-w-xl mx-auto">Enter your company name and WhatsApp number below to start your live onboarding & AI catalog upload on WhatsApp.</p>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto pt-2">
+        <input id="biz-input" type="text" placeholder="Company Name (e.g. Higiene)" class="rounded-xl bg-[#0B141A] border border-[#25D366]/40 px-4 py-3 text-xs text-white focus:outline-none" />
+        <input id="wa-input" type="text" placeholder="WhatsApp Number (+27...)" class="rounded-xl bg-[#0B141A] border border-[#25D366]/40 px-4 py-3 text-xs font-mono text-white focus:outline-none" />
+        <button onclick="launchWhatsAppOnboarding()" class="wa-btn rounded-xl px-5 py-3 text-xs font-extrabold">Activate on WhatsApp →</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-[#080F14] border-t border-[#1F2C34] py-8 text-xs text-slate-400 mt-auto">
+    <div class="max-w-7xl mx-auto px-6 flex flex-wrap items-center justify-between gap-4">
+      <div><strong class="text-white">WhatsAppeezy.com</strong> • Official South African WhatsApp Commerce & PayFast MoR Aggregator</div>
+      <div class="font-mono text-[#25D366]">100% Verified ITN Split • Weekly Friday EFT Settlement</div>
+    </div>
+  </footer>
+
+  <script>
+    const verticals = [
+      {
+        biz: 'Higiene Commercial Hygiene (Pty) Ltd ✓',
+        wa: 'WhatsAppeezy Verified • +27 60 010 4005',
+        title: 'Higiene 5L SABS Surface Sanitizer',
+        price: 'R 420.00 / per 5L drum',
+        order: '🛒 Order: 4 × Higiene 5L SABS Surface Sanitizer',
+        pin: '📍 Pin: Unit 8, Montague Gardens (6.2 km)',
+        subtotal: 'R 1,680.00',
+        delivery: 'R 85.00',
+        total: 'R 1,765.00',
+        ticket: '🖨️ Auto-Fires: Commercial Dispatch & Batch Certificate Slip',
+        img: 'https://images.unsplash.com/photo-1584813470613-5b1c1cad3d69?auto=format&fit=crop&w=600&q=80'
+      },
+      {
+        biz: 'Napoli Woodfired Pizza & Burger Kitchen ✓',
+        wa: 'WhatsAppeezy Verified • +27 60 010 4004',
+        title: 'Double Wagyu Smash Burger & Fries',
+        price: 'R 165.00 / per combo meal',
+        order: '🛒 Order: 2 × Double Wagyu Smash Burger Combo',
+        pin: '📍 Pin: Unit 14B, Rosebank Precinct (3.4 km)',
+        subtotal: 'R 330.00',
+        delivery: 'R 45.00',
+        total: 'R 375.00',
+        ticket: '🖨️ Auto-Fires: Hot-Pass Kitchen Order Ticket (KOT) + Tamper Seal',
+        img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80'
+      },
+      {
+        biz: 'BrickDirect Aggregates & Sand Yard ✓',
+        wa: 'WhatsAppeezy Verified • +27 60 010 4001',
+        title: 'Washed Malmesbury Plaster Sand (6m³)',
+        price: 'R 550.00 / per m³',
+        order: '🛒 Order: 6m³ Washed Malmesbury Plaster Sand',
+        pin: '📍 Pin: Stand 402, Albertinia Civil Site (14.2 km)',
+        subtotal: 'R 3,300.00',
+        delivery: 'R 562.40',
+        total: 'R 3,862.40',
+        ticket: '🖨️ Auto-Fires: SABS Weighbridge & Tipper Truck Loading Slip',
+        img: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=600&q=80'
+      },
+      {
+        biz: 'Aura Luxe Hair & Wellness Studio ✓',
+        wa: 'WhatsAppeezy Verified • +27 60 010 4003',
+        title: 'Signature Balayage, Toner & Cut',
+        price: 'R 650.00 / 60 min session',
+        order: '🛒 Booking: 1 × Signature Balayage (60 min)',
+        pin: '📅 Slot Held: Tomorrow 09:00 AM (10-Min Lock)',
+        subtotal: 'R 650.00',
+        delivery: 'R 0.00',
+        total: 'R 650.00',
+        ticket: '🖨️ Auto-Fires: Confirmed Stylist Slot + 1h WhatsApp Reminder',
+        img: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=600&q=80'
+      }
+    ];
+
+    function selectVertical(idx) {
+      const v = verticals[idx];
+      document.getElementById('phone-biz-name').textContent = v.biz;
+      document.getElementById('phone-wa-num').textContent = v.wa;
+      document.getElementById('phone-prod-title').textContent = v.title;
+      document.getElementById('phone-prod-price').textContent = v.price;
+      document.getElementById('phone-order-line').textContent = v.order;
+      document.getElementById('phone-pin-line').textContent = v.pin;
+      document.getElementById('phone-subtotal').textContent = v.subtotal;
+      document.getElementById('phone-delivery').textContent = v.delivery;
+      document.getElementById('phone-total').textContent = v.total;
+      document.getElementById('phone-ticket').textContent = v.ticket;
+      document.getElementById('phone-img').src = v.img;
+
+      for (let i = 0; i < 4; i++) {
+        const btn = document.getElementById('btn-' + i);
+        if (i === idx) {
+          btn.className = 'px-3.5 py-2 rounded-xl text-xs font-bold transition border bg-[#25D366] text-[#06130E] border-[#25D366] shadow-lg';
+        } else {
+          btn.className = 'px-3.5 py-2 rounded-xl text-xs font-bold transition border bg-[#111B21] text-slate-300 border-[#1F2C34] hover:border-[#25D366]/50';
+        }
+      }
+    }
+
+    function updateGmv(val) {
+      const gmv = Number(val);
+      document.getElementById('gmv-display').textContent = 'R ' + gmv.toLocaleString('en-ZA') + ' / mo';
+      const netStarter = Math.round(gmv * (1 - 0.08 - 0.029) - 299);
+      const netPro = Math.round(gmv * (1 - 0.065 - 0.029) - 599);
+      const netEnt = Math.round(gmv * (1 - 0.05 - 0.029) - 999);
+      document.getElementById('net-starter').textContent = 'R ' + netStarter.toLocaleString('en-ZA') + ' / mo';
+      document.getElementById('net-pro').textContent = 'R ' + netPro.toLocaleString('en-ZA') + ' / mo';
+      document.getElementById('net-ent').textContent = 'R ' + netEnt.toLocaleString('en-ZA') + ' / mo';
+    }
+
+    function launchWhatsAppOnboarding() {
+      const biz = document.getElementById('biz-input').value || 'My Business';
+      const wa = document.getElementById('wa-input').value || '';
+      const msg = encodeURIComponent('Hi WhatsAppeezy! I want to onboard "' + biz + '" (' + wa + ') and load my AI catalog.');
+      window.open('https://wa.me/27600104001?text=' + msg, '_blank');
+    }
+  </script>
 </body>
 </html>
