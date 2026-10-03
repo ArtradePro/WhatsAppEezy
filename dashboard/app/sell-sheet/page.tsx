@@ -48,17 +48,17 @@ export default function B2BVendorSellSheetPage() {
         {/* Header */}
         <div className="flex flex-wrap items-start justify-between gap-4 border-b-2 border-slate-900 pb-4 mb-5">
           <div>
-            <div className="text-[11px] font-extrabold uppercase tracking-widest text-emerald-600 mb-1">
-              Dedicated Virtual WhatsApp Storefront &amp; Automated MoR Settlement
+            <div className="text-[11px] font-extrabold uppercase tracking-widest text-[#128C7E] mb-1">
+              Official WhatsApp Storefront, AI Photo Studio &amp; Automated PayFast MoR Settlement
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950 flex items-center gap-2.5">
-              CARGO-DASH PRO
-              <span className="text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-500/40 px-2.5 py-0.5 rounded-full">
-                Zero-Data Cloud WABA
+              WHATSAPPEEZY.COM
+              <span className="text-xs font-bold bg-[#DCF8C6] text-[#075E54] border border-[#25D366] px-2.5 py-0.5 rounded-full">
+                Zero-App WhatsApp Commerce
               </span>
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
-              Turn Any Materials Yard, Hardware Depot, or Service Studio Into an Instant WhatsApp Checkout Store
+              Turn Any Hygiene Supplier, Restaurant Kitchen, Materials Yard, or Salon Into an Instant WhatsApp Store
             </p>
           </div>
 
@@ -302,8 +302,8 @@ export default function B2BVendorSellSheetPage() {
         {/* Footer */}
         <div className="border-t border-slate-200 pt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600">
           <div className="flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <strong>Cargo-Dash Multi-Tenant WhatsApp Commerce Aggregator</strong> • Railway Cloud + Supabase PostGIS
+            <ShieldCheck className="w-4 h-4 text-[#128C7E]" />
+            <strong>WhatsAppeezy.com Multi-Tenant WhatsApp Commerce &amp; PayFast MoR Engine</strong>
           </div>
           <div className="font-mono text-[10px]">
             Quick Commands: <strong>ADD [Item] | R[Price] | [Unit]</strong> • <strong>HOURS MON-SAT 08:00-17:00 60M</strong> • <strong>BALANCE</strong>

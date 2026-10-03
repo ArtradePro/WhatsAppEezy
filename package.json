@@ -1,7 +1,7 @@
 {
-  "name": "whatsapp-commerce-aggregator",
+  "name": "whatsappeezy",
   "version": "1.0.0",
-  "description": "",
+  "description": "WhatsAppeezy.com — Multi-Tenant WhatsApp Commerce, Gemini AI Catalog Studio & PayFast MoR Engine",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",

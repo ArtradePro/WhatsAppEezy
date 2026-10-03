@@ -3,34 +3,112 @@
 @tailwind utilities;
 
 :root {
-  --background: #0b0f17;
+  --wa-green: #25d366;
+  --wa-teal: #128c7e;
+  --wa-deep-teal: #075e54;
+  --wa-bubble: #005c4b;
+  --wa-dark-bg: #0b141a;
+  --wa-dark-panel: #111b21;
+  --wa-dark-elevated: #1f2c34;
+  --wa-light-cream: #ece5dd;
+  --wa-light-mint: #dcf8c6;
+  --background: #0b141a;
   --foreground: #f8fafc;
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--wa-dark-bg);
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-/* Custom industrial scrollbars */
+h1, h2, h3, .font-display {
+  font-family: var(--font-display), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+code, pre, .font-mono {
+  font-family: var(--font-mono), monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Official WhatsApp Dark Mode + Emerald/Teal Telemetry Backdrop */
+.bg-telemetry-canvas {
+  background-color: #0b141a;
+  background-image:
+    radial-gradient(at 15% 0%, rgba(37, 211, 102, 0.16) 0px, transparent 48%),
+    radial-gradient(at 85% 5%, rgba(18, 140, 126, 0.18) 0px, transparent 48%),
+    radial-gradient(at 50% 100%, rgba(7, 94, 84, 0.15) 0px, transparent 55%),
+    linear-gradient(to right, rgba(37, 211, 102, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(37, 211, 102, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 38px 38px, 38px 38px;
+}
+
+/* Specular WhatsApp Dark Glass Surface (#111B21 -> #1F2C34) */
+.obsidian-card {
+  background: linear-gradient(180deg, rgba(31, 44, 52, 0.92) 0%, rgba(17, 27, 33, 0.97) 100%);
+  border: 1px solid rgba(37, 211, 102, 0.22);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+    0 20px 40px -15px rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(16px);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.obsidian-card:hover {
+  border-color: rgba(37, 211, 102, 0.52);
+}
+
+/* Official WhatsApp Brand Gradients & Glows */
+.wa-gradient-btn {
+  background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+  color: #06130e;
+  box-shadow: 0 10px 28px -6px rgba(37, 211, 102, 0.55);
+}
+
+.wa-gradient-btn:hover {
+  background: linear-gradient(135deg, #34e574 0%, #17a595 100%);
+  box-shadow: 0 12px 32px -4px rgba(37, 211, 102, 0.7);
+}
+
+.wa-teal-header {
+  background: linear-gradient(90deg, #075e54 0%, #128c7e 50%, #075e54 100%);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 28px -4px rgba(37, 211, 102, 0.5);
+}
+
+.glow-sky {
+  box-shadow: 0 0 24px -4px rgba(18, 140, 126, 0.5);
+}
+
+/* Subtle WhatsApp Doodle Dark Wallpaper for Handset Simulator */
+.whatsapp-dark-wallpaper {
+  background-color: #0b141a;
+  background-image: radial-gradient(rgba(37, 211, 102, 0.07) 1px, transparent 0);
+  background-size: 18px 18px;
+}
+
+/* Custom WhatsApp scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #0b141a;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #128c7e;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #25d366;
 }
 
 /* Print Styles for Waybill / Loading Slip */

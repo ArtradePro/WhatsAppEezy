@@ -38,12 +38,16 @@ import {
   MOCK_APPOINTMENTS_LIST,
 } from '../lib/mock-data';
 import {
+  Vendor,
   Product,
   LedgerEntry,
   VendorSubscriptionTier,
   ServiceAppointment,
 } from '../lib/types';
 import { WaybillPreviewModal } from '../components/waybill-preview-modal';
+import { UploadProductModal } from '../components/upload-product-modal';
+import { LiveWhatsAppDemoCockpit } from '../components/live-whatsapp-demo-cockpit';
+import { AddVendorModal } from '../components/add-vendor-modal';
 
 interface OrderItem {
   id: string;
@@ -125,7 +129,8 @@ const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
 
 export default function VendorDashboard() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('dispatch');
-  const [selectedVendor, setSelectedVendor] = useState(MOCK_DEFAULT_VENDOR);
+  const [vendorsList, setVendorsList] = useState<Vendor[]>(MOCK_VENDORS_LIST);
+  const [selectedVendor, setSelectedVendor] = useState<Vendor>(MOCK_DEFAULT_VENDOR);
   const [orders, setOrders] = useState<DashboardOrder[]>([]);
   const [appointments, setAppointments] = useState<ServiceAppointment[]>(MOCK_APPOINTMENTS_LIST);
   const [products, setProducts] = useState<Product[]>(MOCK_INITIAL_PRODUCTS);
@@ -134,6 +139,9 @@ export default function VendorDashboard() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [selectedWaybillOrder, setSelectedWaybillOrder] = useState<any | null>(null);
   const [isWaybillOpen, setIsWaybillOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isAddVendorModalOpen, setIsAddVendorModalOpen] = useState(false);
+  const [showDemoCockpit, setShowDemoCockpit] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'dispatched' | 'delivered'>('all');
 
   // Interactive Draft Approval & Price Edit State
@@ -442,7 +450,7 @@ export default function VendorDashboard() {
 
     try {
       const totalGmv = orders.reduce((s, o) => s + o.total_amount, 0) + 382400;
-      const res = await fetch('/api/v1/ai/bridge', {
+      const res = await fetch('/api/ai/bridge', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -555,146 +563,342 @@ export default function VendorDashboard() {
 
   const draftProductsCount = products.filter((p) => !p.meta_retailer_id).length;
 
+  const handleSimulateLiveWhatsAppOrderToTicket = async () => {
+    let pfId = `PF-MOR-${Date.now().toString().slice(-5)}`;
+    try {
+      const res = await fetch('/api/v1/payments/payfast/sandbox-run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentMethod: 'Capitec Pay / Instant EFT',
+          businessType: selectedVendor.business_type,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.pfPaymentId) pfId = data.pfPaymentId;
+      }
+    } catch {
+      // Continue with local interactive order + MoR ledger creation
+    }
+
+    const isKitchenVendor =
+      selectedVendor.business_name.toLowerCase().includes('kitchen') ||
+      selectedVendor.business_name.toLowerCase().includes('pizza');
+
+    const orderRef = isKitchenVendor
+      ? `KOT-2026-${Math.floor(8930 + Math.random() * 90)}`
+      : `ORD-2026-${Math.floor(8930 + Math.random() * 90)}`;
+
+    const subtotalAmt = isKitchenVendor ? 475.0 : 3300.0;
+    const deliveryAmt = isKitchenVendor ? 57.1 : 562.4;
+    const grossAmt = round2(subtotalAmt + deliveryAmt);
+    const cfg = TIER_CONFIGS[selectedTier];
+    const commAmt = round2(grossAmt * cfg.commissionRate);
+    const billedFee = round2(grossAmt * cfg.billedPct + cfg.billedFixed);
+    const actualFee = round2(grossAmt * cfg.actualPct + cfg.actualFixed);
+    const spreadAmt = round2(billedFee - actualFee);
+    const netVendorAmt = round2(grossAmt - (commAmt + billedFee));
+
+    const newOrder: DashboardOrder = {
+      id: `ord_live_${Date.now()}`,
+      order_ref: orderRef,
+      customer_name: isKitchenVendor
+        ? 'Marco Rossi (WhatsApp Food Order)'
+        : 'Vernon Builder (WhatsApp Site Order)',
+      customer_phone: '+27829014422',
+      delivery_address: isKitchenVendor
+        ? 'Unit 14B, The Tyrwhitt, Rosebank'
+        : 'Stand 402, Albertinia Industrial Park',
+      distance_km: isKitchenVendor ? 3.4 : 14.2,
+      subtotal: subtotalAmt,
+      delivery_fee: deliveryAmt,
+      total_amount: grossAmt,
+      vendor_payout: netVendorAmt,
+      current_status: 'paid',
+      materials_breakdown: isKitchenVendor
+        ? '2x Double Wagyu Smash Burger Combo + 1x Woodfired Margherita Pizza XL (Kitchen Grill Station #1)'
+        : '6m³ Plaster Sand (Washed Malmesbury Grade — Tipper Bin #2)',
+      created_at: new Date().toISOString(),
+      items: [
+        {
+          id: `itm_${Date.now()}`,
+          product_name: isKitchenVendor
+            ? 'Double Wagyu Smash Burger & Rosemary Fries'
+            : 'Plaster Sand (Washed Malmesbury Grade)',
+          quantity: isKitchenVendor ? 2 : 6,
+          unit: isKitchenVendor ? 'combo' : 'm³',
+          total_price: subtotalAmt,
+        },
+      ],
+    };
+
+    setOrders((prev) => [newOrder, ...prev]);
+
+    const prevBal =
+      ledgerEntries.length > 0 ? ledgerEntries[ledgerEntries.length - 1].balance_after : 10327.5;
+    const nowIso = new Date().toISOString();
+    const newLedgerRows: LedgerEntry[] = [
+      {
+        id: `led_${Date.now()}_1`,
+        order_id: newOrder.id,
+        order_ref: orderRef,
+        vendor_id: selectedVendor.id,
+        entry_type: 'customer_payment_received',
+        debit: 0,
+        credit: grossAmt,
+        balance_after: round2(prevBal + grossAmt),
+        reference: `PayFast Master MoR Credit (${pfId})`,
+        created_at: nowIso,
+      },
+      {
+        id: `led_${Date.now()}_2`,
+        order_id: newOrder.id,
+        order_ref: orderRef,
+        vendor_id: selectedVendor.id,
+        entry_type: 'platform_commission_earned',
+        debit: commAmt,
+        credit: 0,
+        balance_after: round2(prevBal + grossAmt - commAmt),
+        reference: `Platform Commission (${(cfg.commissionRate * 100).toFixed(1)}% ${cfg.label})`,
+        created_at: nowIso,
+      },
+      {
+        id: `led_${Date.now()}_3`,
+        order_id: newOrder.id,
+        order_ref: orderRef,
+        vendor_id: selectedVendor.id,
+        entry_type: 'payment_spread_retained',
+        debit: spreadAmt,
+        credit: 0,
+        balance_after: round2(prevBal + grossAmt - commAmt - spreadAmt),
+        reference: `PayFast Gateway Fee Arbitrage Spread Retained`,
+        created_at: nowIso,
+      },
+      {
+        id: `led_${Date.now()}_4`,
+        order_id: newOrder.id,
+        order_ref: orderRef,
+        vendor_id: selectedVendor.id,
+        entry_type: 'gateway_fee_disbursed',
+        debit: actualFee,
+        credit: 0,
+        balance_after: round2(prevBal + netVendorAmt),
+        reference: `Wholesale PayFast Cost Disbursed (Net Escrow +R${netVendorAmt.toFixed(2)})`,
+        created_at: nowIso,
+      },
+    ];
+    setLedgerEntries((prev) => [...prev, ...newLedgerRows]);
+
+    setSelectedWaybillOrder({
+      ...newOrder,
+      payfast_pf_payment_id: pfId,
+    });
+    setIsWaybillOpen(true);
+
+    showToast(
+      `✅ Master PayFast MoR Paid (${pfId})! Net R${netVendorAmt.toFixed(2)} credited & ${
+        isKitchenVendor ? 'Kitchen Order Ticket (KOT)' : 'Tipper Loading Slip'
+      } #${orderRef} fired to ${selectedVendor.business_name}!`
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-industrial-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-telemetry-canvas text-slate-100 flex flex-col">
       {/* Toast Notification Banner */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-emerald-600 text-white px-5 py-3.5 rounded-xl shadow-2xl border border-emerald-400/40">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-emerald-600/95 backdrop-blur-md text-white px-5 py-3.5 rounded-xl shadow-2xl border border-emerald-400/50 glow-emerald">
           <Bell className="w-5 h-5 shrink-0" />
           <span className="font-semibold text-sm">{toastMessage}</span>
         </div>
       )}
 
-      {/* Top Command Header */}
-      <header className="border-b border-industrial-800 bg-industrial-900/90 backdrop-blur sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500/30 to-sky-500/20 border border-emerald-500/40 flex items-center justify-center shadow-inner">
-              <Truck className="w-6 h-6 text-emerald-400" />
+      {/* Top Real-Time WhatsApp Deep Teal Telemetry Ribbon */}
+      <div className="wa-teal-header border-b border-[#25D366]/30 text-[11px] font-mono text-white">
+        <div className="max-w-7xl mx-auto px-6 py-2 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="inline-flex items-center gap-1.5 text-[#DCF8C6] font-bold">
+              <span className="w-2 h-2 rounded-full bg-[#25D366] animate-ping" />
+              WHATSAPPEEZY.COM // MASTER PAYFAST MoR ENGINE: LIVE
+            </span>
+            <span className="hidden sm:inline text-white/30">|</span>
+            <span className="hidden sm:inline text-white/90">
+              META CLOUD API: <strong className="text-[#25D366]">38ms</strong>
+            </span>
+            <span className="hidden md:inline text-white/30">|</span>
+            <span className="hidden md:inline text-white/90">
+              GEMINI FLASH VISION: <strong className="text-[#DCF8C6]">1024×1024 STUDIO READY</strong>
+            </span>
+          </div>
+          <div className="flex items-center gap-4">
+            <a
+              href="/website"
+              className="px-2.5 py-0.5 rounded-full bg-[#25D366] text-[#06130E] font-extrabold hover:bg-[#34E574] transition"
+            >
+              🌐 View Official Website (whatsappeezy.com) →
+            </a>
+            <button
+              onClick={() => setShowDemoCockpit((prev) => !prev)}
+              className="text-[#DCF8C6] hover:text-white underline font-semibold"
+            >
+              {showDemoCockpit ? 'Hide Handset Cockpit ▲' : 'Show Handset Cockpit ▼'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Top Command Deck Header */}
+      <header className="border-b border-[#25D366]/20 bg-[#111B21]/95 backdrop-blur-xl sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-6 py-4 space-y-3.5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#25D366] to-[#128C7E] flex items-center justify-center shadow-lg glow-emerald">
+                <Truck className="w-6 h-6 text-[#06130E]" />
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-mono font-extrabold uppercase tracking-wider text-[#25D366]">
+                    WHATSAPPEEZY.COM // MERCHANT PORTAL
+                  </span>
+                  <span
+                    className={`text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full border ${TIER_CONFIGS[selectedTier].badgeColor}`}
+                  >
+                    {TIER_CONFIGS[selectedTier].label.toUpperCase()} • R
+                    {TIER_CONFIGS[selectedTier].monthlyFee}/mo
+                  </span>
+                  <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full border border-[#25D366]/40 bg-[#005C4B] text-[#DCF8C6]">
+                    📞 {selectedVendor.whatsapp_number}
+                  </span>
+                </div>
+                <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight font-display mt-0.5">
+                  {selectedVendor.business_name}
+                </h1>
+              </div>
             </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
-                  Cargo-Dash Multi-Tenant MoR
-                </span>
-                <span
-                  className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${TIER_CONFIGS[selectedTier].badgeColor}`}
-                >
-                  {TIER_CONFIGS[selectedTier].label.toUpperCase()} • R
-                  {TIER_CONFIGS[selectedTier].monthlyFee}/mo
-                </span>
-                <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300">
-                  📞 {selectedVendor.whatsapp_number} ({selectedVendor.meta_phone_number_id || 'meta_pnum_101'})
-                </span>
-                <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full border border-sky-500/30 bg-sky-500/10 text-sky-300">
-                  {selectedVendor.business_type === 'service_booking'
-                    ? '📅 SERVICE BOOKING (R0 DELIVERY)'
-                    : '🚚 RETAIL & TIPPER DELIVERY'}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 mt-0.5">
-                <Building2 className="w-4 h-4 text-slate-400" />
-                <select
-                  aria-label="Select Active Supplier Tenant"
-                  value={selectedVendor.id}
-                  onChange={(e) => {
-                    const v = MOCK_VENDORS_LIST.find((item) => item.id === e.target.value);
-                    if (v) {
-                      setSelectedVendor(v);
-                      if (v.subscription_tier) setSelectedTier(v.subscription_tier);
-                      showToast(
-                        `Switched isolated virtual number tenant to ${v.business_name} (${v.meta_phone_number_id})`
-                      );
-                    }
-                  }}
-                  className="bg-transparent text-lg font-bold text-white focus:outline-none cursor-pointer hover:text-emerald-300 transition"
-                >
-                  {MOCK_VENDORS_LIST.map((v) => (
-                    <option key={v.id} value={v.id} className="bg-industrial-900 text-white">
-                      {v.business_name} — [{v.whatsapp_number}]
-                    </option>
-                  ))}
-                </select>
-              </div>
+
+            {/* Right Action Controls */}
+            <div className="flex flex-wrap items-center gap-2">
+              <a
+                href="/website"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#005C4B] hover:bg-[#075E54] text-[#DCF8C6] border border-[#25D366]/40 text-xs font-extrabold transition"
+              >
+                🌐 whatsappeezy.com Website
+              </a>
+
+              <button
+                onClick={() => setIsAddVendorModalOpen(true)}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow-lg transition"
+              >
+                <PlusCircle className="w-3.5 h-3.5" />
+                + New Customer / Company
+              </button>
+
+              <button
+                onClick={() => setIsUploadModalOpen(true)}
+                className="wa-gradient-btn flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold transition"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                📸 Load &amp; AI-Enhance Catalog
+              </button>
+
+              <button
+                onClick={handleSimulateLiveWhatsAppOrderToTicket}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#1F2C34] hover:bg-[#2a3b46] text-[#25D366] text-xs font-bold border border-[#25D366]/40 transition"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-[#25D366]" />
+                📲 Simulate Order → PayFast → Ticket
+              </button>
+
+              <a
+                href="/sell-sheet"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#1F2C34] hover:bg-[#2a3b46] text-[#DCF8C6] border border-slate-700 text-xs font-bold transition"
+              >
+                <Printer className="w-3.5 h-3.5 text-[#25D366]" />
+                QR Sell-Sheet
+              </a>
+
+              <select
+                aria-label="Select SA Bank Export Format"
+                value={selectedBankFormat}
+                onChange={(e) => setSelectedBankFormat(e.target.value as any)}
+                className="px-3 py-2 rounded-xl bg-slate-950 text-slate-200 text-xs font-mono border border-slate-800"
+              >
+                <option value="fnb">FNB Host-to-Host CSV</option>
+                <option value="capitec">Capitec Business CSV</option>
+                <option value="standard_bank">Standard Bank CSV</option>
+                <option value="nedbank">Nedbank CPS CSV</option>
+                <option value="absa">ABSA CashFocus CSV</option>
+                <option value="acb">SARB ACB Fixed-Width</option>
+              </select>
+
+              <button
+                onClick={() => handleExportBankCsv()}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold border border-slate-700 transition"
+              >
+                <Download className="w-3.5 h-3.5 text-emerald-400" />
+                EFT Batch
+              </button>
             </div>
           </div>
 
-          {/* Right Action Controls */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            <a
-              href="/sell-sheet"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow transition"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              Print B2B Sell-Sheet (QR)
-            </a>
+          {/* 1-Click Multi-Vertical Company Switcher Pills for Live Customer Pitches */}
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/70">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 mr-1">
+              Active Customer / Company:
+            </span>
+            {vendorsList.map((v) => {
+              const isSelected = v.id === selectedVendor.id;
+              const nameLow = v.business_name.toLowerCase();
+              const isRest = nameLow.includes('kitchen') || nameLow.includes('pizza');
+              const isHyg = nameLow.includes('higiene') || nameLow.includes('hygiene');
+              const isSal = v.business_type === 'service_booking';
+              const icon = isHyg
+                ? '🧴'
+                : isRest
+                ? '🍔'
+                : isSal
+                ? '💇‍♀️'
+                : v.subscription_tier === 'enterprise'
+                ? '⛰️'
+                : '🧱';
 
-            <button
-              onClick={async () => {
-                try {
-                  const res = await fetch('/api/v1/payments/payfast/sandbox-run', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      paymentMethod: 'Capitec Pay / Instant EFT',
-                      businessType: selectedVendor.business_type,
-                    }),
-                  });
-                  if (res.ok) {
-                    const data = await res.json();
+              return (
+                <button
+                  key={v.id}
+                  onClick={() => {
+                    setSelectedVendor(v);
+                    if (v.subscription_tier) setSelectedTier(v.subscription_tier);
                     showToast(
-                      `✅ PayFast Sandbox ITN Verified (${data.pfPaymentId})! 4-Line MoR Ledger Booked & WhatsApp Dispatch Alert Sent to ${selectedVendor.whatsapp_number}`
+                      `Switched active company to ${v.business_name} (${v.whatsapp_number})`
                     );
-                    fetchOrders();
-                    return;
-                  }
-                } catch {
-                  // Fallback local simulation toast
-                }
-                showToast(
-                  `✅ Capitec Pay / PayFast Sandbox ITN Verified! Atomic MoR Sub-Ledger Booked (Net R${settlementPreview.net_vendor_payout.toFixed(2)}) & WhatsApp Dispatch Alert Sent to ${selectedVendor.whatsapp_number}`
-                );
-              }}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 text-xs font-bold border border-sky-500/40 transition"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
-              Run Capitec Pay Sandbox ITN
-            </button>
-
-            <select
-              aria-label="Select SA Bank Export Format"
-              value={selectedBankFormat}
-              onChange={(e) => setSelectedBankFormat(e.target.value as any)}
-              className="px-3 py-2 rounded-lg bg-industrial-950 text-slate-200 text-xs font-mono border border-industrial-700"
-            >
-              <option value="fnb">FNB Host-to-Host CSV</option>
-              <option value="capitec">Capitec Business CSV</option>
-              <option value="standard_bank">Standard Bank CSV</option>
-              <option value="nedbank">Nedbank CPS CSV</option>
-              <option value="absa">ABSA CashFocus CSV</option>
-              <option value="acb">SARB ACB Fixed-Width</option>
-            </select>
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border ${
+                    isSelected
+                      ? 'bg-emerald-500/15 border-emerald-500/60 text-emerald-300 shadow-sm'
+                      : 'bg-slate-900/70 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+                  }`}
+                >
+                  <span>{icon}</span>
+                  <span>{v.business_name}</span>
+                  <span className="text-[10px] font-mono opacity-75 hidden sm:inline">
+                    [{v.whatsapp_number}]
+                  </span>
+                </button>
+              );
+            })}
 
             <button
-              onClick={() => handleExportBankCsv()}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-industrial-800 hover:bg-industrial-700 text-slate-200 text-xs font-semibold border border-industrial-700 transition"
+              onClick={() => setIsAddVendorModalOpen(true)}
+              className="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/40 transition flex items-center gap-1"
             >
-              <Download className="w-4 h-4 text-emerald-400" />
-              Export EFT Batch
-            </button>
-
-            <button
-              onClick={fetchOrders}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-industrial-800 hover:bg-industrial-700 text-slate-200 text-xs font-medium border border-industrial-700 transition"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              Sync
+              <PlusCircle className="w-3.5 h-3.5" />
+              + Add Customer (e.g. Higiene)
             </button>
           </div>
         </div>
 
         {/* 4-Workspace Navigation Tabs */}
-        <div className="max-w-7xl mx-auto px-6 flex items-center gap-2 overflow-x-auto border-t border-industrial-800/70 pt-2">
+        <div className="max-w-7xl mx-auto px-6 flex items-center gap-2 overflow-x-auto border-t border-slate-800/70 pt-1">
           <button
             onClick={() => setActiveTab('dispatch')}
             className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition whitespace-nowrap ${
@@ -704,7 +908,7 @@ export default function VendorDashboard() {
             }`}
           >
             <Truck className="w-4 h-4" />
-            1. Live Dispatch & Waybills ({orders.length})
+            1. Live Dispatch &amp; Tickets ({orders.length})
           </button>
 
           <button
@@ -716,7 +920,7 @@ export default function VendorDashboard() {
             }`}
           >
             <Coins className="w-4 h-4" />
-            2. MoR Revenue, Fee Arbitrage & Escrow Set-Off
+            2. Master PayFast MoR Ledger &amp; SaaS Set-Off
           </button>
 
           <button
@@ -728,7 +932,7 @@ export default function VendorDashboard() {
             }`}
           >
             <Layers className="w-4 h-4" />
-            3. WhatsApp Catalog & Gemini Vision ({products.length})
+            3. AI Studio Catalog &amp; Approval Gate ({products.length})
           </button>
 
           <button
@@ -740,13 +944,23 @@ export default function VendorDashboard() {
             }`}
           >
             <Sparkles className="w-4 h-4" />
-            4. Cloud Virtual Numbers, Zero-Data & Gemini Flash
+            4. Cloud Virtual Numbers, Zero-Data &amp; Gemini Flash
           </button>
         </div>
       </header>
 
       {/* Main Workspace Container */}
-      <main className="max-w-7xl w-full mx-auto px-6 py-8 flex-1 space-y-8">
+      <main className="max-w-7xl w-full mx-auto px-6 py-7 flex-1 space-y-7">
+        {/* Live WhatsApp Handset & Customer Demo Cockpit */}
+        {showDemoCockpit && (
+          <LiveWhatsAppDemoCockpit
+            vendor={selectedVendor}
+            products={products}
+            onOpenAiPhotoModal={() => setIsUploadModalOpen(true)}
+            onTriggerLiveOrder={handleSimulateLiveWhatsAppOrderToTicket}
+          />
+        )}
+
         {/* ============================================================
             WORKSPACE 1: LIVE DISPATCH & WAYBILLS
            ============================================================ */}
@@ -754,44 +968,48 @@ export default function VendorDashboard() {
           <>
             {/* Top Summary KPI Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              <div className="bg-industrial-900 border border-industrial-800 rounded-xl p-5">
-                <div className="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider">
-                  <span>Ready to Load (Paid)</span>
+              <div className="obsidian-card rounded-2xl p-5">
+                <div className="flex items-center justify-between text-slate-400 text-[11px] font-mono font-semibold uppercase tracking-wider">
+                  <span>Ready to Prep / Load (Paid)</span>
                   <Clock className="w-4 h-4 text-amber-400" />
                 </div>
                 <div className="mt-3 flex items-baseline justify-between">
-                  <span className="text-3xl font-extrabold text-white">{paidOrders.length}</span>
-                  <span className="text-xs font-medium text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
-                    Awaiting Tipper
+                  <span className="text-3xl font-extrabold text-white font-display">
+                    {paidOrders.length}
+                  </span>
+                  <span className="text-[11px] font-mono font-bold text-amber-300 bg-amber-500/15 px-2.5 py-0.5 rounded-full border border-amber-500/30">
+                    {selectedVendor.business_name.toLowerCase().includes('kitchen')
+                      ? 'Hot-Pass Queue'
+                      : 'Awaiting Tipper'}
                   </span>
                 </div>
               </div>
 
-              <div className="bg-industrial-900 border border-industrial-800 rounded-xl p-5">
-                <div className="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider">
+              <div className="obsidian-card rounded-2xl p-5">
+                <div className="flex items-center justify-between text-slate-400 text-[11px] font-mono font-semibold uppercase tracking-wider">
                   <span>In Transit (Dispatched)</span>
                   <Truck className="w-4 h-4 text-sky-400" />
                 </div>
                 <div className="mt-3 flex items-baseline justify-between">
-                  <span className="text-3xl font-extrabold text-white">
+                  <span className="text-3xl font-extrabold text-white font-display">
                     {dispatchedOrders.length}
                   </span>
-                  <span className="text-xs font-medium text-sky-400 bg-sky-500/10 px-2.5 py-0.5 rounded-full border border-sky-500/20">
-                    En Route to Site
+                  <span className="text-[11px] font-mono font-bold text-sky-300 bg-sky-500/15 px-2.5 py-0.5 rounded-full border border-sky-500/30">
+                    En Route
                   </span>
                 </div>
               </div>
 
-              <div className="bg-industrial-900 border border-industrial-800 rounded-xl p-5">
-                <div className="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider">
+              <div className="obsidian-card rounded-2xl p-5">
+                <div className="flex items-center justify-between text-slate-400 text-[11px] font-mono font-semibold uppercase tracking-wider">
                   <span>Completed Deliveries</span>
                   <PackageCheck className="w-4 h-4 text-emerald-400" />
                 </div>
                 <div className="mt-3 flex items-baseline justify-between">
-                  <span className="text-3xl font-extrabold text-white">
+                  <span className="text-3xl font-extrabold text-white font-display">
                     {deliveredOrders.length}
                   </span>
-                  <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                  <span className="text-[11px] font-mono font-bold text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
                     POD Verified
                   </span>
                 </div>
@@ -799,31 +1017,34 @@ export default function VendorDashboard() {
 
               <div
                 onClick={() => setActiveTab('revenue')}
-                className="bg-gradient-to-br from-industrial-900 to-emerald-950/40 border border-emerald-500/30 rounded-xl p-5 cursor-pointer hover:border-emerald-400/60 transition"
+                className="obsidian-card rounded-2xl p-5 cursor-pointer border-emerald-500/40 hover:border-emerald-400 transition"
               >
-                <div className="flex items-center justify-between text-emerald-300 text-xs font-semibold uppercase tracking-wider">
+                <div className="flex items-center justify-between text-emerald-300 text-[11px] font-mono font-semibold uppercase tracking-wider">
                   <span>Unsettled Escrow Balance</span>
                   <Coins className="w-4 h-4 text-emerald-400" />
                 </div>
                 <div className="mt-3 flex items-baseline justify-between">
-                  <span className="text-2xl font-extrabold text-emerald-400">
+                  <span className="text-2xl font-extrabold text-emerald-400 font-display">
                     R {currentEscrowBalance.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}
                   </span>
-                  <span className="text-[11px] text-slate-300 underline">View MoR Ledger →</span>
+                  <span className="text-[11px] font-mono text-slate-300 underline">
+                    MoR Ledger →
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Dispatch Filter & AI Optimizer Banner */}
-            <div className="bg-industrial-900 border border-industrial-800 rounded-xl overflow-hidden shadow-xl">
-              <div className="px-6 py-4 border-b border-industrial-800 flex flex-wrap items-center justify-between gap-4">
+            <div className="obsidian-card rounded-2xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-base font-bold text-white">
-                    Live Dispatch & Fulfillment Queue
+                  <h2 className="text-base font-bold text-white font-display">
+                    Live Multi-Vertical Dispatch &amp; Kitchen/Yard Ticket Queue
                   </h2>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    Status updates automatically trigger Meta WhatsApp Cloud API interactive pings to
-                    the contractor on site.
+                    Click <strong>Slip</strong> on any order to print either a{' '}
+                    <strong>Kitchen Order Ticket (KOT)</strong> for burgers/pizzas or an{' '}
+                    <strong>SABS Weighbridge Tipper Loading Slip</strong> for sand/bricks.
                   </p>
                 </div>
 
@@ -1421,11 +1642,18 @@ export default function VendorDashboard() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-industrial-800">
+                <button
+                  onClick={() => setIsUploadModalOpen(true)}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow-lg transition whitespace-nowrap"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  📸 Upload &amp; AI-Enhance Photo On-The-Spot (1024×1024 Studio)
+                </button>
                 <input
                   type="text"
                   value={simUploadCaption}
                   onChange={(e) => setSimUploadCaption(e.target.value)}
-                  placeholder="Enter vendor WhatsApp image caption (e.g. '19mm Concrete Stone R640 per m3')"
+                  placeholder="Or enter vendor WhatsApp image caption (e.g. '19mm Concrete Stone R640 per m3')"
                   className="flex-1 rounded-lg bg-industrial-950 border border-industrial-700 px-3.5 py-2 text-xs text-white font-mono focus:border-sky-400 focus:outline-none"
                 />
                 <button
@@ -1433,7 +1661,7 @@ export default function VendorDashboard() {
                   className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition whitespace-nowrap"
                 >
                   <PlusCircle className="w-4 h-4" />
-                  Simulate WhatsApp Photo Upload (`PROCESS_CATALOG_INGESTION`)
+                  Simulate WhatsApp Caption Upload
                 </button>
               </div>
             </div>
@@ -1926,7 +2154,7 @@ export default function VendorDashboard() {
         )}
       </main>
 
-      {/* Printable Driver Waybill Modal */}
+      {/* Printable Driver Waybill / Kitchen Prep Ticket Modal */}
       {selectedWaybillOrder && (
         <WaybillPreviewModal
           isOpen={isWaybillOpen}
@@ -1935,6 +2163,42 @@ export default function VendorDashboard() {
           vendor={selectedVendor}
         />
       )}
+
+      {/* On-The-Spot AI Photo Enhancer & Live Catalog Loader Modal */}
+      <UploadProductModal
+        vendor={selectedVendor}
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onProductCreated={(newProd, asDraft) => {
+          setProducts((prev) => [newProd, ...prev]);
+          setActiveTab('catalog');
+          showToast(
+            asDraft
+              ? `📸 Saved AI-Enhanced 1024×1024 draft "${newProd.title}" to Pre-Publish Approval Gate!`
+              : `✅ Published AI-Enhanced 1024×1024 "${newProd.title}" (R${newProd.unit_price.toFixed(2)}) live to ${selectedVendor.business_name}'s WhatsApp Catalog!`
+          );
+        }}
+      />
+
+      {/* Onboard New Customer / Vendor Company Modal (e.g. Higiene) */}
+      <AddVendorModal
+        isOpen={isAddVendorModalOpen}
+        onClose={() => setIsAddVendorModalOpen(false)}
+        onVendorCreated={(newVendor, openCatalogUploadImmediately) => {
+          setVendorsList((prev) => [newVendor, ...prev]);
+          setSelectedVendor(newVendor);
+          if (newVendor.subscription_tier) {
+            setSelectedTier(newVendor.subscription_tier);
+          }
+          setActiveTab('catalog');
+          showToast(
+            `🏢 Onboarded "${newVendor.business_name}" with isolated WhatsApp ${newVendor.whatsapp_number}!`
+          );
+          if (openCatalogUploadImmediately) {
+            setTimeout(() => setIsUploadModalOpen(true), 250);
+          }
+        }}
+      />
     </div>
   );
 }
