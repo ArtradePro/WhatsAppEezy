@@ -30,35 +30,35 @@ const envSchema = z.object({
   META_ACCESS_TOKEN: z.string().default('mock-meta-access-token'),
 
   // Branding & Catalog Defaults
-  DEFAULT_BRAND_NAME: z.string().default('CargoDash Pro'),
+  DEFAULT_BRAND_NAME: z.string().default('WhatsAppEezy'),
   DEFAULT_CURRENCY: z.string().default('ZAR'),
   DEFAULT_COMMERCE_BASE_URL: z.string().default('https://wa.me/c/product'),
 
   // WhatsApp Business Cloud API Configuration
   WHATSAPP_PHONE_NUMBER_ID: z.string().default('mock-phone-number-id'),
   WHATSAPP_ACCESS_TOKEN: z.string().default('mock-whatsapp-access-token'),
-  WHATSAPP_VERIFY_TOKEN: z.string().default('cargodash-secure-webhook-token'),
+  WHATSAPP_VERIFY_TOKEN: z.string().default('whatsappeezy_verify_2026'),
   WHATSAPP_BUSINESS_ACCOUNT_ID: z.string().default('mock-waba-id'),
 
   // Meta Cloud API Webhook Handshake & Cryptographic Security
-  META_WEBHOOK_VERIFY_TOKEN: z.string().default(process.env.META_WEBHOOK_VERIFY_TOKEN || process.env.WHATSAPP_VERIFY_TOKEN || 'cargodash-secure-webhook-token'),
+  META_WEBHOOK_VERIFY_TOKEN: z.string().default(process.env.META_WEBHOOK_VERIFY_TOKEN || process.env.WHATSAPP_VERIFY_TOKEN || 'whatsappeezy_verify_2026'),
   META_APP_SECRET: z.string().default(process.env.META_APP_SECRET || 'meta-app-secret-cargodash-prod'),
 
   // Distance & Delivery Configuration
   GOOGLE_MAPS_API_KEY: z.string().default(''),
   VENDOR_DEFAULT_LAT: z.coerce.number().default(-26.2041), // Central Depot (e.g. Johannesburg)
   VENDOR_DEFAULT_LNG: z.coerce.number().default(28.0473),
-  VENDOR_DEFAULT_WHATSAPP_NUMBER: z.string().default('27820000001'),
+  VENDOR_DEFAULT_WHATSAPP_NUMBER: z.string().default('27764862942'),
 
   // PayFast Split-Checkout Configuration
   PAYFAST_MERCHANT_ID: z.string().default('10000100'), // Default sandbox test merchant ID
   PAYFAST_MERCHANT_KEY: z.string().default('46f0cd694581a'), // Default sandbox test merchant key
   PAYFAST_PASSPHRASE: z.string().default('payfast_secure_passphrase'),
   PAYFAST_ENV: z.enum(['sandbox', 'live']).default('sandbox'),
-  PAYFAST_RETURN_URL: z.string().default('https://cargodash.com/checkout/success'),
-  PAYFAST_CANCEL_URL: z.string().default('https://cargodash.com/checkout/cancelled'),
-  PAYFAST_NOTIFY_URL: z.string().default('https://api.cargodash.com/api/v1/payments/payfast/itn'),
-  PLATFORM_COMMISSION_PERCENTAGE: z.coerce.number().default(8.0), // 8% commission
+  PAYFAST_RETURN_URL: z.string().default('https://whatsappeezy.com/?checkout=success'),
+  PAYFAST_CANCEL_URL: z.string().default('https://whatsappeezy.com/?checkout=cancelled'),
+  PAYFAST_NOTIFY_URL: z.string().default('https://whatsappeezy.up.railway.app/api/webhooks/payfast/itn'),
+  PLATFORM_COMMISSION_PERCENTAGE: z.coerce.number().default(5.5), // 5.5% commission
 
   // Database Configuration (Supabase PostgreSQL + PostGIS / Supavisor Pooler)
   DATABASE_URL: z.string().default(process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/cargodash'),
