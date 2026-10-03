@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: whatsappeezy-api
+    runtime: docker
+    repo: https://github.com/ArtradePro/WhatsAppEezy
+    branch: main
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+      - key: AUTO_MIGRATE_ON_STARTUP
+        value: "true"
+      - key: VISION_PROVIDER
+        value: gemini
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: AI_CROSS_BUILD_ENABLED
+        value: "false"
+      - key: META_WEBHOOK_VERIFY_TOKEN
+        value: whatsappeezy_verify_2026
+      - key: WHATSAPP_VERIFY_TOKEN
+        value: whatsappeezy_verify_2026
+      - key: PAYFAST_ENV
+        value: sandbox
+      - key: PLATFORM_COMMISSION_PERCENTAGE
+        value: "5.5"
