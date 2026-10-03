@@ -1,9 +1,9 @@
-# WhatsApp Commerce Aggregator: Supplier Ingestion, Conversational Checkout, Multi-Tenant Dashboard & Accounting
+# WhatsAppEezy (`whatsappeezy.com`) — Multi-Tenant WhatsApp Commerce, Gemini AI Catalog Studio & PayFast MoR Engine
 
-A resilient, production-ready WhatsApp Commerce Platform built in **Node.js (TypeScript)** featuring:
-1. **Supplier Asset Ingestion & Meta Catalog Sync** (Express microservice)
-2. **WhatsApp Business API State Machine & PayFast Split-Checkout** (Fastify microservice)
-3. **Multi-Tenant Supplier Dashboard, Metrics Engine & Accounting Reconciliation** (Xero, Sage One, BullMQ, and South African ACB EFT Payout Batches)
+The official **WhatsAppEezy.com** South African WhatsApp Commerce & Merchant-of-Record (MoR) Platform built in **Node.js (TypeScript)** & **Next.js 14**, featuring:
+1. **On-The-Spot Gemini Flash AI Photo Studio (`1024×1024 #F8F9FA`) & Meta Catalog Sync** (`src/services/image/`, `src/services/vision/`, `dashboard/components/upload-product-modal.tsx`)
+2. **Zero-App WhatsApp Conversational Checkout, PostGIS GPS Delivery Pricing & 100% Verified PayFast MoR ITN Split** (`src/services/state-machine/`, `src/services/payment/`, `src/services/ledger/`)
+3. **Multi-Vertical Merchant Command Portal, Kitchen Order Tickets (KOT), SABS Tipper Waybills & Weekly Friday Bank EFT Payouts** (`dashboard/app/page.tsx`, `dashboard/app/website/page.tsx`, `public/whatsappeezy-hostinger/index.html`)
 
 ---
 
