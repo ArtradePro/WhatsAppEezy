@@ -34,11 +34,15 @@ const envSchema = z.object({
   DEFAULT_CURRENCY: z.string().default('ZAR'),
   DEFAULT_COMMERCE_BASE_URL: z.string().default('https://wa.me/c/product'),
 
-  // WhatsApp Business Cloud API Configuration
+  // WhatsApp Business Cloud API & Gupshup Configuration
   WHATSAPP_PHONE_NUMBER_ID: z.string().default('mock-phone-number-id'),
   WHATSAPP_ACCESS_TOKEN: z.string().default('mock-whatsapp-access-token'),
   WHATSAPP_VERIFY_TOKEN: z.string().default('whatsappeezy_verify_2026'),
   WHATSAPP_BUSINESS_ACCOUNT_ID: z.string().default('mock-waba-id'),
+  GUPSHUP_API_KEY: z.string().optional().default(process.env.GUPSHUP_API_KEY || ''),
+  GUPSHUP_APP_ID: z.string().optional().default(process.env.GUPSHUP_APP_ID || ''),
+  GUPSHUP_APP_NAME: z.string().optional().default(process.env.GUPSHUP_APP_NAME || 'WhatsAppEezy'),
+  GUPSHUP_SOURCE_NUMBER: z.string().optional().default(process.env.GUPSHUP_SOURCE_NUMBER || '917834811114'),
 
   // Meta Cloud API Webhook Handshake & Cryptographic Security
   META_WEBHOOK_VERIFY_TOKEN: z.string().default(process.env.META_WEBHOOK_VERIFY_TOKEN || process.env.WHATSAPP_VERIFY_TOKEN || 'whatsappeezy_verify_2026'),

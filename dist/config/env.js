@@ -33,11 +33,15 @@ const envSchema = zod_1.z.object({
     DEFAULT_BRAND_NAME: zod_1.z.string().default('WhatsAppEezy'),
     DEFAULT_CURRENCY: zod_1.z.string().default('ZAR'),
     DEFAULT_COMMERCE_BASE_URL: zod_1.z.string().default('https://wa.me/c/product'),
-    // WhatsApp Business Cloud API Configuration
+    // WhatsApp Business Cloud API & Gupshup Configuration
     WHATSAPP_PHONE_NUMBER_ID: zod_1.z.string().default('mock-phone-number-id'),
     WHATSAPP_ACCESS_TOKEN: zod_1.z.string().default('mock-whatsapp-access-token'),
     WHATSAPP_VERIFY_TOKEN: zod_1.z.string().default('whatsappeezy_verify_2026'),
     WHATSAPP_BUSINESS_ACCOUNT_ID: zod_1.z.string().default('mock-waba-id'),
+    GUPSHUP_API_KEY: zod_1.z.string().optional().default(process.env.GUPSHUP_API_KEY || ''),
+    GUPSHUP_APP_ID: zod_1.z.string().optional().default(process.env.GUPSHUP_APP_ID || ''),
+    GUPSHUP_APP_NAME: zod_1.z.string().optional().default(process.env.GUPSHUP_APP_NAME || 'WhatsAppEezy'),
+    GUPSHUP_SOURCE_NUMBER: zod_1.z.string().optional().default(process.env.GUPSHUP_SOURCE_NUMBER || '917834811114'),
     // Meta Cloud API Webhook Handshake & Cryptographic Security
     META_WEBHOOK_VERIFY_TOKEN: zod_1.z.string().default(process.env.META_WEBHOOK_VERIFY_TOKEN || process.env.WHATSAPP_VERIFY_TOKEN || 'whatsappeezy_verify_2026'),
     META_APP_SECRET: zod_1.z.string().default(process.env.META_APP_SECRET || 'meta-app-secret-cargodash-prod'),

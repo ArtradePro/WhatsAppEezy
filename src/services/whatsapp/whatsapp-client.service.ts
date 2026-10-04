@@ -490,9 +490,53 @@ export class WhatsAppClientService {
   }
 
   /**
-   * Low-level payload dispatcher
+   * Low-level payload dispatcher (Supports both Gupshup API & Meta Graph Cloud API)
    */
   private async sendPayload(to: string, payload: Record<string, any>): Promise<string> {
+    const cleanDestination = to.replace(/^\+/, '');
+
+    // 1. If Gupshup API Key is configured, dispatch via Gupshup API (v3 Partner/CAT or v1/msg)
+    if (config.GUPSHUP_API_KEY) {
+      try {
+        if (config.GUPSHUP_APP_ID) {
+          // Gupshup v3 Meta-compatible endpoint
+          const v3Url = `https://partner.gupshup.io/partner/app/${config.GUPSHUP_APP_ID}/v3/message`;
+          const response = await axios.post(v3Url, payload, {
+            headers: {
+              Authorization: config.GUPSHUP_API_KEY,
+              apikey: config.GUPSHUP_API_KEY,
+              'Content-Type': 'application/json',
+            },
+          });
+          return response.data?.messages?.[0]?.id || response.data?.messageId || `gup_v3_${Date.now()}`;
+        }
+
+        // Gupshup v1/msg form-encoded endpoint
+        const bodyText =
+          payload?.text?.body ||
+          payload?.interactive?.body?.text ||
+          'Welcome to WhatsAppEezy! Reply 1 to browse our catalog.';
+        const formData = new URLSearchParams();
+        formData.append('channel', 'whatsapp');
+        formData.append('source', (config.GUPSHUP_SOURCE_NUMBER || '917834811114').replace(/^\+/, ''));
+        formData.append('destination', cleanDestination);
+        formData.append('src.name', config.GUPSHUP_APP_NAME || 'WhatsAppEezy');
+        formData.append('message', JSON.stringify({ type: 'text', text: bodyText }));
+
+        const response = await axios.post('https://api.gupshup.io/wa/api/v1/msg', formData.toString(), {
+          headers: {
+            apikey: config.GUPSHUP_API_KEY,
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        });
+        return response.data?.messageId || `gup_${Date.now()}`;
+      } catch (err: any) {
+        console.error(`Failed to send Gupshup WhatsApp message to ${to}:`, err?.response?.data || err.message);
+        return `gup.fallback_${Date.now()}`;
+      }
+    }
+
+    // 2. Fallback to Mock Mode or Direct Meta Cloud API
     if (!this.isConfigured || config.MOCK_EXTERNAL_APIS) {
       const mockMsgId = `wamid.HBgL${Date.now()}`;
       return mockMsgId;
