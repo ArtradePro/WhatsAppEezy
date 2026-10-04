@@ -40,7 +40,7 @@ const envSchema = z.object({
   WHATSAPP_VERIFY_TOKEN: z.string().default('whatsappeezy_verify_2026'),
   WHATSAPP_BUSINESS_ACCOUNT_ID: z.string().default('mock-waba-id'),
   GUPSHUP_API_KEY: z.string().optional().default(process.env.GUPSHUP_API_KEY || ''),
-  GUPSHUP_APP_ID: z.string().optional().default(process.env.GUPSHUP_APP_ID || ''),
+  GUPSHUP_APP_ID: z.string().optional().default(process.env.GUPSHUP_APP_ID || 'd4f0052b-a102-49f2-bf53-c737349628ee'),
   GUPSHUP_APP_NAME: z.string().optional().default(process.env.GUPSHUP_APP_NAME || 'WhatsAppEezy'),
   GUPSHUP_SOURCE_NUMBER: z.string().optional().default(process.env.GUPSHUP_SOURCE_NUMBER || '917834811114'),
 

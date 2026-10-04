@@ -39,7 +39,7 @@ const envSchema = zod_1.z.object({
     WHATSAPP_VERIFY_TOKEN: zod_1.z.string().default('whatsappeezy_verify_2026'),
     WHATSAPP_BUSINESS_ACCOUNT_ID: zod_1.z.string().default('mock-waba-id'),
     GUPSHUP_API_KEY: zod_1.z.string().optional().default(process.env.GUPSHUP_API_KEY || ''),
-    GUPSHUP_APP_ID: zod_1.z.string().optional().default(process.env.GUPSHUP_APP_ID || ''),
+    GUPSHUP_APP_ID: zod_1.z.string().optional().default(process.env.GUPSHUP_APP_ID || 'd4f0052b-a102-49f2-bf53-c737349628ee'),
     GUPSHUP_APP_NAME: zod_1.z.string().optional().default(process.env.GUPSHUP_APP_NAME || 'WhatsAppEezy'),
     GUPSHUP_SOURCE_NUMBER: zod_1.z.string().optional().default(process.env.GUPSHUP_SOURCE_NUMBER || '917834811114'),
     // Meta Cloud API Webhook Handshake & Cryptographic Security

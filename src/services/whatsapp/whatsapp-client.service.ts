@@ -495,23 +495,9 @@ export class WhatsAppClientService {
   private async sendPayload(to: string, payload: Record<string, any>): Promise<string> {
     const cleanDestination = to.replace(/^\+/, '');
 
-    // 1. If Gupshup API Key is configured, dispatch via Gupshup API (v3 Partner/CAT or v1/msg)
+    // 1. If Gupshup API Key is configured, dispatch via Gupshup API (v1/msg with v3 fallback)
     if (config.GUPSHUP_API_KEY) {
       try {
-        if (config.GUPSHUP_APP_ID) {
-          // Gupshup v3 Meta-compatible endpoint
-          const v3Url = `https://partner.gupshup.io/partner/app/${config.GUPSHUP_APP_ID}/v3/message`;
-          const response = await axios.post(v3Url, payload, {
-            headers: {
-              Authorization: config.GUPSHUP_API_KEY,
-              apikey: config.GUPSHUP_API_KEY,
-              'Content-Type': 'application/json',
-            },
-          });
-          return response.data?.messages?.[0]?.id || response.data?.messageId || `gup_v3_${Date.now()}`;
-        }
-
-        // Gupshup v1/msg form-encoded endpoint
         const bodyText =
           payload?.text?.body ||
           payload?.interactive?.body?.text ||
