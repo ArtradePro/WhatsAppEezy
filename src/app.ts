@@ -390,13 +390,37 @@ export function createApp(): Application {
     adaptFastifyController((req, reply) => virtualNumberController.executeZeroDataCommand(req, reply))
   );
 
-  // Active Session Inspector
+  // Active Session Inspector & Gupshup Live Configuration
   app.get('/api/v1/sessions/:waId', async (req: Request, res: Response) => {
     const waId = req.params.waId as string;
     const session = await conversationSessionStore.getSession(waId);
+    const { whatsAppClientService } = await import('./services/whatsapp/whatsapp-client.service');
     res.json({
       success: true,
       session,
+      gupshupConfigured: Boolean(config.GUPSHUP_API_KEY),
+      lastOutboundResult: whatsAppClientService.lastOutboundResult,
+    });
+  });
+
+  app.post('/api/v1/whatsapp/configure-gupshup', async (req: Request, res: Response) => {
+    const { apiKey, appId, testPhone } = req.body || {};
+    const { whatsAppClientService } = await import('./services/whatsapp/whatsapp-client.service');
+    if (apiKey) {
+      whatsAppClientService.configureGupshup(String(apiKey), appId ? String(appId) : undefined);
+    }
+    let testMessageId: string | null = null;
+    if (testPhone) {
+      testMessageId = await whatsAppClientService.sendTextMessage(
+        String(testPhone),
+        '🟢 *WhatsAppEezy Live!* Your Gupshup + Railway engine is connected.\n\nReply *1* for Higiene Commercial Hygiene & Cleaning or *hi* to browse all catalogs!'
+      );
+    }
+    res.json({
+      success: true,
+      gupshupConfigured: Boolean(config.GUPSHUP_API_KEY),
+      testMessageId,
+      lastOutboundResult: whatsAppClientService.lastOutboundResult,
     });
   });
 

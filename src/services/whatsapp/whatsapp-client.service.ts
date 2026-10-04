@@ -7,18 +7,32 @@ export class WhatsAppClientService {
   private readonly phoneNumberId: string;
   private readonly accessToken: string;
   private readonly isConfigured: boolean;
+  private runtimeGupshupApiKey: string = '';
+  private runtimeGupshupAppId: string = '';
+  public lastOutboundResult: Record<string, any> | null = null;
 
   constructor() {
     this.baseUrl = config.META_GRAPH_BASE_URL;
     this.version = config.META_GRAPH_API_VERSION;
     this.phoneNumberId = config.WHATSAPP_PHONE_NUMBER_ID;
     this.accessToken = config.WHATSAPP_ACCESS_TOKEN;
+    this.runtimeGupshupApiKey = config.GUPSHUP_API_KEY || '';
+    this.runtimeGupshupAppId = config.GUPSHUP_APP_ID || 'd4f0052b-a102-49f2-bf53-c737349628ee';
 
     this.isConfigured =
       Boolean(this.accessToken) &&
       this.accessToken !== 'mock-whatsapp-access-token' &&
       Boolean(this.phoneNumberId) &&
       this.phoneNumberId !== 'mock-phone-number-id';
+  }
+
+  public configureGupshup(apiKey: string, appId?: string): void {
+    this.runtimeGupshupApiKey = apiKey.trim();
+    config.GUPSHUP_API_KEY = this.runtimeGupshupApiKey;
+    if (appId) {
+      this.runtimeGupshupAppId = appId.trim();
+      config.GUPSHUP_APP_ID = this.runtimeGupshupAppId;
+    }
   }
 
   /**
@@ -495,28 +509,45 @@ export class WhatsAppClientService {
   private async sendPayload(to: string, payload: Record<string, any>): Promise<string> {
     const cleanDestination = to.replace(/^\+/, '');
 
-    // 1. If Gupshup API Key is configured, dispatch via Gupshup API (v1/msg with v3 fallback)
-    if (config.GUPSHUP_API_KEY) {
-      try {
-        const bodyText =
-          payload?.text?.body ||
-          payload?.interactive?.body?.text ||
-          'Welcome to WhatsAppEezy! Reply 1 to browse our catalog.';
-        const formData = new URLSearchParams();
-        formData.append('channel', 'whatsapp');
-        formData.append('source', (config.GUPSHUP_SOURCE_NUMBER || '917834811114').replace(/^\+/, ''));
-        formData.append('destination', cleanDestination);
-        formData.append('src.name', config.GUPSHUP_APP_NAME || 'WhatsAppEezy');
-        formData.append('message', JSON.stringify({ type: 'text', text: bodyText }));
+    // 1. If Gupshup API Key / Customer App Token is configured, dispatch via Gupshup API
+    const gupshupKey = this.runtimeGupshupApiKey || config.GUPSHUP_API_KEY;
+    if (gupshupKey) {
+      const bodyText =
+        payload?.text?.body ||
+        payload?.interactive?.body?.text ||
+        'Welcome to WhatsAppEezy! Reply 1 to browse our catalog.';
+      const formData = new URLSearchParams();
+      formData.append('channel', 'whatsapp');
+      formData.append('source', (config.GUPSHUP_SOURCE_NUMBER || '917834811114').replace(/^\+/, ''));
+      formData.append('destination', cleanDestination);
+      formData.append('src.name', config.GUPSHUP_APP_NAME || 'WhatsAppEezy');
+      formData.append('message', JSON.stringify({ type: 'text', text: bodyText }));
 
+      try {
         const response = await axios.post('https://api.gupshup.io/wa/api/v1/msg', formData.toString(), {
           headers: {
-            apikey: config.GUPSHUP_API_KEY,
+            apikey: gupshupKey,
+            Authorization: gupshupKey.startsWith('Bearer ') ? gupshupKey : `Bearer ${gupshupKey}`,
             'Content-Type': 'application/x-www-form-urlencoded',
           },
         });
+        this.lastOutboundResult = {
+          ok: true,
+          provider: 'gupshup-v1',
+          to: cleanDestination,
+          status: response.status,
+          data: response.data,
+          at: new Date().toISOString(),
+        };
         return response.data?.messageId || `gup_${Date.now()}`;
       } catch (err: any) {
+        this.lastOutboundResult = {
+          ok: false,
+          provider: 'gupshup-v1',
+          to: cleanDestination,
+          error: err?.response?.data || err.message,
+          at: new Date().toISOString(),
+        };
         console.error(`Failed to send Gupshup WhatsApp message to ${to}:`, err?.response?.data || err.message);
         return `gup.fallback_${Date.now()}`;
       }

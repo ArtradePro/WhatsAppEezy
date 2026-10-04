@@ -237,13 +237,33 @@ function createApp() {
     app.post('/api/v1/virtual-numbers/provision', adaptFastifyController((req, reply) => virtual_number_controller_1.virtualNumberController.provisionVirtualNumber(req, reply)));
     app.post('/api/v1/virtual-numbers/onboard-vendor', adaptFastifyController((req, reply) => virtual_number_controller_1.virtualNumberController.onboardVendor(req, reply)));
     app.post('/api/v1/virtual-numbers/zero-data-command', adaptFastifyController((req, reply) => virtual_number_controller_1.virtualNumberController.executeZeroDataCommand(req, reply)));
-    // Active Session Inspector
+    // Active Session Inspector & Gupshup Live Configuration
     app.get('/api/v1/sessions/:waId', async (req, res) => {
         const waId = req.params.waId;
         const session = await conversation_session_store_1.conversationSessionStore.getSession(waId);
+        const { whatsAppClientService } = await import('./services/whatsapp/whatsapp-client.service');
         res.json({
             success: true,
             session,
+            gupshupConfigured: Boolean(env_1.config.GUPSHUP_API_KEY),
+            lastOutboundResult: whatsAppClientService.lastOutboundResult,
+        });
+    });
+    app.post('/api/v1/whatsapp/configure-gupshup', async (req, res) => {
+        const { apiKey, appId, testPhone } = req.body || {};
+        const { whatsAppClientService } = await import('./services/whatsapp/whatsapp-client.service');
+        if (apiKey) {
+            whatsAppClientService.configureGupshup(String(apiKey), appId ? String(appId) : undefined);
+        }
+        let testMessageId = null;
+        if (testPhone) {
+            testMessageId = await whatsAppClientService.sendTextMessage(String(testPhone), '🟢 *WhatsAppEezy Live!* Your Gupshup + Railway engine is connected.\n\nReply *1* for Higiene Commercial Hygiene & Cleaning or *hi* to browse all catalogs!');
+        }
+        res.json({
+            success: true,
+            gupshupConfigured: Boolean(env_1.config.GUPSHUP_API_KEY),
+            testMessageId,
+            lastOutboundResult: whatsAppClientService.lastOutboundResult,
         });
     });
     // Catch-all 404 handler

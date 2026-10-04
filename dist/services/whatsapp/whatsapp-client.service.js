@@ -12,16 +12,29 @@ class WhatsAppClientService {
     phoneNumberId;
     accessToken;
     isConfigured;
+    runtimeGupshupApiKey = '';
+    runtimeGupshupAppId = '';
+    lastOutboundResult = null;
     constructor() {
         this.baseUrl = env_1.config.META_GRAPH_BASE_URL;
         this.version = env_1.config.META_GRAPH_API_VERSION;
         this.phoneNumberId = env_1.config.WHATSAPP_PHONE_NUMBER_ID;
         this.accessToken = env_1.config.WHATSAPP_ACCESS_TOKEN;
+        this.runtimeGupshupApiKey = env_1.config.GUPSHUP_API_KEY || '';
+        this.runtimeGupshupAppId = env_1.config.GUPSHUP_APP_ID || 'd4f0052b-a102-49f2-bf53-c737349628ee';
         this.isConfigured =
             Boolean(this.accessToken) &&
                 this.accessToken !== 'mock-whatsapp-access-token' &&
                 Boolean(this.phoneNumberId) &&
                 this.phoneNumberId !== 'mock-phone-number-id';
+    }
+    configureGupshup(apiKey, appId) {
+        this.runtimeGupshupApiKey = apiKey.trim();
+        env_1.config.GUPSHUP_API_KEY = this.runtimeGupshupApiKey;
+        if (appId) {
+            this.runtimeGupshupAppId = appId.trim();
+            env_1.config.GUPSHUP_APP_ID = this.runtimeGupshupAppId;
+        }
     }
     /**
      * Sends a plain text WhatsApp message
@@ -417,27 +430,44 @@ class WhatsAppClientService {
      */
     async sendPayload(to, payload) {
         const cleanDestination = to.replace(/^\+/, '');
-        // 1. If Gupshup API Key is configured, dispatch via Gupshup API (v1/msg with v3 fallback)
-        if (env_1.config.GUPSHUP_API_KEY) {
+        // 1. If Gupshup API Key / Customer App Token is configured, dispatch via Gupshup API
+        const gupshupKey = this.runtimeGupshupApiKey || env_1.config.GUPSHUP_API_KEY;
+        if (gupshupKey) {
+            const bodyText = payload?.text?.body ||
+                payload?.interactive?.body?.text ||
+                'Welcome to WhatsAppEezy! Reply 1 to browse our catalog.';
+            const formData = new URLSearchParams();
+            formData.append('channel', 'whatsapp');
+            formData.append('source', (env_1.config.GUPSHUP_SOURCE_NUMBER || '917834811114').replace(/^\+/, ''));
+            formData.append('destination', cleanDestination);
+            formData.append('src.name', env_1.config.GUPSHUP_APP_NAME || 'WhatsAppEezy');
+            formData.append('message', JSON.stringify({ type: 'text', text: bodyText }));
             try {
-                const bodyText = payload?.text?.body ||
-                    payload?.interactive?.body?.text ||
-                    'Welcome to WhatsAppEezy! Reply 1 to browse our catalog.';
-                const formData = new URLSearchParams();
-                formData.append('channel', 'whatsapp');
-                formData.append('source', (env_1.config.GUPSHUP_SOURCE_NUMBER || '917834811114').replace(/^\+/, ''));
-                formData.append('destination', cleanDestination);
-                formData.append('src.name', env_1.config.GUPSHUP_APP_NAME || 'WhatsAppEezy');
-                formData.append('message', JSON.stringify({ type: 'text', text: bodyText }));
                 const response = await axios_1.default.post('https://api.gupshup.io/wa/api/v1/msg', formData.toString(), {
                     headers: {
-                        apikey: env_1.config.GUPSHUP_API_KEY,
+                        apikey: gupshupKey,
+                        Authorization: gupshupKey.startsWith('Bearer ') ? gupshupKey : `Bearer ${gupshupKey}`,
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
                 });
+                this.lastOutboundResult = {
+                    ok: true,
+                    provider: 'gupshup-v1',
+                    to: cleanDestination,
+                    status: response.status,
+                    data: response.data,
+                    at: new Date().toISOString(),
+                };
                 return response.data?.messageId || `gup_${Date.now()}`;
             }
             catch (err) {
+                this.lastOutboundResult = {
+                    ok: false,
+                    provider: 'gupshup-v1',
+                    to: cleanDestination,
+                    error: err?.response?.data || err.message,
+                    at: new Date().toISOString(),
+                };
                 console.error(`Failed to send Gupshup WhatsApp message to ${to}:`, err?.response?.data || err.message);
                 return `gup.fallback_${Date.now()}`;
             }
