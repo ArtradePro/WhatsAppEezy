@@ -21,9 +21,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'WhatsAppeezy.com | AI-Powered WhatsApp Commerce, PayFast MoR & Dispatch Portal',
+  title: 'WhatsAppEezy.com | AI-Powered WhatsApp Commerce, PayFast MoR & Dispatch Portal',
   description:
-    'Turn any WhatsApp number into an AI-enhanced store, instant PayFast checkout, and automated kitchen/yard dispatch engine at whatsappeezy.com.',
+    'Turn any WhatsApp number into an AI-enhanced store, instant PayFast checkout, and automated kitchen/yard dispatch engine at WhatsAppEezy.com.',
 };
 
 export default function RootLayout({
@@ -34,9 +34,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`dark ${spaceGrotesk.variable} ${jakarta.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="min-h-screen bg-[#0B141A] text-slate-100 antialiased selection:bg-[#25D366]/30 selection:text-[#25D366]">
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-[#0B141A] text-slate-100 antialiased selection:bg-[#25D366]/30 selection:text-[#25D366]"
+      >
         {children}
       </body>
     </html>

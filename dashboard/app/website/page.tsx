@@ -109,7 +109,7 @@ const GEMINI_ANTIGRAVITY_PROMPTS = [
   },
 ];
 
-export default function WhatsAppeezyOfficialWebsite() {
+export default function WhatsAppEezyOfficialWebsite() {
   const [activeVerticalIdx, setActiveVerticalIdx] = useState(0);
   const [monthlyGmv, setMonthlyGmv] = useState(120000);
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
@@ -227,7 +227,7 @@ export default function WhatsAppeezyOfficialWebsite() {
 
             <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl">
               No apps to download. No complex websites to maintain. With{' '}
-              <strong className="text-white">WhatsAppeezy.com</strong>, we load your catalog on the
+              <strong className="text-white">WhatsAppEezy.com</strong>, we load your catalog on the
               spot with <strong className="text-[#25D366]">AI-enhanced 1024×1024 photos</strong>,
               collect 100% verified <strong className="text-[#25D366]">PayFast &amp; Capitec Pay</strong>{' '}
               payments into our Master Merchant Account, and fire instant{' '}
@@ -272,7 +272,7 @@ export default function WhatsAppeezyOfficialWebsite() {
                 href="#onboard-now"
                 className="px-5 py-3.5 rounded-2xl bg-[#1F2C34] hover:bg-[#283842] text-white border border-[#25D366]/30 text-sm font-bold transition"
               >
-                Register Your Business on WhatsAppeezy
+                Register Your Business on WhatsAppEezy
               </a>
             </div>
 
@@ -309,7 +309,7 @@ export default function WhatsAppeezyOfficialWebsite() {
                         <ShieldCheck className="w-3.5 h-3.5 text-[#25D366] shrink-0" />
                       </div>
                       <div className="text-[10px] text-[#DCF8C6] font-mono">
-                        WhatsAppeezy Verified • {activeVertical.whatsapp}
+                        WhatsAppEezy Verified • {activeVertical.whatsapp}
                       </div>
                     </div>
                   </div>
@@ -358,7 +358,7 @@ export default function WhatsAppeezyOfficialWebsite() {
                     </div>
                   </div>
 
-                  {/* Incoming WhatsAppeezy PayFast MoR Bubble */}
+                  {/* Incoming WhatsAppEezy PayFast MoR Bubble */}
                   <div className="bg-[#1F2C34] text-slate-100 rounded-xl rounded-tl-none p-3.5 max-w-[94%] border border-[#25D366]/40 shadow-lg space-y-2.5">
                     <div className="flex items-center justify-between text-[10px] font-mono text-[#25D366] font-bold">
                       <span>⚡ WHATSAPPEEZY PAYFAST MoR</span>
@@ -410,7 +410,7 @@ export default function WhatsAppeezyOfficialWebsite() {
           </h2>
           <p className="text-sm text-slate-400">
             Whether you sell hygiene supplies, burgers &amp; pizzas, building sand, or salon
-            appointments—WhatsAppeezy runs your entire storefront inside WhatsApp.
+            appointments—WhatsAppEezy runs your entire storefront inside WhatsApp.
           </p>
         </div>
 
@@ -432,7 +432,7 @@ export default function WhatsAppeezyOfficialWebsite() {
               step: '03',
               icon: CreditCard,
               title: 'Master PayFast MoR Settlement',
-              desc: 'Customers pay via Capitec Pay or Instant EFT into the WhatsAppeezy Master Merchant Account. 100% Verified ITN Split locks in your net payout.',
+              desc: 'Customers pay via Capitec Pay or Instant EFT into the WhatsAppEezy Master Merchant Account. 100% Verified ITN Split locks in your net payout.',
             },
             {
               step: '04',
@@ -549,7 +549,7 @@ export default function WhatsAppeezyOfficialWebsite() {
                 >
                   {tier.popular && (
                     <span className="absolute -top-3 right-6 px-3 py-0.5 rounded-full bg-[#25D366] text-[#06130E] text-[10px] font-mono font-extrabold uppercase">
-                      Most Popular on WhatsAppeezy
+                      Most Popular on WhatsAppEezy
                     </span>
                   )}
                   <div className="space-y-4">
@@ -609,7 +609,7 @@ export default function WhatsAppeezyOfficialWebsite() {
               GEMINI FLASH + ANTIGRAVITY AI ENGINE
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white font-display mt-1">
-              Built-In Gemini AI Prompts Powering WhatsAppeezy.com
+              Built-In Gemini AI Prompts Powering WhatsAppEezy.com
             </h2>
           </div>
           <a
@@ -664,11 +664,11 @@ export default function WhatsAppeezyOfficialWebsite() {
               🚀 LIVE ON WHATSAPPEEZY.COM
             </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-display">
-              Ready to Load Your Customer&apos;s Catalog on WhatsAppeezy?
+              Ready to Load Your Customer&apos;s Catalog on WhatsAppEezy?
             </h2>
             <p className="text-sm text-slate-300 max-w-xl mx-auto">
               Enter your business or client details below to launch straight into the{' '}
-              <strong className="text-[#25D366]">WhatsAppeezy Merchant Command Portal</strong> with
+              <strong className="text-[#25D366]">WhatsAppEezy Merchant Command Portal</strong> with
               instant AI photo enhancement.
             </p>
 
@@ -692,7 +692,7 @@ export default function WhatsAppeezyOfficialWebsite() {
                   onClick={() => setLeadSubmitted(true)}
                   className="wa-gradient-btn rounded-xl px-5 py-3 text-xs font-extrabold transition"
                 >
-                  Activate on WhatsAppeezy →
+                  Activate on WhatsAppEezy →
                 </button>
               </div>
             ) : (
@@ -716,7 +716,7 @@ export default function WhatsAppeezyOfficialWebsite() {
       <footer className="bg-[#080F14] border-t border-[#1F2C34] py-8 text-xs text-slate-400">
         <div className="max-w-7xl mx-auto px-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-white font-display">WhatsAppeezy.com</span>
+            <span className="font-bold text-white font-display">WhatsAppEezy.com</span>
             <span>• Official South African WhatsApp Commerce &amp; PayFast MoR Aggregator</span>
           </div>
           <div className="flex items-center gap-4 font-mono">

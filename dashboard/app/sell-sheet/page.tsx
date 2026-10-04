@@ -52,7 +52,7 @@ export default function B2BVendorSellSheetPage() {
               Official WhatsApp Storefront, AI Photo Studio &amp; Automated PayFast MoR Settlement
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950 flex items-center gap-2.5">
-              WHATSAPPEEZY.COM
+              WhatsAppEezy.com
               <span className="text-xs font-bold bg-[#DCF8C6] text-[#075E54] border border-[#25D366] px-2.5 py-0.5 rounded-full">
                 Zero-App WhatsApp Commerce
               </span>
@@ -66,7 +66,7 @@ export default function B2BVendorSellSheetPage() {
             <div className="font-bold text-slate-950 text-sm">Merchant of Record (MoR) Engine</div>
             <div>Capitec Pay • Instant EFT • Card • Scan-to-Pay</div>
             <div className="inline-block mt-1.5 bg-slate-900 text-emerald-400 font-mono text-[10px] font-bold px-2.5 py-0.5 rounded">
-              Master WABA: waba_master_cargodash_001
+              Master WABA: waba_master_whatsappeezy_001
             </div>
           </div>
         </div>
@@ -303,7 +303,7 @@ export default function B2BVendorSellSheetPage() {
         <div className="border-t border-slate-200 pt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600">
           <div className="flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-[#128C7E]" />
-            <strong>WhatsAppeezy.com Multi-Tenant WhatsApp Commerce &amp; PayFast MoR Engine</strong>
+            <strong>WhatsAppEezy.com Multi-Tenant WhatsApp Commerce &amp; PayFast MoR Engine</strong>
           </div>
           <div className="font-mono text-[10px]">
             Quick Commands: <strong>ADD [Item] | R[Price] | [Unit]</strong> • <strong>HOURS MON-SAT 08:00-17:00 60M</strong> • <strong>BALANCE</strong>
