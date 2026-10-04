@@ -7,6 +7,7 @@ interface GpsPinDropMapProps {
   lat: number;
   lon: number;
   radiusKm?: number;
+  maxRadiusKm?: number;
   freeRadiusKm?: number;
   onChange: (lat: number, lon: number, resolvedAddress?: string) => void;
 }
@@ -20,10 +21,12 @@ interface SearchResult {
 export const GpsPinDropMap: React.FC<GpsPinDropMapProps> = ({
   lat,
   lon,
-  radiusKm = 50,
+  radiusKm,
+  maxRadiusKm,
   freeRadiusKm = 15,
   onChange,
 }) => {
+  const effectiveRadiusKm = radiusKm ?? maxRadiusKm ?? 50;
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null);
   const markerInstanceRef = useRef<any>(null);
@@ -125,7 +128,7 @@ export const GpsPinDropMap: React.FC<GpsPinDropMapProps> = ({
 
       // Max delivery radius circle (Sky Blue)
       const maxCircle = L.circle([lat, lon], {
-        radius: (radiusKm || 50) * 1000,
+        radius: (effectiveRadiusKm || 50) * 1000,
         color: '#38bdf8',
         weight: 2,
         fillColor: '#38bdf8',
@@ -185,13 +188,13 @@ export const GpsPinDropMap: React.FC<GpsPinDropMapProps> = ({
     }
     if (radiusCircleRef.current) {
       radiusCircleRef.current.setLatLng([lat, lon]);
-      radiusCircleRef.current.setRadius((radiusKm || 0) * 1000);
+      radiusCircleRef.current.setRadius((effectiveRadiusKm || 0) * 1000);
     }
     if (freeCircleRef.current) {
       freeCircleRef.current.setLatLng([lat, lon]);
       freeCircleRef.current.setRadius((freeRadiusKm || 0) * 1000);
     }
-  }, [lat, lon, radiusKm, freeRadiusKm]);
+  }, [lat, lon, effectiveRadiusKm, freeRadiusKm]);
 
   const handleAddressSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -331,7 +334,7 @@ export const GpsPinDropMap: React.FC<GpsPinDropMapProps> = ({
           </div>
           <div className="flex items-center gap-3 font-mono text-[10px]">
             <span className="text-emerald-400">● Green Circle: Free Local Zone ({freeRadiusKm}km)</span>
-            <span className="text-sky-400">● Blue Circle: Max Zone ({radiusKm}km)</span>
+            <span className="text-sky-400">● Blue Circle: Max Zone ({effectiveRadiusKm}km)</span>
           </div>
         </div>
       </div>
