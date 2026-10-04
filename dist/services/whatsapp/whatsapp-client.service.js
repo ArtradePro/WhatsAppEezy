@@ -484,9 +484,43 @@ class WhatsAppClientService {
         // 1. If Gupshup API Key / Customer App Token is configured, dispatch via Gupshup API
         const gupshupKey = await this.refreshGupshupCustomerAppTokenIfNeeded(false);
         if (gupshupKey) {
-            const bodyText = payload?.text?.body ||
-                payload?.interactive?.body?.text ||
-                'Welcome to WhatsAppEezy! Reply 1 to browse our catalog.';
+            let bodyText = payload?.text?.body || '';
+            if (!bodyText && payload?.interactive) {
+                const inter = payload.interactive;
+                const parts = [];
+                if (inter.header?.text) {
+                    parts.push(`*${inter.header.text}*`);
+                }
+                if (inter.body?.text) {
+                    parts.push(inter.body.text);
+                }
+                if (Array.isArray(inter.action?.sections)) {
+                    for (const sec of inter.action.sections) {
+                        if (sec.title)
+                            parts.push(`\n📂 *${sec.title}*`);
+                        if (Array.isArray(sec.rows)) {
+                            sec.rows.forEach((r, idx) => {
+                                parts.push(`*${idx + 1}.* ${r.title}${r.description ? ` — _${r.description}_` : ''}`);
+                            });
+                        }
+                    }
+                }
+                if (Array.isArray(inter.action?.buttons)) {
+                    parts.push('');
+                    inter.action.buttons.forEach((b, idx) => {
+                        const title = b?.reply?.title || b?.title || '';
+                        if (title)
+                            parts.push(`👉 Reply *${idx + 1}* for *${title}*`);
+                    });
+                }
+                if (inter.footer?.text) {
+                    parts.push(`\n_${inter.footer.text}_`);
+                }
+                bodyText = parts.join('\n');
+            }
+            if (!bodyText) {
+                bodyText = 'Welcome to WhatsAppEezy! Reply 1 to browse our catalog.';
+            }
             const formData = new URLSearchParams();
             formData.append('channel', 'whatsapp');
             formData.append('source', (env_1.config.GUPSHUP_SOURCE_NUMBER || '917834811114').replace(/^\+/, ''));

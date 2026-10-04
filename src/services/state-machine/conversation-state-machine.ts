@@ -44,6 +44,11 @@ export class ConversationStateMachine {
       if (byMeta) return byMeta;
     }
 
+    if (metadata?.displayPhoneNumber === '917834811114') {
+      const higiene = await postgresVendorRepository.findById('f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55');
+      if (higiene) return higiene;
+    }
+
     return (
       (await postgresVendorRepository.findById('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11')) ||
       (await postgresVendorRepository.findAll())[0]
@@ -59,7 +64,24 @@ export class ConversationStateMachine {
     message: WhatsAppInboundMessage,
     metadata?: InboundTenantMetadata
   ): Promise<void> {
-    const vendor = await this.resolveTenantVendor(metadata);
+    let vendor = await this.resolveTenantVendor(metadata);
+    const incomingText = message.text?.body?.trim().toLowerCase();
+
+    // Multi-Vendor Keyword Switcher (for single master WhatsApp number aggregation)
+    if (incomingText === '#higiene' || incomingText === 'higiene') {
+      const v = await postgresVendorRepository.findById('f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55');
+      if (v) vendor = v;
+    } else if (incomingText === '#sand' || incomingText === '#brick' || incomingText === 'brickdirect') {
+      const v = await postgresVendorRepository.findById('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11');
+      if (v) vendor = v;
+    } else if (incomingText === '#pizza' || incomingText === 'pizza') {
+      const v = await postgresVendorRepository.findById('d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a44');
+      if (v) vendor = v;
+    } else if (incomingText === '#salon' || incomingText === 'salon') {
+      const v = await postgresVendorRepository.findById('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a33');
+      if (v) vendor = v;
+    }
+
     const businessType = vendor.business_type || 'retail_delivery';
 
     const session = await conversationSessionStore.getSession(senderWaId, customerName, {
@@ -68,9 +90,9 @@ export class ConversationStateMachine {
       displayPhoneNumber: metadata?.displayPhoneNumber || vendor.whatsapp_number,
       businessType,
     });
+    session.vendorId = vendor.id;
 
     // Fast-path cancel / reset command
-    const incomingText = message.text?.body?.trim().toLowerCase();
     if (incomingText === 'reset' || incomingText === 'cancel' || incomingText === 'restart') {
       if (session.activeAppointmentId) {
         await appointmentEngineService.cancelAppointmentHold(session.activeAppointmentId);
@@ -313,18 +335,34 @@ export class ConversationStateMachine {
     const buttonId = message.interactive?.button_reply?.id;
     const listId = message.interactive?.list_reply?.id;
 
+    const rawText = message.text?.body?.trim().toLowerCase() || '';
+    const numericPick = /^[1-9]$/.test(rawText) ? parseInt(rawText, 10) : null;
+
+    if (numericPick !== null) {
+      const vendorProducts = (await postgresProductRepository.findByVendor(vendor.id)).filter((p) => p.is_available);
+      const picked = vendorProducts[numericPick - 1];
+      if (picked) {
+        await this.addItemToCart(session, picked.meta_product_retailer_id || picked.id, vendor);
+        return;
+      }
+    }
+
     if (
       buttonId === 'btn_browse_catalog' ||
-      message.text?.body?.toLowerCase().includes('browse') ||
-      message.text?.body?.toLowerCase().includes('book') ||
-      message.text?.body?.toLowerCase().includes('menu')
+      rawText === 'hi' ||
+      rawText === 'hello' ||
+      rawText.includes('browse') ||
+      rawText.includes('book') ||
+      rawText.includes('menu') ||
+      rawText.includes('higiene') ||
+      rawText.includes('proxy')
     ) {
       if (vendor.business_type === 'service_booking') {
         const vendorProducts = await postgresProductRepository.findByVendor(vendor.id);
         await whatsAppClientService.sendInteractiveList(
           session.waId,
           vendor.business_name.slice(0, 60),
-          `Select a service from *${vendor.business_name}* below to view real-time appointment availability:`,
+          `Select a service from *${vendor.business_name}* below (reply with item number *1-${vendorProducts.length}*):`,
           'Choose Service',
           [
             {
@@ -347,7 +385,7 @@ export class ConversationStateMachine {
         await whatsAppClientService.sendInteractiveList(
           session.waId,
           vendor.business_name.slice(0, 60),
-          `Browse fresh items from *${vendor.business_name}* below:`,
+          `Browse items from *${vendor.business_name}* below (reply with item number *1-${vendorProducts.length}* to order):`,
           'View Catalog',
           [
             {
@@ -356,7 +394,7 @@ export class ConversationStateMachine {
                 .filter((p) => p.is_available)
                 .map((p) => ({
                   id: p.meta_product_retailer_id || p.id,
-                  title: p.title.slice(0, 24),
+                  title: p.title,
                   description: `R${p.unit_price.toFixed(2)} (${p.unit_of_measure})`.slice(0, 72),
                 })),
             },
@@ -376,10 +414,23 @@ export class ConversationStateMachine {
       return;
     }
 
-    // Default fallback in browsing
-    await whatsAppClientService.sendTextMessage(
+    // Default fallback in browsing -> show catalog list directly
+    const vendorProducts = (await postgresProductRepository.findByVendor(vendor.id)).filter((p) => p.is_available);
+    await whatsAppClientService.sendInteractiveList(
       session.waId,
-      'To order, simply select an item from our interactive catalog or tap the WhatsApp Storefront icon on this chat to send your cart!'
+      vendor.business_name.slice(0, 60),
+      `Welcome to *${vendor.business_name}*! Reply with an item number (*1-${vendorProducts.length}*) below to add it to your order:`,
+      'View Catalog',
+      [
+        {
+          title: 'Available Products',
+          rows: vendorProducts.map((p) => ({
+            id: p.meta_product_retailer_id || p.id,
+            title: p.title,
+            description: `R${p.unit_price.toFixed(2)} (${p.unit_of_measure})`.slice(0, 72),
+          })),
+        },
+      ]
     );
   }
 
@@ -396,6 +447,7 @@ export class ConversationStateMachine {
   ): Promise<void> {
     const buttonId = message.interactive?.button_reply?.id;
     const listId = message.interactive?.list_reply?.id;
+    const rawCartText = message.text?.body?.trim().toLowerCase() || '';
 
     // If customer directly picked a slot while in CART_BUILDING, route to SLOT_SELECTION
     if (listId?.startsWith('slot_') && vendor.business_type === 'service_booking') {
@@ -409,14 +461,20 @@ export class ConversationStateMachine {
       buttonId === 'btn_select_slot' ||
       (vendor.business_type === 'service_booking' &&
         (buttonId === 'btn_proceed_delivery' ||
-          message.text?.body?.toLowerCase().includes('slot') ||
-          message.text?.body?.toLowerCase().includes('book')))
+          rawCartText === '1' ||
+          rawCartText.includes('slot') ||
+          rawCartText.includes('book')))
     ) {
       await this.promptNextAvailableSlots(session, vendor);
       return;
     }
 
-    if (buttonId === 'btn_proceed_delivery' || message.text?.body?.toLowerCase().includes('delivery')) {
+    if (
+      buttonId === 'btn_proceed_delivery' ||
+      rawCartText === '1' ||
+      rawCartText.includes('delivery') ||
+      rawCartText.includes('checkout')
+    ) {
       session.currentStage = 'ADDRESS_INPUT';
       await conversationSessionStore.saveSession(session);
 
@@ -425,7 +483,7 @@ export class ConversationStateMachine {
       return;
     }
 
-    if (buttonId === 'btn_add_more') {
+    if (buttonId === 'btn_add_more' || rawCartText === '2') {
       session.currentStage = 'BROWSING';
       await conversationSessionStore.saveSession(session);
       await this.handleBrowsingStage(
