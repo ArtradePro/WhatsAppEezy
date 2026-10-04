@@ -104,6 +104,27 @@ class FreightCalculatorService {
         };
         const distanceResult = await distance_matrix_service_1.distanceMatrixService.calculateDistance(origin, customerCoords);
         const distanceKm = distanceResult.distanceKm;
+        const totalCubicMeters = items && items.length > 0 ? this.calculateAggregatedVolume(items) : 0;
+        const freeRadiusKm = customRates?.freeDeliveryRadiusKm ?? 0;
+        const isWithinFreeLocalZone = (freeRadiusKm > 0 && distanceKm <= freeRadiusKm) ||
+            (customRates?.baseDeliveryFee === 0 && customRates?.perKmRate === 0);
+        if (isWithinFreeLocalZone) {
+            return {
+                distanceKm,
+                durationMinutes: distanceResult.durationMinutes,
+                durationText: distanceResult.durationText,
+                freightTier: `FREE LOCAL DELIVERY (Within ${freeRadiusKm || distanceKm}km Zone)`,
+                baseFlagFall: 0,
+                ratePerKm: 0,
+                mileageCost: 0,
+                totalCubicMeters,
+                tipperSurcharge: 0,
+                totalFreightCost: 0,
+                customerCoordinates: customerCoords,
+                deliveryAddress: deliveryAddress || `GPS Pin (${customerCoords.lat.toFixed(4)}, ${customerCoords.lng.toFixed(4)})`,
+                vendorDepotCoordinates: origin,
+            };
+        }
         // Match appropriate pricing tier
         const activeTier = this.tiers.find((t) => distanceKm >= t.minKm && distanceKm <= t.maxKm) ||
             this.tiers[this.tiers.length - 1];
@@ -113,12 +134,14 @@ class FreightCalculatorService {
         const ratePerKm = customRates?.perKmRate !== undefined
             ? Number(customRates.perKmRate)
             : activeTier.ratePerKm;
+        const billableKm = freeRadiusKm > 0 ? Math.max(0, distanceKm - freeRadiusKm) : distanceKm;
         const tierName = customRates?.baseDeliveryFee !== undefined && customRates?.perKmRate !== undefined
-            ? `Vendor Rate: R${baseFlagFall} + R${ratePerKm}/km`
+            ? freeRadiusKm > 0
+                ? `Free first ${freeRadiusKm}km, then R${ratePerKm}/km`
+                : `Vendor Rate: R${baseFlagFall} + R${ratePerKm}/km`
             : activeTier.tierName;
-        const mileageCost = Math.round(distanceKm * ratePerKm * 100) / 100;
-        const totalCubicMeters = items && items.length > 0 ? this.calculateAggregatedVolume(items) : 0;
-        const tipperSurcharge = this.calculateTipperSurcharge(totalCubicMeters);
+        const mileageCost = Math.round(billableKm * ratePerKm * 100) / 100;
+        const tipperSurcharge = baseFlagFall === 0 ? 0 : this.calculateTipperSurcharge(totalCubicMeters);
         const totalFreightCost = Math.round((baseFlagFall + mileageCost + tipperSurcharge) * 100) / 100;
         return {
             distanceKm,

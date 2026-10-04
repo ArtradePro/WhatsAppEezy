@@ -20,9 +20,12 @@ export interface Vendor {
   bank_branch_code: string;
   base_location_lon: number;
   base_location_lat: number;
+  depot_address?: string;
   max_delivery_radius_km: number;
+  free_delivery_radius_km?: number;
   base_delivery_fee: number;
   per_km_rate: number;
+  vat_inclusive?: boolean;
   commission_rate: number;
   subscription_tier?: VendorSubscriptionTier;
   subscription_monthly_fee?: number;
@@ -47,9 +50,12 @@ export interface Product {
     | 'hardware'
     | 'hair_styling'
     | 'wellness_massage'
-    | 'woodfired_pizza';
+    | 'woodfired_pizza'
+    | 'gourmet_burger'
+    | 'hygiene_cleaning';
   unit_of_measure: string;
   unit_price: number;
+  vat_inclusive?: boolean;
   is_available: boolean;
   image_url: string;
   raw_image_url?: string;

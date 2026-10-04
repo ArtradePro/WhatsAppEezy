@@ -43,9 +43,12 @@ export interface DbVendor {
   bank_branch_code: string;
   base_location_lon: number;
   base_location_lat: number;
+  depot_address?: string;
   max_delivery_radius_km: number;
+  free_delivery_radius_km?: number;
   base_delivery_fee: number;
   per_km_rate: number;
+  vat_inclusive?: boolean;
   subscription_tier?: VendorSubscriptionTier;
   subscription_monthly_fee?: number;
   commission_rate: number;
@@ -93,6 +96,7 @@ export interface DbProduct {
   category: string;
   unit_of_measure: string;
   unit_price: number;
+  vat_inclusive?: boolean;
   raw_image_url?: string;
   enhanced_image_url?: string;
   draft_specs?: Record<string, any> | null;

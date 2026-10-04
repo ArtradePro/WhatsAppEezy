@@ -22,36 +22,36 @@ interface UploadProductModalProps {
 
 const DEMO_PHOTO_PRESETS = [
   {
-    label: '🧴 Higiene 5L Industrial Surface Sanitizer & Disinfectant (R420)',
-    caption: 'Higiene 5L SABS Commercial Surface Sanitizer & Disinfectant R420 per 5L drum',
+    label: '🧱 Cement Maxi Bricks 7MPa (R2,600 per 1000pcs)',
+    caption: 'Cement Maxi Bricks (7 MPa) R2600 per 1000pcs',
+    category: 'bricks_blocks',
+    unit: 'per 1000pcs',
+    rawUrl:
+      'https://images.unsplash.com/photo-1584467541268-b040f83be3fd?auto=format&fit=crop&w=700&q=80',
+  },
+  {
+    label: '🧴 Higiene 5L Industrial Surface Sanitizer (R185 per 5L)',
+    caption: '5L Industrial Surface Sanitizer (70% Alcohol) R185 per 5L container',
     category: 'hygiene_cleaning',
-    unit: 'per 5L drum',
+    unit: 'per 5L container',
     rawUrl:
       'https://images.unsplash.com/photo-1584813470613-5b1c1cad3d69?auto=format&fit=crop&w=700&q=80',
   },
   {
-    label: '🧱 6m³ Washed Plaster Sand (R580/m³)',
-    caption: 'Washed Malmesbury Plaster Sand R580 per m3 direct tipper load',
+    label: '🧱 6m³ Washed Plaster Sand (R550 per m3)',
+    caption: 'Washed Malmesbury Plaster Sand R550 per m3 direct tipper load',
     category: 'sand_stone',
     unit: 'per m3',
     rawUrl:
       'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=700&q=80',
   },
   {
-    label: '🍔 Double Wagyu Smash Burger & Fries (R165)',
-    caption: 'Double Wagyu Smash Burger with aged cheddar & rosemary fries R165 per combo meal',
-    category: 'gourmet_burger',
-    unit: 'per combo meal',
+    label: '🧴 Higiene 25L Anti-Bacterial Hand Soap (R640 per 25L drum)',
+    caption: '25L Anti-Bacterial Liquid Hand Soap (Bulk) R640 per 25L drum',
+    category: 'hygiene_cleaning',
+    unit: 'per 25L drum',
     rawUrl:
-      'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=700&q=80',
-  },
-  {
-    label: '🍕 Woodfired Pepperoni Diavola Pizza (R155)',
-    caption: 'Woodfired Pepperoni Diavola XL Pizza with Fior di Latte & hot honey R155 per XL pizza',
-    category: 'woodfired_pizza',
-    unit: 'per XL pizza',
-    rawUrl:
-      'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=700&q=80',
+      'https://images.unsplash.com/photo-1585421514738-01798e348b17?auto=format&fit=crop&w=700&q=80',
   },
 ];
 
@@ -243,7 +243,7 @@ export const UploadProductModal: React.FC<UploadProductModalProps> = ({
       // Fallback to local extraction if offline
     }
 
-    const priceMatch = caption.match(/R\s*([0-9]+(?:\.[0-9]+)?)/i);
+    const priceMatch = caption.match(/(?:R|ZAR)?\s*([0-9]+(?:\.[0-9]+)?)/i);
     const fallbackPrice = priceMatch ? parseFloat(priceMatch[1]) : 580.0;
     const lowerCap = caption.toLowerCase();
 
@@ -254,20 +254,26 @@ export const UploadProductModal: React.FC<UploadProductModalProps> = ({
         ? 'woodfired_pizza'
         : lowerCap.includes('balayage') || lowerCap.includes('hair') || lowerCap.includes('session')
         ? 'hair_styling'
+        : lowerCap.includes('sanitizer') || lowerCap.includes('soap') || lowerCap.includes('hygiene')
+        ? 'hygiene_cleaning'
         : lowerCap.includes('brick')
         ? 'bricks_blocks'
         : aiProd?.category || 'sand_stone';
 
-    const inferredUnit =
-      lowerCap.includes('combo') || lowerCap.includes('burger')
-        ? 'per combo meal'
-        : lowerCap.includes('pizza')
-        ? 'per XL pizza'
-        : lowerCap.includes('session') || lowerCap.includes('min')
-        ? '60 min session'
-        : lowerCap.includes('1000')
-        ? 'per 1000 bricks'
-        : aiProd?.unit_of_measure || 'per m3';
+    const customUnitMatch = caption.match(/\b(per\s+[a-z0-9\s³]+)$/i);
+    const inferredUnit = customUnitMatch
+      ? customUnitMatch[1].trim()
+      : lowerCap.includes('1000pcs') || lowerCap.includes('1000 pcs')
+      ? 'per 1000pcs'
+      : lowerCap.includes('1000')
+      ? 'per 1000pcs'
+      : lowerCap.includes('combo') || lowerCap.includes('burger')
+      ? 'per combo meal'
+      : lowerCap.includes('pizza')
+      ? 'per XL pizza'
+      : lowerCap.includes('session') || lowerCap.includes('min')
+      ? '60 min session'
+      : aiProd?.unit_of_measure || 'per m3';
 
     const finalTitle =
       aiProd?.title ||
@@ -288,6 +294,7 @@ export const UploadProductModal: React.FC<UploadProductModalProps> = ({
       category: inferredCategory,
       unit_of_measure: inferredUnit,
       unit_price: finalPrice,
+      vat_inclusive: vendor.vat_inclusive ?? false,
       is_available: true,
       image_url: normalizedDataUrl,
       raw_image_url: rawSource,
@@ -510,10 +517,10 @@ export const UploadProductModal: React.FC<UploadProductModalProps> = ({
 
               {/* Editable Extracted Metadata */}
               <div className="p-4 bg-industrial-950 rounded-xl border border-industrial-700 space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="sm:col-span-2">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                  <div className="sm:col-span-5">
                     <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
-                      AI-Extracted Product Title
+                      Product Title
                     </label>
                     <input
                       type="text"
@@ -524,22 +531,97 @@ export const UploadProductModal: React.FC<UploadProductModalProps> = ({
                       className="w-full rounded-lg bg-industrial-900 border border-industrial-700 px-3 py-1.5 text-xs font-bold text-white"
                     />
                   </div>
-                  <div>
+                  <div className="sm:col-span-3">
                     <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
                       Unit Price (ZAR)
                     </label>
                     <input
-                      type="number"
-                      value={extractedProduct.unit_price || 0}
-                      onChange={(e) =>
+                      type="text"
+                      value={extractedProduct.unit_price ?? ''}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        const numMatch = raw.match(/([0-9]+(?:\.[0-9]+)?)/);
+                        const unitPart = raw
+                          .replace(/^(?:R|ZAR)?\s*[0-9]+(?:\.[0-9]+)?\s*/i, '')
+                          .trim();
                         setExtractedProduct((prev) => ({
                           ...prev,
-                          unit_price: Number(e.target.value) || 0,
-                        }))
-                      }
+                          unit_price: numMatch ? parseFloat(numMatch[1]) : 0,
+                          ...(unitPart ? { unit_of_measure: unitPart } : {}),
+                        }));
+                      }}
+                      placeholder="e.g. 2600"
                       className="w-full rounded-lg bg-industrial-900 border border-emerald-500/40 px-3 py-1.5 text-xs font-mono font-bold text-emerald-400"
                     />
                   </div>
+                  <div className="sm:col-span-4">
+                    <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1">
+                      Unit (e.g. per 1000pcs, per m3)
+                    </label>
+                    <input
+                      type="text"
+                      value={extractedProduct.unit_of_measure || ''}
+                      onChange={(e) =>
+                        setExtractedProduct((prev) => ({
+                          ...prev,
+                          unit_of_measure: e.target.value,
+                        }))
+                      }
+                      placeholder="per 1000pcs"
+                      className="w-full rounded-lg bg-industrial-900 border border-sky-500/40 px-3 py-1.5 text-xs font-mono font-bold text-sky-300"
+                    />
+                  </div>
+                </div>
+
+                {/* Quick Unit of Measure Chips & 15% SA VAT Selector */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[10px] font-mono uppercase text-slate-400">
+                      Quick Unit:
+                    </span>
+                    {[
+                      'per 1000pcs',
+                      'per m3',
+                      'per 6m3 load',
+                      'per 5L container',
+                      'per 25L drum',
+                      'per unit',
+                    ].map((u) => (
+                      <button
+                        key={u}
+                        type="button"
+                        onClick={() =>
+                          setExtractedProduct((prev) => ({ ...prev, unit_of_measure: u }))
+                        }
+                        className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border transition ${
+                          extractedProduct.unit_of_measure === u
+                            ? 'bg-sky-500/20 border-sky-500 text-sky-300'
+                            : 'bg-industrial-900 border-industrial-700 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {u}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setExtractedProduct((prev) => ({
+                        ...prev,
+                        vat_inclusive: !prev?.vat_inclusive,
+                      }))
+                    }
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-extrabold border transition ${
+                      extractedProduct.vat_inclusive
+                        ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
+                        : 'bg-amber-500/20 border-amber-500/50 text-amber-300'
+                    }`}
+                  >
+                    {extractedProduct.vat_inclusive
+                      ? `✅ Price INCLUDES 15% VAT (Excl: R${((extractedProduct.unit_price || 0) / 1.15).toFixed(2)})`
+                      : `⚡ Price EXCLUDES VAT (+15% VAT = R${((extractedProduct.unit_price || 0) * 1.15).toFixed(2)} Incl.)`}
+                  </button>
                 </div>
 
                 <div>
@@ -558,7 +640,8 @@ export const UploadProductModal: React.FC<UploadProductModalProps> = ({
 
                 <div className="flex flex-wrap items-center gap-2 pt-1 font-mono text-xs">
                   <span className="px-2.5 py-1 rounded bg-industrial-900 text-emerald-400 font-bold border border-industrial-700">
-                    R{extractedProduct.unit_price?.toFixed(2)} / {extractedProduct.unit_of_measure}
+                    R{extractedProduct.unit_price?.toFixed(2)} {extractedProduct.unit_of_measure}{' '}
+                    ({extractedProduct.vat_inclusive ? 'Incl. 15% VAT' : 'Excl. VAT'})
                   </span>
                   <span className="px-2.5 py-1 rounded bg-industrial-900 text-sky-300 border border-industrial-700">
                     SKU: {extractedProduct.meta_retailer_id}

@@ -152,9 +152,11 @@ export default function VendorDashboard() {
   // Interactive Draft Approval & Live Product Price/Title Edit State
   const [editingPriceProductId, setEditingPriceProductId] = useState<string | null>(null);
   const [editingTitleInput, setEditingTitleInput] = useState<string>('');
-  const [priceEditInput, setPriceEditInput] = useState<string>('R620 per m3');
+  const [priceEditInput, setPriceEditInput] = useState<string>('R2600 per 1000pcs');
+  const [editingUnitInput, setEditingUnitInput] = useState<string>('per 1000pcs');
+  const [editingVatInclusive, setEditingVatInclusive] = useState<boolean>(false);
   const [simUploadCaption, setSimUploadCaption] = useState<string>(
-    '19mm Crushed Concrete Stone R640 per m3'
+    'Cement Maxi Bricks R2600 per 1000pcs'
   );
   const [selectedBankFormat, setSelectedBankFormat] = useState<
     'fnb' | 'capitec' | 'standard_bank' | 'nedbank' | 'absa' | 'acb'
@@ -384,19 +386,23 @@ export default function VendorDashboard() {
     const priceMatch = priceEditInput.match(/([0-9]+(?:[\.,][0-9]{1,2})?)/);
     const newPrice = priceMatch
       ? parseFloat(priceMatch[1].replace(',', '.'))
-      : existing?.unit_price || 620;
+      : existing?.unit_price || 2600;
     const lower = priceEditInput.toLowerCase();
-    const afterNumber = priceEditInput.replace(/^(?:R|ZAR)?\s*[0-9]+(?:[\.,][0-9]{1,2})?\s*/i, '').trim();
+    const afterNumber = priceEditInput
+      .replace(/^(?:R|ZAR)?\s*[0-9]+(?:[\.,][0-9]{1,2})?\s*/i, '')
+      .trim();
     const newUnit =
       afterNumber.length > 0
         ? afterNumber
+        : editingUnitInput.trim().length > 0
+        ? editingUnitInput.trim()
+        : lower.includes('1000') || lower.includes('pcs') || lower.includes('brick')
+        ? 'per 1000pcs'
         : lower.includes('m3') || lower.includes('cube')
         ? 'per m3'
-        : lower.includes('1000') || lower.includes('brick')
-        ? 'per 1000 bricks'
         : lower.includes('bag')
         ? 'per bag'
-        : existing?.unit_of_measure || 'per unit';
+        : existing?.unit_of_measure || 'per 1000pcs';
     const newTitle = editingTitleInput.trim() || existing?.title || 'Catalog Item';
 
     setProducts((prev) =>
@@ -407,6 +413,7 @@ export default function VendorDashboard() {
               title: newTitle,
               unit_price: newPrice,
               unit_of_measure: newUnit,
+              vat_inclusive: editingVatInclusive,
             }
           : p
       )
@@ -420,6 +427,7 @@ export default function VendorDashboard() {
           title: newTitle,
           unit_price: newPrice,
           unit_of_measure: newUnit,
+          vat_inclusive: editingVatInclusive,
         }),
       });
     } catch {
@@ -427,8 +435,11 @@ export default function VendorDashboard() {
     }
 
     setEditingPriceProductId(null);
+    const vatLabel = editingVatInclusive
+      ? 'Incl. 15% VAT'
+      : `Excl. VAT (R${(newPrice * 1.15).toFixed(2)} Incl. 15% VAT)`;
     showToast(
-      `✅ Updated "${newTitle}" to R${newPrice.toFixed(2)} (${newUnit}) — synced live to WhatsApp Catalog!`
+      `✅ Updated "${newTitle}" to R${newPrice.toFixed(2)} ${newUnit} (${vatLabel}) — synced live to WhatsApp Catalog!`
     );
   };
 
@@ -799,7 +810,11 @@ export default function VendorDashboard() {
                     📞 {selectedVendor.whatsapp_number}
                   </span>
                   <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-300">
-                    📍 Depot: {selectedVendor.base_location_lat.toFixed(4)}, {selectedVendor.base_location_lon.toFixed(4)} • R{selectedVendor.base_delivery_fee} + R{selectedVendor.per_km_rate}/km ({selectedVendor.max_delivery_radius_km}km zone)
+                    📍 Depot: {selectedVendor.base_location_lat.toFixed(4)}, {selectedVendor.base_location_lon.toFixed(4)} •{' '}
+                    {(selectedVendor.free_delivery_radius_km ?? 0) > 0
+                      ? `FREE Local (≤${selectedVendor.free_delivery_radius_km}km) then `
+                      : ''}
+                    R{selectedVendor.base_delivery_fee} + R{selectedVendor.per_km_rate}/km ({selectedVendor.max_delivery_radius_km}km zone)
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 mt-0.5">
@@ -1691,7 +1706,13 @@ export default function VendorDashboard() {
                   </span>
                 </div>
                 <p className="text-xs text-slate-300">
-                  Delivery Pricing: <strong className="text-emerald-400 font-mono">R{selectedVendor.base_delivery_fee.toFixed(2)} base + R{selectedVendor.per_km_rate.toFixed(2)}/km</strong> • Payout Bank: <strong className="text-white">{selectedVendor.bank_name} ({selectedVendor.bank_account_number})</strong>
+                  Delivery Pricing:{' '}
+                  <strong className="text-emerald-400 font-mono">
+                    {(selectedVendor.free_delivery_radius_km ?? 0) > 0
+                      ? `FREE Local Delivery (≤${selectedVendor.free_delivery_radius_km}km) • then R${selectedVendor.base_delivery_fee.toFixed(2)} base + R${selectedVendor.per_km_rate.toFixed(2)}/km`
+                      : `R${selectedVendor.base_delivery_fee.toFixed(2)} base + R${selectedVendor.per_km_rate.toFixed(2)}/km`}
+                  </strong>{' '}
+                  • Payout Bank: <strong className="text-white">{selectedVendor.bank_name} ({selectedVendor.bank_account_number})</strong>
                 </p>
               </div>
 
@@ -1709,7 +1730,7 @@ export default function VendorDashboard() {
                   className="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-extrabold transition flex items-center gap-1.5 shadow"
                 >
                   <Settings className="w-3.5 h-3.5" />
-                  ⚙️ Edit Company Info, Location &amp; Delivery Rates
+                  ⚙️ Edit Company Info, GPS Pin-Drop &amp; Delivery Rates
                 </button>
               </div>
             </div>
@@ -1723,7 +1744,7 @@ export default function VendorDashboard() {
                     Add New Product or Edit Live Catalog Pricing for {selectedVendor.business_name}
                   </h2>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    Click <strong>&ldquo;✏️ Edit Item &amp; Price&rdquo;</strong> on any card below to change its title, price, or unit of measure immediately, or click <strong>&ldquo;📸 Upload &amp; AI-Enhance Photo&rdquo;</strong> to add a new product to {selectedVendor.business_name}&apos;s WhatsApp catalog.
+                    Click <strong>&ldquo;✏️ Edit Item / Price&rdquo;</strong> on any card below to change its title, price (e.g. <code>R2600 per 1000pcs</code>), unit, or <strong>Excl. VAT / Incl. 15% VAT</strong> status immediately, or click <strong>&ldquo;📸 Add Product / AI-Enhance Photo&rdquo;</strong>.
                   </p>
                 </div>
 
@@ -1744,7 +1765,7 @@ export default function VendorDashboard() {
                   type="text"
                   value={simUploadCaption}
                   onChange={(e) => setSimUploadCaption(e.target.value)}
-                  placeholder="Or quick-add via WhatsApp caption (e.g. '25L Industrial Sanitizer R640 per 25L drum')"
+                  placeholder="Or quick-add via WhatsApp caption (e.g. 'Cement Maxi Bricks R2600 per 1000pcs')"
                   className="flex-1 rounded-lg bg-industrial-950 border border-industrial-700 px-3.5 py-2 text-xs text-white font-mono focus:border-sky-400 focus:outline-none"
                 />
                 <button
@@ -1764,6 +1785,9 @@ export default function VendorDashboard() {
               ).map((prod) => {
                 const isDraft = !prod.meta_retailer_id;
                 const isEditingThis = editingPriceProductId === prod.id;
+                const isVatIncl = prod.vat_inclusive === true;
+                const vatAmount = isVatIncl ? prod.unit_price - prod.unit_price / 1.15 : prod.unit_price * 0.15;
+                const totalInclVat = isVatIncl ? prod.unit_price : prod.unit_price * 1.15;
 
                 return (
                   <div
@@ -1810,7 +1834,7 @@ export default function VendorDashboard() {
                         {isEditingThis && (
                           <div className="mt-3 p-3.5 rounded-lg bg-industrial-950 border border-amber-500/50 space-y-2.5">
                             <div className="text-[11px] font-bold text-amber-300">
-                              ✏️ Edit Product Name, Price &amp; Unit (Live WhatsApp Sync):
+                              ✏️ Edit Product Name, Price, Unit &amp; VAT (Live WhatsApp Sync):
                             </div>
                             <input
                               type="text"
@@ -1819,23 +1843,83 @@ export default function VendorDashboard() {
                               placeholder="Product Title"
                               className="w-full rounded bg-industrial-900 border border-industrial-700 px-2.5 py-1.5 text-xs text-white font-semibold"
                             />
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                value={priceEditInput}
-                                onChange={(e) => setPriceEditInput(e.target.value)}
-                                placeholder="e.g. R620 per m3"
-                                className="flex-1 rounded bg-industrial-900 border border-industrial-700 px-2.5 py-1.5 text-xs text-emerald-300 font-mono font-bold"
-                              />
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-[10px] text-slate-400 mb-0.5">Price (ZAR)</label>
+                                <input
+                                  type="text"
+                                  value={priceEditInput}
+                                  onChange={(e) => setPriceEditInput(e.target.value)}
+                                  placeholder="e.g. R2600"
+                                  className="w-full rounded bg-industrial-900 border border-industrial-700 px-2.5 py-1.5 text-xs text-emerald-300 font-mono font-bold"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] text-slate-400 mb-0.5">Unit (e.g. per 1000pcs)</label>
+                                <input
+                                  type="text"
+                                  value={editingUnitInput}
+                                  onChange={(e) => setEditingUnitInput(e.target.value)}
+                                  placeholder="per 1000pcs"
+                                  className="w-full rounded bg-industrial-900 border border-industrial-700 px-2.5 py-1.5 text-xs text-sky-300 font-mono font-bold"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Quick Unit Chips */}
+                            <div className="flex flex-wrap gap-1">
+                              {['per 1000pcs', 'per m3', 'per 6m3 load', 'per 5L container', 'per 25L drum', 'per bag'].map((u) => (
+                                <button
+                                  key={u}
+                                  type="button"
+                                  onClick={() => setEditingUnitInput(u)}
+                                  className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border transition ${
+                                    editingUnitInput === u
+                                      ? 'bg-sky-500 text-slate-950 border-sky-400'
+                                      : 'bg-industrial-900 text-slate-300 border-industrial-700 hover:border-sky-500/50'
+                                  }`}
+                                >
+                                  {u}
+                                </button>
+                              ))}
+                            </div>
+
+                            {/* VAT Toggle */}
+                            <div className="grid grid-cols-2 gap-1.5 pt-1">
+                              <button
+                                type="button"
+                                onClick={() => setEditingVatInclusive(false)}
+                                className={`py-1 px-2 rounded text-[10px] font-bold border transition ${
+                                  !editingVatInclusive
+                                    ? 'bg-amber-500 text-slate-950 border-amber-400'
+                                    : 'bg-industrial-900 text-slate-400 border-industrial-700'
+                                }`}
+                              >
+                                Price EXCL. VAT (+15%)
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingVatInclusive(true)}
+                                className={`py-1 px-2 rounded text-[10px] font-bold border transition ${
+                                  editingVatInclusive
+                                    ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+                                    : 'bg-industrial-900 text-slate-400 border-industrial-700'
+                                }`}
+                              >
+                                Price INCL. 15% VAT
+                              </button>
+                            </div>
+
+                            <div className="flex gap-2 pt-1">
                               <button
                                 onClick={() => handleApplyPriceEdit(prod.id)}
-                                className="px-3 py-1.5 rounded bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold"
+                                className="flex-1 py-1.5 rounded bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold"
                               >
-                                Save
+                                💾 Save Price &amp; Unit
                               </button>
                               <button
                                 onClick={() => setEditingPriceProductId(null)}
-                                className="px-2.5 py-1.5 rounded bg-slate-800 text-slate-300 text-xs"
+                                className="px-3 py-1.5 rounded bg-slate-800 text-slate-300 text-xs"
                               >
                                 Cancel
                               </button>
@@ -1848,12 +1932,28 @@ export default function VendorDashboard() {
                     <div className="px-5 py-3.5 border-t border-industrial-800 bg-industrial-950/50 space-y-3">
                       <div className="flex items-center justify-between gap-2">
                         <div>
-                          <span className="text-xs text-slate-400">Unit Price:</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-slate-400">Unit Price:</span>
+                            <span
+                              className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${
+                                isVatIncl
+                                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                                  : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                              }`}
+                            >
+                              {isVatIncl ? 'INCL. 15% VAT' : 'EXCL. VAT (+15%)'}
+                            </span>
+                          </div>
                           <div className="text-lg font-extrabold text-emerald-400 font-mono">
                             R {prod.unit_price.toFixed(2)}{' '}
-                            <span className="text-xs font-normal text-slate-400">
+                            <span className="text-xs font-bold text-sky-300">
                               {prod.unit_of_measure}
                             </span>
+                          </div>
+                          <div className="text-[11px] font-mono text-slate-400">
+                            {isVatIncl
+                              ? `Includes R${vatAmount.toFixed(2)} VAT (Excl: R${(prod.unit_price / 1.15).toFixed(2)})`
+                              : `+ 15% VAT (R${vatAmount.toFixed(2)}) = R${totalInclVat.toFixed(2)} Incl. VAT`}
                           </div>
                         </div>
 
@@ -1862,7 +1962,9 @@ export default function VendorDashboard() {
                             onClick={() => {
                               setEditingPriceProductId(prod.id);
                               setEditingTitleInput(prod.title);
-                              setPriceEditInput(`R${prod.unit_price} ${prod.unit_of_measure}`);
+                              setPriceEditInput(`R${prod.unit_price}`);
+                              setEditingUnitInput(prod.unit_of_measure || 'per 1000pcs');
+                              setEditingVatInclusive(prod.vat_inclusive === true);
                             }}
                             className="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition flex items-center gap-1"
                           >

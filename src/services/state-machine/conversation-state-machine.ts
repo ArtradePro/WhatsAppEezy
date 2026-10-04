@@ -811,6 +811,7 @@ export class ConversationStateMachine {
       {
         baseDeliveryFee: vendor.base_delivery_fee,
         perKmRate: vendor.per_km_rate,
+        freeDeliveryRadiusKm: vendor.free_delivery_radius_km ?? 15,
       }
     );
     session.currentQuote = quote;
@@ -889,7 +890,10 @@ export class ConversationStateMachine {
       .map((i) => `• ${i.quantity}x ${i.name} = ${config.DEFAULT_CURRENCY} ${i.totalPrice.toFixed(2)}`)
       .join('\n');
 
-    let deliverySummary = `• Tipper Transport Dispatch: ${config.DEFAULT_CURRENCY} ${(quote.baseFlagFall + (quote.mileageCost || 0)).toFixed(2)}`;
+    let deliverySummary =
+      quote.totalFreightCost === 0
+        ? `• Local Delivery (${quote.distanceKm.toFixed(1)} km): *FREE (R 0.00)*`
+        : `• Tipper Transport Dispatch: ${config.DEFAULT_CURRENCY} ${(quote.baseFlagFall + (quote.mileageCost || 0)).toFixed(2)}`;
     if (quote.tipperSurcharge && quote.tipperSurcharge > 0) {
       deliverySummary += `\n• Bulk Load Tipper Surcharge (>6m³): ${config.DEFAULT_CURRENCY} ${quote.tipperSurcharge.toFixed(2)}`;
     }

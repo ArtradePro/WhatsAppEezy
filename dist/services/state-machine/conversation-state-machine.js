@@ -606,6 +606,7 @@ class ConversationStateMachine {
         const quote = await freight_calculator_service_1.freightCalculatorService.calculateFreightQuote(customerCoords, addressName, vendorCoords, session.cart, {
             baseDeliveryFee: vendor.base_delivery_fee,
             perKmRate: vendor.per_km_rate,
+            freeDeliveryRadiusKm: vendor.free_delivery_radius_km ?? 15,
         });
         session.currentQuote = quote;
         const materialsSubtotal = session.cart.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -674,7 +675,9 @@ class ConversationStateMachine {
         const materialsSummary = session.cart
             .map((i) => `• ${i.quantity}x ${i.name} = ${env_1.config.DEFAULT_CURRENCY} ${i.totalPrice.toFixed(2)}`)
             .join('\n');
-        let deliverySummary = `• Tipper Transport Dispatch: ${env_1.config.DEFAULT_CURRENCY} ${(quote.baseFlagFall + (quote.mileageCost || 0)).toFixed(2)}`;
+        let deliverySummary = quote.totalFreightCost === 0
+            ? `• Local Delivery (${quote.distanceKm.toFixed(1)} km): *FREE (R 0.00)*`
+            : `• Tipper Transport Dispatch: ${env_1.config.DEFAULT_CURRENCY} ${(quote.baseFlagFall + (quote.mileageCost || 0)).toFixed(2)}`;
         if (quote.tipperSurcharge && quote.tipperSurcharge > 0) {
             deliverySummary += `\n• Bulk Load Tipper Surcharge (>6m³): ${env_1.config.DEFAULT_CURRENCY} ${quote.tipperSurcharge.toFixed(2)}`;
         }

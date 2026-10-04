@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Vendor, VendorSubscriptionTier } from '../lib/types';
+import { GpsPinDropMap } from './gps-pindrop-map';
 import {
   X,
   Building2,
@@ -33,9 +34,12 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({
   const [bankName, setBankName] = useState('First National Bank (FNB)');
   const [bankAccountNumber, setBankAccountNumber] = useState('62991100442');
   const [bankBranchCode, setBankBranchCode] = useState('250655');
-  const [baseDeliveryFee, setBaseDeliveryFee] = useState<number>(85);
+  const [baseDeliveryFee, setBaseDeliveryFee] = useState<number>(0);
   const [perKmRate, setPerKmRate] = useState<number>(8.5);
+  const [freeDeliveryRadiusKm, setFreeDeliveryRadiusKm] = useState<number>(15);
   const [maxRadiusKm, setMaxRadiusKm] = useState<number>(35);
+  const [lat, setLat] = useState<number>(-34.1831);
+  const [lon, setLon] = useState<number>(22.1465);
 
   if (!isOpen) return null;
 
@@ -73,11 +77,12 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({
       bank_name: bankName,
       bank_account_number: bankAccountNumber.trim() || '62000000000',
       bank_branch_code: bankBranchCode.trim() || '250655',
-      base_location_lon: 28.0473,
-      base_location_lat: -26.2041,
+      base_location_lon: Number(lon) || 22.1465,
+      base_location_lat: Number(lat) || -34.1831,
       max_delivery_radius_km: businessType === 'service_booking' ? 0 : Number(maxRadiusKm) || 35,
-      base_delivery_fee: businessType === 'service_booking' ? 0 : Number(baseDeliveryFee) || 85,
-      per_km_rate: businessType === 'service_booking' ? 0 : Number(perKmRate) || 8.5,
+      free_delivery_radius_km: businessType === 'service_booking' ? 0 : Math.max(0, Number(freeDeliveryRadiusKm) || 0),
+      base_delivery_fee: businessType === 'service_booking' ? 0 : Math.max(0, Number(baseDeliveryFee) || 0),
+      per_km_rate: businessType === 'service_booking' ? 0 : Math.max(0, Number(perKmRate) || 0),
       commission_rate: tierInfo.commissionRate,
       subscription_tier: subscriptionTier,
       subscription_monthly_fee: tierInfo.monthlyFee,
@@ -206,20 +211,31 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({
             </div>
           </div>
 
-          {/* 3. PostGIS Delivery Pricing */}
+          {/* 3. PostGIS Delivery Pricing & Interactive GPS Pin-Drop */}
           {businessType === 'retail_delivery' && (
-            <div className="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 space-y-2.5">
+            <div className="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 space-y-3">
               <div className="text-[11px] font-mono uppercase text-sky-400 font-bold flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5" />
-                Automated WhatsApp GPS Pin Delivery Formula
+                Automated WhatsApp Delivery Formula &amp; Depot GPS Pin-Drop
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
-                  <label className="block text-[10px] text-slate-400 mb-1">Base Dispatch Fee (R)</label>
+                  <label className="block text-[10px] text-emerald-400 font-bold mb-1">Free Local Zone (km)</label>
                   <input
                     type="number"
+                    min="0"
+                    value={freeDeliveryRadiusKm}
+                    onChange={(e) => setFreeDeliveryRadiusKm(Math.max(0, Number(e.target.value)))}
+                    className="w-full rounded-lg bg-slate-900 border border-emerald-500/50 px-2.5 py-1.5 font-mono text-emerald-300 font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-slate-400 mb-1">Base Fee (R)</label>
+                  <input
+                    type="number"
+                    min="0"
                     value={baseDeliveryFee}
-                    onChange={(e) => setBaseDeliveryFee(Number(e.target.value))}
+                    onChange={(e) => setBaseDeliveryFee(Math.max(0, Number(e.target.value)))}
                     className="w-full rounded-lg bg-slate-900 border border-slate-700 px-2.5 py-1.5 font-mono text-white"
                   />
                 </div>
@@ -228,8 +244,9 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({
                   <input
                     type="number"
                     step="0.5"
+                    min="0"
                     value={perKmRate}
-                    onChange={(e) => setPerKmRate(Number(e.target.value))}
+                    onChange={(e) => setPerKmRate(Math.max(0, Number(e.target.value)))}
                     className="w-full rounded-lg bg-slate-900 border border-slate-700 px-2.5 py-1.5 font-mono text-white"
                   />
                 </div>
@@ -237,12 +254,24 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({
                   <label className="block text-[10px] text-slate-400 mb-1">Max Radius (km)</label>
                   <input
                     type="number"
+                    min="1"
                     value={maxRadiusKm}
                     onChange={(e) => setMaxRadiusKm(Number(e.target.value))}
                     className="w-full rounded-lg bg-slate-900 border border-slate-700 px-2.5 py-1.5 font-mono text-white"
                   />
                 </div>
               </div>
+
+              <GpsPinDropMap
+                lat={lat}
+                lon={lon}
+                freeRadiusKm={freeDeliveryRadiusKm}
+                maxRadiusKm={maxRadiusKm}
+                onChange={(newLat, newLon) => {
+                  setLat(newLat);
+                  setLon(newLon);
+                }}
+              />
             </div>
           )}
 
