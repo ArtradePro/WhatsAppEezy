@@ -513,7 +513,7 @@ export class XeroEngineService {
       type: BatchPayment.TypeEnum.PAYBATCH,
       account: { accountID: bankAccountId },
       date: batchDate,
-      reference: `CARGODASH-EFT-${batchPaymentNumber}`,
+      reference: `WHATSAPPEEZY-EFT-${batchPaymentNumber}`,
       status: BatchPayment.StatusEnum.AUTHORISED,
       totalAmount,
       payments,

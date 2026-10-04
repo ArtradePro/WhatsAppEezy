@@ -7,7 +7,7 @@ class CsvPayoutGeneratorService {
      * (Universal format accepted by South African clearing banks)
      */
     generateBankingCsv(items, options) {
-        const payerRef = options?.payerReference || 'CARGODASH EOD';
+        const payerRef = options?.payerReference || 'WHATSAPPEEZY EOD';
         const status = options?.status || 'APPROVED';
         const headers = [
             'Recipient Name',
@@ -39,7 +39,7 @@ class CsvPayoutGeneratorService {
      * Format: Recipient Name, Recipient Account Number, Branch Code, Account Type (1=Cheque, 2=Savings), Amount, Own Reference, Their Reference
      */
     generateFnbCsv(items, options) {
-        const payerRef = options?.payerReference || 'CARGODASH';
+        const payerRef = options?.payerReference || 'WHATSAPPEEZY';
         const headers = [
             'Recipient Name',
             'Recipient Account Number',
@@ -66,7 +66,7 @@ class CsvPayoutGeneratorService {
      * Format: Branch Code, Account Number, Account Type (1=Current, 2=Savings), Amount, Beneficiary Name, Beneficiary Statement Description, My Statement Description
      */
     generateStandardBankCsv(items, options) {
-        const payerRef = options?.payerReference || 'CARGODASH';
+        const payerRef = options?.payerReference || 'WHATSAPPEEZY';
         const headers = [
             'Branch Code',
             'Account Number',
@@ -93,7 +93,7 @@ class CsvPayoutGeneratorService {
      * Format: Account Number, Branch Code, Account Type, Amount, Beneficiary Name, Their Reference, Own Reference
      */
     generateNedbankCsv(items, options) {
-        const payerRef = options?.payerReference || 'CARGODASH';
+        const payerRef = options?.payerReference || 'WHATSAPPEEZY';
         const headers = [
             'Account Number',
             'Branch Code',
@@ -120,7 +120,7 @@ class CsvPayoutGeneratorService {
      * Format: Beneficiary Name, Beneficiary Account, Branch Code, Account Type, Amount, Beneficiary Reference, Own Reference
      */
     generateAbsaCsv(items, options) {
-        const payerRef = options?.payerReference || 'CARGODASH';
+        const payerRef = options?.payerReference || 'WHATSAPPEEZY';
         const headers = [
             'Beneficiary Name',
             'Beneficiary Account',
@@ -147,7 +147,7 @@ class CsvPayoutGeneratorService {
      * Format: Beneficiary Name, Bank Name, Branch Code (470010), Account Number, Amount, Beneficiary Reference, My Reference
      */
     generateCapitecCsv(items, options) {
-        const payerRef = options?.payerReference || 'CARGODASH';
+        const payerRef = options?.payerReference || 'WHATSAPPEEZY';
         const headers = [
             'Beneficiary Name',
             'Bank Name',

@@ -160,7 +160,7 @@ class PostgresLedgerService {
             entry_type: 'platform_commission_earned',
             debit_amount: params.platformFee,
             credit_amount: 0.0,
-            reference: `CargoDash commission on ${params.orderRef}`,
+            reference: `WhatsAppEezy commission on ${params.orderRef}`,
         });
         // 3. Debit Payment Gateway Fee (PayFast)
         const gatewayFeeDeducted = await this.recordEntry({

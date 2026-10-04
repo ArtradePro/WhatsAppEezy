@@ -20,7 +20,7 @@ export class CsvPayoutGeneratorService {
       status?: string;
     }
   ): string {
-    const payerRef = options?.payerReference || 'CARGODASH EOD';
+    const payerRef = options?.payerReference || 'WHATSAPPEEZY EOD';
     const status = options?.status || 'APPROVED';
 
     const headers = [
@@ -60,7 +60,7 @@ export class CsvPayoutGeneratorService {
     items: PayoutBatchItem[],
     options?: { payerReference?: string }
   ): string {
-    const payerRef = options?.payerReference || 'CARGODASH';
+    const payerRef = options?.payerReference || 'WHATSAPPEEZY';
     const headers = [
       'Recipient Name',
       'Recipient Account Number',
@@ -94,7 +94,7 @@ export class CsvPayoutGeneratorService {
     items: PayoutBatchItem[],
     options?: { payerReference?: string }
   ): string {
-    const payerRef = options?.payerReference || 'CARGODASH';
+    const payerRef = options?.payerReference || 'WHATSAPPEEZY';
     const headers = [
       'Branch Code',
       'Account Number',
@@ -128,7 +128,7 @@ export class CsvPayoutGeneratorService {
     items: PayoutBatchItem[],
     options?: { payerReference?: string }
   ): string {
-    const payerRef = options?.payerReference || 'CARGODASH';
+    const payerRef = options?.payerReference || 'WHATSAPPEEZY';
     const headers = [
       'Account Number',
       'Branch Code',
@@ -162,7 +162,7 @@ export class CsvPayoutGeneratorService {
     items: PayoutBatchItem[],
     options?: { payerReference?: string }
   ): string {
-    const payerRef = options?.payerReference || 'CARGODASH';
+    const payerRef = options?.payerReference || 'WHATSAPPEEZY';
     const headers = [
       'Beneficiary Name',
       'Beneficiary Account',
@@ -196,7 +196,7 @@ export class CsvPayoutGeneratorService {
     items: PayoutBatchItem[],
     options?: { payerReference?: string }
   ): string {
-    const payerRef = options?.payerReference || 'CARGODASH';
+    const payerRef = options?.payerReference || 'WHATSAPPEEZY';
     const headers = [
       'Beneficiary Name',
       'Bank Name',

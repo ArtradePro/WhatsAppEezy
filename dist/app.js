@@ -21,6 +21,7 @@ const revenue_controller_1 = require("./controllers/revenue.controller");
 const ai_bridge_controller_1 = require("./controllers/ai-bridge.controller");
 const virtual_number_controller_1 = require("./controllers/virtual-number.controller");
 const conversation_session_store_1 = require("./services/state-machine/conversation-session.store");
+const whatsapp_client_service_1 = require("./services/whatsapp/whatsapp-client.service");
 const env_1 = require("./config/env");
 const db_1 = require("./database/db");
 /**
@@ -241,29 +242,27 @@ function createApp() {
     app.get('/api/v1/sessions/:waId', async (req, res) => {
         const waId = req.params.waId;
         const session = await conversation_session_store_1.conversationSessionStore.getSession(waId);
-        const { whatsAppClientService } = await import('./services/whatsapp/whatsapp-client.service');
         res.json({
             success: true,
             session,
             gupshupConfigured: Boolean(env_1.config.GUPSHUP_API_KEY),
-            lastOutboundResult: whatsAppClientService.lastOutboundResult,
+            lastOutboundResult: whatsapp_client_service_1.whatsAppClientService.lastOutboundResult,
         });
     });
     app.post('/api/v1/whatsapp/configure-gupshup', async (req, res) => {
         const { apiKey, appId, testPhone } = req.body || {};
-        const { whatsAppClientService } = await import('./services/whatsapp/whatsapp-client.service');
         if (apiKey) {
-            whatsAppClientService.configureGupshup(String(apiKey), appId ? String(appId) : undefined);
+            whatsapp_client_service_1.whatsAppClientService.configureGupshup(String(apiKey), appId ? String(appId) : undefined);
         }
         let testMessageId = null;
         if (testPhone) {
-            testMessageId = await whatsAppClientService.sendTextMessage(String(testPhone), '🟢 *WhatsAppEezy Live!* Your Gupshup + Railway engine is connected.\n\nReply *1* for Higiene Commercial Hygiene & Cleaning or *hi* to browse all catalogs!');
+            testMessageId = await whatsapp_client_service_1.whatsAppClientService.sendTextMessage(String(testPhone), '🟢 *WhatsAppEezy Live!* Your Gupshup + Railway engine is connected.\n\nReply *1* for Higiene Commercial Hygiene & Cleaning or *hi* to browse all catalogs!');
         }
         res.json({
             success: true,
             gupshupConfigured: Boolean(env_1.config.GUPSHUP_API_KEY),
             testMessageId,
-            lastOutboundResult: whatsAppClientService.lastOutboundResult,
+            lastOutboundResult: whatsapp_client_service_1.whatsAppClientService.lastOutboundResult,
         });
     });
     // Catch-all 404 handler

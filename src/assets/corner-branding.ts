@@ -11,7 +11,7 @@ export interface CornerBadgeOptions {
 }
 
 export function generateCornerBrandingSvg(options: CornerBadgeOptions = {}): Buffer {
-  const brandName = (options.brandName || 'CARGODASH').toUpperCase();
+  const brandName = (options.brandName || 'WHATSAPPEEZY').toUpperCase();
   const badgeLabel = (options.badgeLabel || 'VERIFIED SUPPLIER').toUpperCase();
   const width = options.width || 240;
   const height = options.height || 64;

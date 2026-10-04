@@ -33,7 +33,7 @@ class XeroClientService {
                         Date: invoice.invoiceDate.split('T')[0],
                         DueDate: invoice.dueDate.split('T')[0],
                         InvoiceNumber: invoice.invoiceNumber,
-                        Reference: `CargoDash Commission: ${invoice.orderId}`,
+                        Reference: `WhatsAppEezy Commission: ${invoice.orderId}`,
                         CurrencyCode: invoice.currency,
                         Status: 'AUTHORISED',
                         LineItems: invoice.lineItems.map((item) => ({

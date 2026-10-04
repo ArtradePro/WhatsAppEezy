@@ -133,7 +133,7 @@ class WhatsAppClientService {
                 type: 'list',
                 header: { type: 'text', text: headerText },
                 body: { text: bodyText },
-                footer: { text: 'CargoDash WhatsApp Commerce' },
+                footer: { text: 'WhatsAppEezy WhatsApp Commerce' },
                 action: {
                     button: buttonTitle,
                     sections,
@@ -446,7 +446,7 @@ class WhatsAppClientService {
                     text: bodyText,
                 },
                 footer: {
-                    text: 'CargoDash Verified Catalog Sync',
+                    text: 'WhatsAppEezy Verified Catalog Sync',
                 },
                 action: {
                     buttons: [

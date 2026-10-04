@@ -26,7 +26,7 @@ export class SharpService {
     const targetHeight = options.targetHeight || this.defaultHeight;
     const innerMax = options.innerMaxDimension || this.defaultInnerMax;
     const cornerPosition = options.cornerPosition || 'top-right';
-    const brandName = options.brandName || 'CARGODASH';
+    const brandName = options.brandName || 'WHATSAPPEEZY';
 
     // Step 1: Inspect input image
     const image = sharp(inputBuffer);

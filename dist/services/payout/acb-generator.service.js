@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.acbGeneratorService = exports.AcbGeneratorService = void 0;
 class AcbGeneratorService {
-    platformUserCode = 'CARGODASH01';
-    platformUserName = 'CARGODASH COMMERCE';
+    platformUserCode = 'WAEEZY0001';
+    platformUserName = 'WHATSAPPEEZY COMMERCE';
     /**
      * Generates a fixed-width South African Automated Clearing Bureau (ACB) EFT batch file
      * Standard 80-character fixed-width record layout
@@ -47,7 +47,7 @@ class AcbGeneratorService {
                 this.padLeft(amountCents.toString(), 11, '0'),
                 this.padRight(item.recipientName.toUpperCase(), 24),
                 this.padRight(item.statementReference, 15),
-                this.padRight('CARGODASH', 10),
+                this.padRight('WHATSAPPEEZY', 10),
             ].join('');
             lines.push(detail);
         });

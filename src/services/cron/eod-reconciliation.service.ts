@@ -156,7 +156,7 @@ export class EodReconciliationService {
 
     // 2. Generate CSV payout batch formatted for standard South African online banking
     const csvFileContent = csvPayoutGeneratorService.generateBankingCsv(items, {
-      payerReference: 'CARGODASH EOD',
+      payerReference: 'WHATSAPPEEZY EOD',
       status: 'APPROVED',
     });
     const csvFilename = `${batchNumber}.csv`;

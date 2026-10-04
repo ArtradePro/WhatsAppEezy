@@ -182,7 +182,7 @@ class PayFastWebhookController {
             m_payment_id: orderRef,
             pf_payment_id: pfPaymentId,
             payment_status: 'COMPLETE',
-            item_name: `CargoDash: Order #${orderRef.slice(-6)}`,
+            item_name: `WhatsAppEezy: Order #${orderRef.slice(-6)}`,
             item_description: `${paymentMethod} Settlement`,
             amount_gross: totalAmount.toFixed(2),
             amount_fee: wholesaleGatewayFee.toFixed(2),

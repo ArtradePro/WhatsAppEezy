@@ -266,7 +266,7 @@ class VirtualNumberManagerService {
                 : [];
             const paidCount = orders.filter((o) => o.current_status === 'paid').length;
             const dispatchedCount = orders.filter((o) => o.current_status === 'dispatched').length;
-            const replyText = `📡 *ZERO-DATA YARD STATUS (${vendor?.business_name || 'Cargo-Dash'})*\n` +
+            const replyText = `📡 *ZERO-DATA YARD STATUS (${vendor?.business_name || 'WhatsAppEezy'})*\n` +
                 `• Cloud Storefront: *ONLINE 24/7 (No SIM Data Needed)*\n` +
                 `• Virtual Number ID: \`${vendor?.meta_phone_number_id || 'waba_master'}\`\n` +
                 `• Unsettled Escrow: *R ${escrowBalance.toFixed(2)}*\n` +

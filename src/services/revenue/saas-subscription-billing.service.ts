@@ -209,7 +209,7 @@ export class SaasSubscriptionBillingService {
         const pfCharge = await this.chargePayFastTokenizedSubscription({
           token: vendor.payfast_subscription_token,
           amountZar: remainingUnpaid,
-          itemName: `CargoDash SaaS ${tier.toUpperCase()} Remainder (${cycle})`,
+          itemName: `WhatsAppEezy SaaS ${tier.toUpperCase()} Remainder (${cycle})`,
           vendorId: vendor.id,
         });
         gatewayChargedAmount = remainingUnpaid;
@@ -228,7 +228,7 @@ export class SaasSubscriptionBillingService {
       const pfCharge = await this.chargePayFastTokenizedSubscription({
         token,
         amountZar: monthlyFeeZar,
-        itemName: `CargoDash SaaS ${tier.toUpperCase()} Subscription (${cycle})`,
+        itemName: `WhatsAppEezy SaaS ${tier.toUpperCase()} Subscription (${cycle})`,
         vendorId: vendor.id,
       });
       gatewayChargedAmount = monthlyFeeZar;

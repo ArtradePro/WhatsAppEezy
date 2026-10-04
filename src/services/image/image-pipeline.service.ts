@@ -59,7 +59,7 @@ export class ImagePipelineService {
       targetHeight: 1024,
       innerMaxDimension: 880,
       backgroundColor: { r: 255, g: 255, b: 255, alpha: 1 },
-      brandName: options.brandName || 'CARGODASH',
+      brandName: options.brandName || 'WHATSAPPEEZY',
       cornerPosition: options.cornerPosition || 'top-right',
     });
 

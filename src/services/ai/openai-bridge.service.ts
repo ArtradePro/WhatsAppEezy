@@ -177,7 +177,7 @@ export class OpenAiBridgeService {
    * Executes operational or co-build synthesis:
    * - Uses OpenAI GPT-4o (`sk-proj-...`) when Cross-Build Mode is enabled
    * - Uses Google Gemini Flash when locked to production or when a Gemini key is provided
-   * - Falls back cleanly to the deterministic Cargo-Dash MoR & spatial engine
+   * - Falls back cleanly to the deterministic WhatsAppEezy MoR & spatial engine
    */
   async executeBridgeTask(req: OpenAiBridgeRequest): Promise<OpenAiBridgeResponse> {
     const envOpenAiKey = this.crossBuildEnabled ? (process.env.OPENAI_API_KEY || config.OPENAI_API_KEY || '') : '';
@@ -207,7 +207,7 @@ export class OpenAiBridgeService {
     ) {
       const openAiModel = req.modelOverride || config.OPENAI_MODEL || 'gpt-4o';
       try {
-        const systemPrompt = `You are the Cargo-Dash Cross-Build Co-Architect collaborating with Antigravity Gemini Flash.
+        const systemPrompt = `You are the WhatsAppEezy Cross-Build Co-Architect collaborating with Antigravity Gemini Flash.
 You specialize in South African WhatsApp Commerce Aggregation, PayFast Merchant-of-Record (MoR) interchange fee arbitrage, PostGIS 45km haulage dispatch, Cloud Virtual WhatsApp Numbers (Zero-Data supplier commands), and Next.js 14 Tailwind UI engineering.
 Respond strictly in valid JSON with keys:
 - "headline": string
@@ -290,7 +290,7 @@ Respond strictly in valid JSON with keys:
     const geminiModel = req.modelOverride || config.GEMINI_MODEL || 'gemini-flash-latest';
     if (isLiveGeminiPossible) {
       try {
-        const promptText = `You are the Cargo-Dash Antigravity Gemini Flash Operations & Revenue Co-Pilot.
+        const promptText = `You are the WhatsAppEezy Antigravity Gemini Flash Operations & Revenue Co-Pilot.
 Respond strictly in valid JSON with keys: "headline", "summary", "insights" (array of strings), "metrics" (key-value object), optional "generatedProduct", and optional "codeArtifact".
 Input: ${JSON.stringify({
           taskType: req.taskType,
@@ -483,7 +483,7 @@ Input: ${JSON.stringify({
           model,
           taskType: 'UI_COBUILDER_ARCHITECT',
           headline: 'Antigravity + Gemini Flash Component Blueprint Synthesized',
-          summary: `Synthesized component blueprint for "${req.prompt || 'MoR Fee Arbitrage & Escrow Widget'}" aligned with Cargo-Dash's 5-component Double-Entry Ledger and Industrial Dark-Mode design system.`,
+          summary: `Synthesized component blueprint for "${req.prompt || 'MoR Fee Arbitrage & Escrow Widget'}" aligned with WhatsAppEezy's 5-component Double-Entry Ledger and Industrial Dark-Mode design system.`,
           insights: [
             'Binds directly to `/api/v1/revenue/calculate-settlement` and `/api/v1/revenue/subscriptions/bill-vendor`.',
             'Enforces zero-leakage identity: net_vendor_payout + platform_commission + gateway_margin_spread + payment_fee_actual === gross_amount.',

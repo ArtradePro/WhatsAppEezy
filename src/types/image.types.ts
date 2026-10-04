@@ -9,7 +9,7 @@ export interface CanvasProcessingOptions {
   innerMaxDimension?: number;
   /** Background color object or hex (default pure white #FFFFFF) */
   backgroundColor?: { r: number; g: number; b: number; alpha: number };
-  /** Brand text to display in corner badge (e.g. 'CargoDash Verified') */
+  /** Brand text to display in corner badge (e.g. 'WhatsAppEezy Verified') */
   brandName?: string;
   /** Corner location for branding (default: 'top-right') */
   cornerPosition?: CornerPosition;

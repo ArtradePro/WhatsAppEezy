@@ -34,7 +34,8 @@ class ConversationStateMachine {
             if (higiene)
                 return higiene;
         }
-        return ((await postgres_vendor_repository_1.postgresVendorRepository.findById('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11')) ||
+        return ((await postgres_vendor_repository_1.postgresVendorRepository.findById('f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55')) ||
+            (await postgres_vendor_repository_1.postgresVendorRepository.findById('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11')) ||
             (await postgres_vendor_repository_1.postgresVendorRepository.findAll())[0]);
     }
     /**
@@ -166,14 +167,14 @@ class ConversationStateMachine {
         }
         // Handle dispatch desk support / speak to agent button
         if (buttonId === 'btn_speak_agent') {
-            await whatsapp_client_service_1.whatsAppClientService.sendTextMessage(senderWaId, '👷 *CargoDash Dispatch Desk*\n\nA logistics coordinator has been notified of your inquiry and will reach out to you shortly on WhatsApp to assist with your site delivery requirements. You can also contact our operations line at +27 11 000 0000.');
+            await whatsapp_client_service_1.whatsAppClientService.sendTextMessage(senderWaId, '🟢 *WhatsAppEezy Dispatch Desk*\n\nA coordinator has been notified of your inquiry and will reach out to you shortly on WhatsApp to assist with your order. You can also contact our operations line at +27 76 486 2942.');
             return;
         }
         // Handle change location button at any point (only for retail_delivery)
         if (buttonId === 'btn_change_location' && businessType === 'retail_delivery') {
             session.currentStage = 'ADDRESS_INPUT';
             await conversation_session_store_1.conversationSessionStore.saveSession(session);
-            await whatsapp_client_service_1.whatsAppClientService.sendLocationRequestMessage(senderWaId, '📍 To recalculate delivery fees and direct tipper transport, please share your updated site location below:');
+            await whatsapp_client_service_1.whatsAppClientService.sendLocationRequestMessage(senderWaId, '📍 To calculate delivery fees and ETA, please share your updated delivery location pin below:');
             return;
         }
         // Handle vendor dispatch action buttons (Truck Dispatched & Delivered to Site)
@@ -228,24 +229,23 @@ class ConversationStateMachine {
      */
     async handleIdleStage(session, _message, vendor) {
         if (vendor.business_type === 'service_booking') {
-            const welcome = `✨ *Welcome to ${vendor.business_name}!*\n\nBook appointments, treatments, and professional services directly on WhatsApp.\n\nSelect an option below to get started:`;
+            const welcome = `🟢 *Welcome to WhatsAppEezy — ${vendor.business_name}!*\n\nBook appointments, treatments, and professional services directly on WhatsApp.\n\nSelect an option below to get started:`;
             await whatsapp_client_service_1.whatsAppClientService.sendInteractiveButtons(session.waId, welcome, [
                 { id: 'btn_browse_catalog', title: '📅 Book a Service' },
                 { id: 'btn_help', title: 'ℹ️ How It Works' },
             ]);
         }
-        else if (vendor.id !== 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11') {
-            const welcome = `👋 *Welcome to ${vendor.business_name}!*\n\nOrder directly via WhatsApp for fast delivery to your door.\n\nExplore our catalog or build an order:`;
-            await whatsapp_client_service_1.whatsAppClientService.sendInteractiveButtons(session.waId, welcome, [
-                { id: 'btn_browse_catalog', title: '🛒 Browse Menu' },
-                { id: 'btn_help', title: 'ℹ️ How It Works' },
-            ]);
-        }
         else {
-            const welcome = `👋 *Welcome to CargoDash Commerce!* \n\nWe provide heavy building materials & bulk construction supplies directly to your site via WhatsApp.\n\nExplore our catalog or build an order:`;
-            await whatsapp_client_service_1.whatsAppClientService.sendInteractiveButtons(session.waId, welcome, [
-                { id: 'btn_browse_catalog', title: '🧱 Browse Materials' },
-                { id: 'btn_help', title: 'ℹ️ How It Works' },
+            const vendorProducts = (await postgres_product_repository_1.postgresProductRepository.findByVendor(vendor.id)).filter((p) => p.is_available);
+            await whatsapp_client_service_1.whatsAppClientService.sendInteractiveList(session.waId, `WhatsAppEezy • ${vendor.business_name}`.slice(0, 60), `🟢 *Welcome to WhatsAppEezy.com!*\nYou are shopping with *${vendor.business_name}*.\n\nReply with an item number (*1-${vendorProducts.length}*) below to add to your order (or reply *#SAND*, *#PIZZA*, *#SALON*, *#HIGIENE* to switch store):`, 'View Catalog', [
+                {
+                    title: 'Verified Catalog',
+                    rows: vendorProducts.map((p) => ({
+                        id: p.meta_product_retailer_id || p.id,
+                        title: p.title,
+                        description: `R${p.unit_price.toFixed(2)} (${p.unit_of_measure})`.slice(0, 72),
+                    })),
+                },
             ]);
         }
         session.currentStage = 'BROWSING';

@@ -46,7 +46,7 @@ export class PayFastService {
       notify_url: config.PAYFAST_NOTIFY_URL,
       m_payment_id: order.orderId,
       amount: formattedAmount,
-      item_name: `CargoDash: Order #${order.orderId.slice(-6)}`,
+      item_name: `WhatsAppEezy: Order #${order.orderId.slice(-6)}`,
       item_description: itemDescription.slice(0, 250),
       custom_str1: order.customerWhatsApp,
       custom_str2: order.vendorWhatsApp,

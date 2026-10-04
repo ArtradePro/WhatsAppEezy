@@ -15,6 +15,7 @@ import { revenueController } from './controllers/revenue.controller';
 import { aiBridgeController } from './controllers/ai-bridge.controller';
 import { virtualNumberController } from './controllers/virtual-number.controller';
 import { conversationSessionStore } from './services/state-machine/conversation-session.store';
+import { whatsAppClientService } from './services/whatsapp/whatsapp-client.service';
 import { config } from './config/env';
 import { db } from './database/db';
 
@@ -394,7 +395,6 @@ export function createApp(): Application {
   app.get('/api/v1/sessions/:waId', async (req: Request, res: Response) => {
     const waId = req.params.waId as string;
     const session = await conversationSessionStore.getSession(waId);
-    const { whatsAppClientService } = await import('./services/whatsapp/whatsapp-client.service');
     res.json({
       success: true,
       session,
@@ -405,7 +405,6 @@ export function createApp(): Application {
 
   app.post('/api/v1/whatsapp/configure-gupshup', async (req: Request, res: Response) => {
     const { apiKey, appId, testPhone } = req.body || {};
-    const { whatsAppClientService } = await import('./services/whatsapp/whatsapp-client.service');
     if (apiKey) {
       whatsAppClientService.configureGupshup(String(apiKey), appId ? String(appId) : undefined);
     }

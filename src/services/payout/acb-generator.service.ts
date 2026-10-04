@@ -2,8 +2,8 @@ import { PayoutBatchItem } from '../../types/payout.types';
 import { BankAccountType } from '../../types/tenant.types';
 
 export class AcbGeneratorService {
-  private readonly platformUserCode = 'CARGODASH01';
-  private readonly platformUserName = 'CARGODASH COMMERCE';
+  private readonly platformUserCode = 'WAEEZY0001';
+  private readonly platformUserName = 'WHATSAPPEEZY COMMERCE';
 
   /**
    * Generates a fixed-width South African Automated Clearing Bureau (ACB) EFT batch file
@@ -57,7 +57,7 @@ export class AcbGeneratorService {
         this.padLeft(amountCents.toString(), 11, '0'),
         this.padRight(item.recipientName.toUpperCase(), 24),
         this.padRight(item.statementReference, 15),
-        this.padRight('CARGODASH', 10),
+        this.padRight('WHATSAPPEEZY', 10),
       ].join('');
 
       lines.push(detail);
