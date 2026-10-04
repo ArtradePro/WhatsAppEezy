@@ -34,6 +34,15 @@ async function bootstrap() {
     console.log(`=======================================================`);
   });
 
+  if (Number(PORT) !== 3000) {
+    const port3000Server = app.listen(3000, HOST, () => {
+      console.log(`📡 Railway Dual-Port Listener active on http://${HOST}:3000`);
+    });
+    port3000Server.on('error', () => {
+      // Ignore if 3000 is already bound
+    });
+  }
+
   process.on('SIGTERM', async () => {
     console.log('SIGTERM signal received: closing workers, DB pool, and HTTP server');
     await Promise.allSettled([

@@ -5,8 +5,8 @@ import { z } from 'zod';
 dotenv.config();
 
 const envSchema = z.object({
-  PORT: z.coerce.number().default(3000),
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  PORT: z.coerce.number().catch(3000).default(3000),
+  NODE_ENV: z.enum(['development', 'production', 'test']).catch('production').default('development'),
 
   // Cloudinary Configuration
   CLOUDINARY_CLOUD_NAME: z.string().default('mock-cloud'),
@@ -15,7 +15,7 @@ const envSchema = z.object({
   CLOUDINARY_FOLDER: z.string().default('whatsapp-commerce-catalog'),
 
   // AI Vision & Gemini Flash Runtime Configuration (OpenAI Removed)
-  VISION_PROVIDER: z.enum(['gemini', 'anthropic', 'openai']).default('gemini'),
+  VISION_PROVIDER: z.enum(['gemini', 'anthropic', 'openai']).catch('gemini').default('gemini'),
   GEMINI_API_KEY: z.string().optional().default(process.env.GEMINI_API_KEY || ''),
   GEMINI_MODEL: z.string().default(process.env.GEMINI_MODEL || 'gemini-2.5-flash'),
   OPENAI_API_KEY: z.string().optional().default(''),
@@ -46,25 +46,25 @@ const envSchema = z.object({
 
   // Distance & Delivery Configuration
   GOOGLE_MAPS_API_KEY: z.string().default(''),
-  VENDOR_DEFAULT_LAT: z.coerce.number().default(-26.2041), // Central Depot (e.g. Johannesburg)
-  VENDOR_DEFAULT_LNG: z.coerce.number().default(28.0473),
+  VENDOR_DEFAULT_LAT: z.coerce.number().catch(-26.2041).default(-26.2041), // Central Depot (e.g. Johannesburg)
+  VENDOR_DEFAULT_LNG: z.coerce.number().catch(28.0473).default(28.0473),
   VENDOR_DEFAULT_WHATSAPP_NUMBER: z.string().default('27764862942'),
 
   // PayFast Split-Checkout Configuration
   PAYFAST_MERCHANT_ID: z.string().default('10000100'), // Default sandbox test merchant ID
   PAYFAST_MERCHANT_KEY: z.string().default('46f0cd694581a'), // Default sandbox test merchant key
   PAYFAST_PASSPHRASE: z.string().default('payfast_secure_passphrase'),
-  PAYFAST_ENV: z.enum(['sandbox', 'live']).default('sandbox'),
+  PAYFAST_ENV: z.enum(['sandbox', 'live']).catch('sandbox').default('sandbox'),
   PAYFAST_RETURN_URL: z.string().default('https://whatsappeezy.com/?checkout=success'),
   PAYFAST_CANCEL_URL: z.string().default('https://whatsappeezy.com/?checkout=cancelled'),
   PAYFAST_NOTIFY_URL: z.string().default('https://whatsappeezy.up.railway.app/api/webhooks/payfast/itn'),
-  PLATFORM_COMMISSION_PERCENTAGE: z.coerce.number().default(5.5), // 5.5% commission
+  PLATFORM_COMMISSION_PERCENTAGE: z.coerce.number().catch(5.5).default(5.5), // 5.5% commission
 
   // Database Configuration (Supabase PostgreSQL + PostGIS / Supavisor Pooler)
   DATABASE_URL: z.string().default(process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/cargodash'),
   DIRECT_URL: z.string().optional().default(process.env.DIRECT_URL || ''),
-  DATABASE_SSL: z.enum(['auto', 'true', 'false']).default('auto'),
-  DATABASE_POOL_MAX: z.coerce.number().default(20),
+  DATABASE_SSL: z.enum(['auto', 'true', 'false']).catch('auto').default('auto'),
+  DATABASE_POOL_MAX: z.coerce.number().catch(20).default(20),
   AUTO_MIGRATE_ON_STARTUP: z
     .string()
     .default(process.env.AUTO_MIGRATE_ON_STARTUP || 'false')
