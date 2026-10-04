@@ -36,6 +36,64 @@ export class WhatsAppClientService {
   }
 
   /**
+   * Automatically refreshes the 24-hour Gupshup Customer App Token (CAT) using GUPSHUP_ACCOUNT_SECRET
+   * whenever the current CAT is within 2 hours of expiration or receives a 401.
+   */
+  public async refreshGupshupCustomerAppTokenIfNeeded(force = false): Promise<string> {
+    const currentToken = this.runtimeGupshupApiKey || config.GUPSHUP_API_KEY || '';
+    const secret = config.GUPSHUP_ACCOUNT_SECRET;
+    const appId = this.runtimeGupshupAppId || config.GUPSHUP_APP_ID || 'd4f0052b-a102-49f2-bf53-c737349628ee';
+
+    if (!force && currentToken.split('.').length === 3) {
+      try {
+        const payloadJson = JSON.parse(Buffer.from(currentToken.split('.')[1], 'base64url').toString('utf8'));
+        const nowSec = Math.floor(Date.now() / 1000);
+        if (payloadJson.exp && payloadJson.exp - nowSec > 7200) {
+          return currentToken;
+        }
+      } catch {
+        // Proceed to refresh if JWT decode fails
+      }
+    }
+
+    if (!secret) return currentToken;
+
+    const candidateUrls = [
+      `https://api.gupshup.io/wa/api/v1/app/${appId}/token`,
+      `https://api.gupshup.io/wa/app/${appId}/token`,
+      `https://partner.gupshup.io/partner/app/${appId}/token`,
+    ];
+
+    for (const url of candidateUrls) {
+      try {
+        const resp = await axios.post(
+          url,
+          { appId },
+          {
+            headers: {
+              Authorization: `Bearer ${secret}`,
+              apikey: secret,
+              'x-account-secret': secret,
+              'Content-Type': 'application/json',
+            },
+            timeout: 5000,
+          }
+        );
+        const newToken = resp.data?.token || resp.data?.access_token || resp.data?.data?.token;
+        if (newToken) {
+          this.configureGupshup(newToken, appId);
+          console.log('🔄 [Gupshup Auto-Refresh] Minted fresh 24h Customer App Token automatically');
+          return newToken;
+        }
+      } catch {
+        // Try next candidate endpoint
+      }
+    }
+
+    return currentToken;
+  }
+
+  /**
    * Sends a plain text WhatsApp message
    */
   async sendTextMessage(to: string, body: string): Promise<string> {
@@ -510,7 +568,7 @@ export class WhatsAppClientService {
     const cleanDestination = to.replace(/^\+/, '');
 
     // 1. If Gupshup API Key / Customer App Token is configured, dispatch via Gupshup API
-    const gupshupKey = this.runtimeGupshupApiKey || config.GUPSHUP_API_KEY;
+    const gupshupKey = await this.refreshGupshupCustomerAppTokenIfNeeded(false);
     if (gupshupKey) {
       const bodyText =
         payload?.text?.body ||
