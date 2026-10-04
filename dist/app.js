@@ -22,6 +22,8 @@ const ai_bridge_controller_1 = require("./controllers/ai-bridge.controller");
 const virtual_number_controller_1 = require("./controllers/virtual-number.controller");
 const conversation_session_store_1 = require("./services/state-machine/conversation-session.store");
 const whatsapp_client_service_1 = require("./services/whatsapp/whatsapp-client.service");
+const postgres_vendor_repository_1 = require("./database/postgres-vendor.repository");
+const postgres_product_repository_1 = require("./database/postgres-product.repository");
 const env_1 = require("./config/env");
 const db_1 = require("./database/db");
 /**
@@ -263,6 +265,124 @@ function createApp() {
             gupshupConfigured: Boolean(env_1.config.GUPSHUP_API_KEY),
             testMessageId,
             lastOutboundResult: whatsapp_client_service_1.whatsAppClientService.lastOutboundResult,
+        });
+    });
+    // Live Vendor & Catalog Management Endpoints (Command Center -> WhatsApp Bot Sync)
+    app.get('/api/v1/vendors', async (_req, res) => {
+        const vendors = await postgres_vendor_repository_1.postgresVendorRepository.findAll();
+        res.json({
+            success: true,
+            count: vendors.length,
+            vendors,
+        });
+    });
+    app.post('/api/v1/vendors', async (req, res) => {
+        const body = req.body || {};
+        const saved = await postgres_vendor_repository_1.postgresVendorRepository.saveVendor(body);
+        res.status(201).json({
+            success: true,
+            vendor: saved,
+        });
+    });
+    const handleUpdateVendor = async (req, res) => {
+        const id = String(req.params.id);
+        const updates = req.body || {};
+        const updated = await postgres_vendor_repository_1.postgresVendorRepository.updateVendor(id, updates);
+        if (!updated) {
+            res.status(404).json({
+                success: false,
+                error: 'VendorNotFound',
+                message: `Vendor '${id}' was not found.`,
+            });
+            return;
+        }
+        res.json({
+            success: true,
+            vendor: updated,
+        });
+    };
+    app.patch('/api/v1/vendors/:id', handleUpdateVendor);
+    app.put('/api/v1/vendors/:id', handleUpdateVendor);
+    app.get('/api/v1/catalog/products', async (req, res) => {
+        const vendorId = req.query.vendor_id ? String(req.query.vendor_id) : undefined;
+        const products = vendorId
+            ? await postgres_product_repository_1.postgresProductRepository.findByVendor(vendorId)
+            : await postgres_product_repository_1.postgresProductRepository.findAll();
+        res.json({
+            success: true,
+            count: products.length,
+            products,
+        });
+    });
+    app.post('/api/v1/catalog/products', async (req, res) => {
+        const body = req.body || {};
+        const saved = await postgres_product_repository_1.postgresProductRepository.saveProduct({
+            id: body.id || '',
+            vendor_id: body.vendor_id || 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
+            meta_catalog_id: body.meta_catalog_id || 'cat_higiene_005',
+            meta_product_retailer_id: body.meta_product_retailer_id !== undefined
+                ? body.meta_product_retailer_id
+                : body.meta_retailer_id !== undefined
+                    ? body.meta_retailer_id
+                    : `SKU-${Date.now().toString().slice(-5)}`,
+            title: body.title || 'New Catalog Item',
+            description: body.description || '',
+            category: body.category || 'general',
+            unit_of_measure: body.unit_of_measure || 'per unit',
+            unit_price: Number(body.unit_price) || 100,
+            raw_image_url: body.raw_image_url || body.image_url,
+            enhanced_image_url: body.enhanced_image_url || body.image_url,
+            is_available: body.is_available !== undefined ? Boolean(body.is_available) : true,
+        });
+        res.status(201).json({
+            success: true,
+            product: saved,
+        });
+    });
+    const handleUpdateCatalogProduct = async (req, res) => {
+        const id = String(req.params.id);
+        const body = req.body || {};
+        const updates = {};
+        if (body.title !== undefined)
+            updates.title = String(body.title);
+        if (body.description !== undefined)
+            updates.description = String(body.description);
+        if (body.category !== undefined)
+            updates.category = String(body.category);
+        if (body.unit_of_measure !== undefined)
+            updates.unit_of_measure = String(body.unit_of_measure);
+        if (body.unit_price !== undefined)
+            updates.unit_price = Number(body.unit_price);
+        if (body.is_available !== undefined)
+            updates.is_available = Boolean(body.is_available);
+        if (body.meta_product_retailer_id !== undefined) {
+            updates.meta_product_retailer_id = body.meta_product_retailer_id;
+        }
+        else if (body.meta_retailer_id !== undefined) {
+            updates.meta_product_retailer_id = body.meta_retailer_id;
+        }
+        const updated = await postgres_product_repository_1.postgresProductRepository.updateProduct(id, updates);
+        if (!updated) {
+            res.status(404).json({
+                success: false,
+                error: 'ProductNotFound',
+                message: `Product '${id}' was not found.`,
+            });
+            return;
+        }
+        res.json({
+            success: true,
+            product: updated,
+        });
+    };
+    app.patch('/api/v1/catalog/products/:id', handleUpdateCatalogProduct);
+    app.put('/api/v1/catalog/products/:id', handleUpdateCatalogProduct);
+    app.patch('/api/v1/products/:id', handleUpdateCatalogProduct);
+    app.delete('/api/v1/catalog/products/:id', async (req, res) => {
+        const id = String(req.params.id);
+        const deleted = await postgres_product_repository_1.postgresProductRepository.deleteProduct(id);
+        res.json({
+            success: deleted,
         });
     });
     // Catch-all 404 handler

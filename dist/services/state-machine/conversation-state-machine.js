@@ -45,25 +45,34 @@ class ConversationStateMachine {
         let vendor = await this.resolveTenantVendor(metadata);
         const incomingText = message.text?.body?.trim().toLowerCase();
         // Multi-Vendor Keyword Switcher (for single master WhatsApp number aggregation)
+        let switchedVendor = false;
         if (incomingText === '#higiene' || incomingText === 'higiene') {
             const v = await postgres_vendor_repository_1.postgresVendorRepository.findById('f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55');
-            if (v)
+            if (v) {
                 vendor = v;
+                switchedVendor = true;
+            }
         }
         else if (incomingText === '#sand' || incomingText === '#brick' || incomingText === 'brickdirect') {
             const v = await postgres_vendor_repository_1.postgresVendorRepository.findById('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11');
-            if (v)
+            if (v) {
                 vendor = v;
+                switchedVendor = true;
+            }
         }
         else if (incomingText === '#pizza' || incomingText === 'pizza') {
-            const v = await postgres_vendor_repository_1.postgresVendorRepository.findById('d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a44');
-            if (v)
+            const v = await postgres_vendor_repository_1.postgresVendorRepository.findById('d3eeef66-6d3c-4fe9-883e-3cc6ce050d44');
+            if (v) {
                 vendor = v;
+                switchedVendor = true;
+            }
         }
         else if (incomingText === '#salon' || incomingText === 'salon') {
-            const v = await postgres_vendor_repository_1.postgresVendorRepository.findById('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a33');
-            if (v)
+            const v = await postgres_vendor_repository_1.postgresVendorRepository.findById('c2ddde77-7c2b-4ef8-994d-4bb7bd160c33');
+            if (v) {
                 vendor = v;
+                switchedVendor = true;
+            }
         }
         const businessType = vendor.business_type || 'retail_delivery';
         const session = await conversation_session_store_1.conversationSessionStore.getSession(senderWaId, customerName, {
@@ -73,6 +82,11 @@ class ConversationStateMachine {
             businessType,
         });
         session.vendorId = vendor.id;
+        if (switchedVendor) {
+            session.currentStage = 'IDLE';
+            session.cart = [];
+            await conversation_session_store_1.conversationSessionStore.saveSession(session);
+        }
         // Fast-path cancel / reset command
         if (incomingText === 'reset' || incomingText === 'cancel' || incomingText === 'restart') {
             if (session.activeAppointmentId) {
@@ -291,24 +305,17 @@ class ConversationStateMachine {
                 ]);
                 return;
             }
-            if (vendor.id !== 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11') {
-                const vendorProducts = await postgres_product_repository_1.postgresProductRepository.findByVendor(vendor.id);
-                await whatsapp_client_service_1.whatsAppClientService.sendInteractiveList(session.waId, vendor.business_name.slice(0, 60), `Browse items from *${vendor.business_name}* below (reply with item number *1-${vendorProducts.length}* to order):`, 'View Catalog', [
-                    {
-                        title: 'Featured Catalog',
-                        rows: vendorProducts
-                            .filter((p) => p.is_available)
-                            .map((p) => ({
-                            id: p.meta_product_retailer_id || p.id,
-                            title: p.title,
-                            description: `R${p.unit_price.toFixed(2)} (${p.unit_of_measure})`.slice(0, 72),
-                        })),
-                    },
-                ]);
-                return;
-            }
-            // Default Yard A ("Direct Yard Delivery")
-            await whatsapp_client_service_1.whatsAppClientService.sendDirectYardDeliveryCategories(session.waId);
+            const vendorProducts = (await postgres_product_repository_1.postgresProductRepository.findByVendor(vendor.id)).filter((p) => p.is_available);
+            await whatsapp_client_service_1.whatsAppClientService.sendInteractiveList(session.waId, `WhatsAppEezy • ${vendor.business_name}`.slice(0, 60), `🟢 *Welcome to WhatsAppEezy.com!*\nYou are shopping with *${vendor.business_name}*.\n\nReply with an item number (*1-${vendorProducts.length}*) below to add to your order (or reply *#SAND*, *#PIZZA*, *#SALON*, *#HIGIENE* to switch store):`, 'View Catalog', [
+                {
+                    title: 'Verified Catalog',
+                    rows: vendorProducts.map((p) => ({
+                        id: p.meta_product_retailer_id || p.id,
+                        title: p.title,
+                        description: `R${p.unit_price.toFixed(2)} (${p.unit_of_measure})`.slice(0, 72),
+                    })),
+                },
+            ]);
             return;
         }
         // If customer selected an item from interactive list

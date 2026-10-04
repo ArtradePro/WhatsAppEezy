@@ -69,18 +69,31 @@ export class ConversationStateMachine {
     const incomingText = message.text?.body?.trim().toLowerCase();
 
     // Multi-Vendor Keyword Switcher (for single master WhatsApp number aggregation)
+    let switchedVendor = false;
     if (incomingText === '#higiene' || incomingText === 'higiene') {
       const v = await postgresVendorRepository.findById('f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55');
-      if (v) vendor = v;
+      if (v) {
+        vendor = v;
+        switchedVendor = true;
+      }
     } else if (incomingText === '#sand' || incomingText === '#brick' || incomingText === 'brickdirect') {
       const v = await postgresVendorRepository.findById('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11');
-      if (v) vendor = v;
+      if (v) {
+        vendor = v;
+        switchedVendor = true;
+      }
     } else if (incomingText === '#pizza' || incomingText === 'pizza') {
-      const v = await postgresVendorRepository.findById('d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a44');
-      if (v) vendor = v;
+      const v = await postgresVendorRepository.findById('d3eeef66-6d3c-4fe9-883e-3cc6ce050d44');
+      if (v) {
+        vendor = v;
+        switchedVendor = true;
+      }
     } else if (incomingText === '#salon' || incomingText === 'salon') {
-      const v = await postgresVendorRepository.findById('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a33');
-      if (v) vendor = v;
+      const v = await postgresVendorRepository.findById('c2ddde77-7c2b-4ef8-994d-4bb7bd160c33');
+      if (v) {
+        vendor = v;
+        switchedVendor = true;
+      }
     }
 
     const businessType = vendor.business_type || 'retail_delivery';
@@ -92,6 +105,12 @@ export class ConversationStateMachine {
       businessType,
     });
     session.vendorId = vendor.id;
+
+    if (switchedVendor) {
+      session.currentStage = 'IDLE';
+      session.cart = [];
+      await conversationSessionStore.saveSession(session);
+    }
 
     // Fast-path cancel / reset command
     if (incomingText === 'reset' || incomingText === 'cancel' || incomingText === 'restart') {
@@ -387,31 +406,23 @@ export class ConversationStateMachine {
         return;
       }
 
-      if (vendor.id !== 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11') {
-        const vendorProducts = await postgresProductRepository.findByVendor(vendor.id);
-        await whatsAppClientService.sendInteractiveList(
-          session.waId,
-          vendor.business_name.slice(0, 60),
-          `Browse items from *${vendor.business_name}* below (reply with item number *1-${vendorProducts.length}* to order):`,
-          'View Catalog',
-          [
-            {
-              title: 'Featured Catalog',
-              rows: vendorProducts
-                .filter((p) => p.is_available)
-                .map((p) => ({
-                  id: p.meta_product_retailer_id || p.id,
-                  title: p.title,
-                  description: `R${p.unit_price.toFixed(2)} (${p.unit_of_measure})`.slice(0, 72),
-                })),
-            },
-          ]
-        );
-        return;
-      }
-
-      // Default Yard A ("Direct Yard Delivery")
-      await whatsAppClientService.sendDirectYardDeliveryCategories(session.waId);
+      const vendorProducts = (await postgresProductRepository.findByVendor(vendor.id)).filter((p) => p.is_available);
+      await whatsAppClientService.sendInteractiveList(
+        session.waId,
+        `WhatsAppEezy • ${vendor.business_name}`.slice(0, 60),
+        `🟢 *Welcome to WhatsAppEezy.com!*\nYou are shopping with *${vendor.business_name}*.\n\nReply with an item number (*1-${vendorProducts.length}*) below to add to your order (or reply *#SAND*, *#PIZZA*, *#SALON*, *#HIGIENE* to switch store):`,
+        'View Catalog',
+        [
+          {
+            title: 'Verified Catalog',
+            rows: vendorProducts.map((p) => ({
+              id: p.meta_product_retailer_id || p.id,
+              title: p.title,
+              description: `R${p.unit_price.toFixed(2)} (${p.unit_of_measure})`.slice(0, 72),
+            })),
+          },
+        ]
+      );
       return;
     }
 

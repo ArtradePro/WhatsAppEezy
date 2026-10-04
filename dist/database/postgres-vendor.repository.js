@@ -125,10 +125,40 @@ class PostgresVendorRepository {
             is_active: true,
             created_at: new Date().toISOString(),
         };
+        const v5 = {
+            id: 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
+            business_name: 'Higiene Commercial Hygiene & Cleaning (Pty) Ltd',
+            slug: 'higiene-commercial-hygiene',
+            whatsapp_number: '+27600104005',
+            meta_phone_number_id: 'meta_pnum_higiene_105',
+            meta_catalog_id: 'cat_higiene_005',
+            business_type: 'retail_delivery',
+            contact_email: 'orders@higiene.co.za',
+            vat_number: 'ZA4950112233',
+            bank_account_holder: 'Higiene Commercial Hygiene (Pty) Ltd',
+            bank_name: 'First National Bank (FNB)',
+            bank_account_number: '62991100442',
+            bank_branch_code: '250655',
+            base_location_lon: 28.0473,
+            base_location_lat: -26.2041,
+            max_delivery_radius_km: 50.0,
+            base_delivery_fee: 85.0,
+            per_km_rate: 8.5,
+            subscription_tier: 'pro',
+            subscription_monthly_fee: 599.0,
+            commission_rate: 0.065,
+            processing_fee_billed_rate: { percentage: 0.029, fixed_fee: 2.0 },
+            processing_fee_actual_cost: { percentage: 0.02, fixed_fee: 1.5 },
+            payfast_subscription_token: 'pf_token_higiene_005',
+            auto_ledger_setoff: true,
+            is_active: true,
+            created_at: new Date().toISOString(),
+        };
         this.inMemoryVendors.set(v1.id, v1);
         this.inMemoryVendors.set(v2.id, v2);
         this.inMemoryVendors.set(v3.id, v3);
         this.inMemoryVendors.set(v4.id, v4);
+        this.inMemoryVendors.set(v5.id, v5);
     }
     async saveVendor(vendor) {
         const id = vendor.id || (0, crypto_1.randomUUID)();
@@ -199,7 +229,10 @@ class PostgresVendorRepository {
         return normalized;
     }
     async updateVendor(id, updates) {
-        const existing = await this.findById(id);
+        const normalizedId = id === 'e5fffa99-9e5d-4fe8-992a-2dd8df180e55'
+            ? 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55'
+            : id;
+        const existing = await this.findById(normalizedId);
         if (!existing)
             return null;
         const updated = {
@@ -207,14 +240,18 @@ class PostgresVendorRepository {
             ...updates,
             id: existing.id,
         };
-        this.inMemoryVendors.set(id, updated);
+        this.inMemoryVendors.set(existing.id, updated);
+        await this.saveVendor(updated);
         return updated;
     }
     async findById(id) {
+        const normalizedId = id === 'e5fffa99-9e5d-4fe8-992a-2dd8df180e55'
+            ? 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55'
+            : id;
         const pool = db_1.db.getPool();
         if (pool) {
             try {
-                const res = await pool.query('SELECT *, ST_X(base_location::geometry) as base_location_lon, ST_Y(base_location::geometry) as base_location_lat FROM vendors WHERE id = $1::uuid', [id]);
+                const res = await pool.query('SELECT *, ST_X(base_location::geometry) as base_location_lon, ST_Y(base_location::geometry) as base_location_lat FROM vendors WHERE id = $1::uuid', [normalizedId]);
                 if (res.rows[0])
                     return res.rows[0];
             }
@@ -222,7 +259,7 @@ class PostgresVendorRepository {
                 console.warn('[PostgresVendorRepo] FindById fallback:', err);
             }
         }
-        return this.inMemoryVendors.get(id) || null;
+        return this.inMemoryVendors.get(normalizedId) || null;
     }
     async findBySlug(slug) {
         for (const v of this.inMemoryVendors.values()) {

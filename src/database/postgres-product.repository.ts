@@ -17,11 +17,35 @@ export class PostgresProductRepository {
         vendor_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
         meta_catalog_id: 'cat_brickdirect_001',
         meta_product_retailer_id: 'SKU-SAND-PLASTER-6M3',
-        title: 'Plaster Sand (6m³ Bulk Tipper Load)',
-        description: 'Washed SABS graded plaster sand delivered via 6m³ tipper.',
+        title: 'Plaster Sand (Washed Malmesbury Grade)',
+        description: 'Fine screened SABS plaster sand for exterior rendering and masonry brickwork.',
         category: 'sand_stone',
-        unit_of_measure: 'per 6m3 tipper',
-        unit_price: 1850.0,
+        unit_of_measure: 'per m3',
+        unit_price: 550.0,
+        is_available: true,
+      },
+      {
+        id: '11111111-1111-4111-8111-111111111103',
+        vendor_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+        meta_catalog_id: 'cat_brickdirect_001',
+        meta_product_retailer_id: 'MAT-SAND-BUILD-02',
+        title: 'Coarse River Building Sand',
+        description: 'High tensile river sand suitable for structural concrete footing and slab foundations.',
+        category: 'sand_stone',
+        unit_of_measure: 'per m3',
+        unit_price: 480.0,
+        is_available: true,
+      },
+      {
+        id: '11111111-1111-4111-8111-111111111104',
+        vendor_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+        meta_catalog_id: 'cat_brickdirect_001',
+        meta_product_retailer_id: 'MAT-STONE-19MM-03',
+        title: '19mm Blue Crushed Stone Aggregate',
+        description: 'Crushed granite stone for 25-30 MPa civil reinforced concrete and driveways.',
+        category: 'sand_stone',
+        unit_of_measure: 'per m3',
+        unit_price: 620.0,
         is_available: true,
       },
       {
@@ -29,11 +53,72 @@ export class PostgresProductRepository {
         vendor_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
         meta_catalog_id: 'cat_brickdirect_001',
         meta_product_retailer_id: 'SKU-BRICK-MAXI-1000',
-        title: 'Cement Maxi Bricks (1000 Units)',
-        description: '7MPa structural cement maxi bricks palletized.',
+        title: 'Cement Maxi Bricks (7 MPa)',
+        description: '7MPa structural cement maxi bricks palletized (per 1000 units).',
         category: 'bricks_blocks',
         unit_of_measure: 'per 1000 bricks',
         unit_price: 2450.0,
+        is_available: true,
+      },
+      // Vendor E: Higiene Commercial Hygiene & Cleaning (Pty) Ltd (retail_delivery)
+      {
+        id: '55555555-5555-4555-8555-555555555501',
+        vendor_id: 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
+        meta_catalog_id: 'cat_higiene_005',
+        meta_product_retailer_id: 'HYG-SAN-5L',
+        title: '5L Industrial Surface Sanitizer (70% Alcohol)',
+        description: 'SABS 1853 hospital & commercial kitchen grade surface sanitizer, 99.99% germ kill.',
+        category: 'hygiene_cleaning',
+        unit_of_measure: 'per 5L container',
+        unit_price: 185.0,
+        is_available: true,
+      },
+      {
+        id: '55555555-5555-4555-8555-555555555502',
+        vendor_id: 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
+        meta_catalog_id: 'cat_higiene_005',
+        meta_product_retailer_id: 'HYG-SOAP-25L',
+        title: '25L Anti-Bacterial Liquid Hand Soap (Bulk)',
+        description: 'Commercial washroom anti-bacterial liquid hand soap for high-traffic facilities.',
+        category: 'hygiene_cleaning',
+        unit_of_measure: 'per 25L drum',
+        unit_price: 640.0,
+        is_available: true,
+      },
+      {
+        id: '55555555-5555-4555-8555-555555555503',
+        vendor_id: 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
+        meta_catalog_id: 'cat_higiene_005',
+        meta_product_retailer_id: 'HYG-TOWEL-6PK',
+        title: 'Commercial Reflex Paper Towel Rolls (6-Pack)',
+        description: '2-ply virgin pulp centre-feed reflex paper towel rolls for kitchens and washrooms.',
+        category: 'hygiene_cleaning',
+        unit_of_measure: 'per bale of 6',
+        unit_price: 320.0,
+        is_available: true,
+      },
+      {
+        id: '55555555-5555-4555-8555-555555555504',
+        vendor_id: 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
+        meta_catalog_id: 'cat_higiene_005',
+        meta_product_retailer_id: 'HYG-DEGR-25L',
+        title: '25L Heavy-Duty Food-Grade Kitchen Degreaser',
+        description: 'Concentrated food-safe alkaline degreaser for commercial extraction canopies and floors.',
+        category: 'hygiene_cleaning',
+        unit_of_measure: 'per 25L drum',
+        unit_price: 790.0,
+        is_available: true,
+      },
+      {
+        id: '55555555-5555-4555-8555-555555555505',
+        vendor_id: 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
+        meta_catalog_id: 'cat_higiene_005',
+        meta_product_retailer_id: 'HYG-DISP-AUTO',
+        title: 'Touchless Stainless Wall Sanitizer Dispenser',
+        description: 'Brushed 304 stainless steel infrared sensor dispenser (1000ml refillable reservoir).',
+        category: 'hygiene_cleaning',
+        unit_of_measure: 'per unit',
+        unit_price: 495.0,
         is_available: true,
       },
       // Vendor C: Aura Luxe Hair & Wellness Studio (service_booking)
@@ -107,6 +192,10 @@ export class PostgresProductRepository {
 
   async saveProduct(product: DbProduct): Promise<DbProduct> {
     const id = product.id || randomUUID();
+    const normalizedVendorId =
+      product.vendor_id === 'e5fffa99-9e5d-4fe8-992a-2dd8df180e55'
+        ? 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55'
+        : product.vendor_id;
     const pool = db.getPool();
 
     if (pool) {
@@ -129,7 +218,7 @@ export class PostgresProductRepository {
         `;
         const res = await pool.query(queryText, [
           id,
-          product.vendor_id,
+          normalizedVendorId,
           product.meta_catalog_id,
           product.meta_product_retailer_id ?? null,
           product.title,
@@ -142,13 +231,16 @@ export class PostgresProductRepository {
           product.is_available,
           product.draft_specs ? JSON.stringify(product.draft_specs) : null,
         ]);
-        if (res.rows[0]) return res.rows[0];
+        if (res.rows[0]) {
+          this.inMemoryProducts.set(id, { ...product, id, vendor_id: normalizedVendorId });
+          return res.rows[0];
+        }
       } catch (err) {
         console.warn('[PostgresProductRepo] DB save fallback:', err);
       }
     }
 
-    const saved = { ...product, id };
+    const saved = { ...product, id, vendor_id: normalizedVendorId };
     this.inMemoryProducts.set(id, saved);
     return saved;
   }
@@ -171,17 +263,21 @@ export class PostgresProductRepository {
   }
 
   async findByVendor(vendorId: string): Promise<DbProduct[]> {
+    const normalizedVendorId =
+      vendorId === 'e5fffa99-9e5d-4fe8-992a-2dd8df180e55'
+        ? 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55'
+        : vendorId;
     const pool = db.getPool();
     if (pool) {
       try {
-        const res = await pool.query('SELECT * FROM products WHERE vendor_id = $1::uuid', [vendorId]);
-        return res.rows;
+        const res = await pool.query('SELECT * FROM products WHERE vendor_id = $1::uuid', [normalizedVendorId]);
+        if (res.rows.length > 0) return res.rows;
       } catch (err) {
         console.warn('[PostgresProductRepo] FindByVendor fallback:', err);
       }
     }
 
-    return Array.from(this.inMemoryProducts.values()).filter((p) => p.vendor_id === vendorId);
+    return Array.from(this.inMemoryProducts.values()).filter((p) => p.vendor_id === normalizedVendorId);
   }
 
   async findById(id: string): Promise<DbProduct | null> {
@@ -194,15 +290,23 @@ export class PostgresProductRepository {
         console.warn('[PostgresProductRepo] FindById fallback:', err);
       }
     }
-    return this.inMemoryProducts.get(id) || null;
+    const byId = this.inMemoryProducts.get(id);
+    if (byId) return byId;
+    for (const p of this.inMemoryProducts.values()) {
+      if (p.meta_product_retailer_id === id) return p;
+    }
+    return null;
   }
 
   async updateProduct(id: string, updates: Partial<DbProduct>): Promise<DbProduct | null> {
+    const existing = await this.findById(id);
+    const targetId = existing ? existing.id : id;
+
     const pool = db.getPool();
     if (pool) {
       try {
         const setClauses: string[] = [];
-        const values: any[] = [id];
+        const values: any[] = [targetId];
         let idx = 2;
 
         for (const [key, val] of Object.entries(updates)) {
@@ -214,17 +318,21 @@ export class PostgresProductRepository {
         if (setClauses.length > 0) {
           const sql = `UPDATE products SET ${setClauses.join(', ')} WHERE id = $1::uuid RETURNING *`;
           const res = await pool.query(sql, values);
-          if (res.rows[0]) return res.rows[0];
+          if (res.rows[0]) {
+            if (existing) {
+              this.inMemoryProducts.set(existing.id, { ...existing, ...updates });
+            }
+            return res.rows[0];
+          }
         }
       } catch (err) {
         console.warn('[PostgresProductRepo] Update fallback:', err);
       }
     }
 
-    const existing = this.inMemoryProducts.get(id);
     if (!existing) return null;
     const updated = { ...existing, ...updates };
-    this.inMemoryProducts.set(id, updated);
+    this.inMemoryProducts.set(existing.id, updated);
     return updated;
   }
 

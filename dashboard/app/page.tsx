@@ -28,6 +28,8 @@ import {
   Trash2,
   Edit3,
   Send,
+  Settings,
+  MapPin,
 } from 'lucide-react';
 import {
   MOCK_ORDERS_LIST,
@@ -48,6 +50,7 @@ import { WaybillPreviewModal } from '../components/waybill-preview-modal';
 import { UploadProductModal } from '../components/upload-product-modal';
 import { LiveWhatsAppDemoCockpit } from '../components/live-whatsapp-demo-cockpit';
 import { AddVendorModal } from '../components/add-vendor-modal';
+import { EditVendorModal } from '../components/edit-vendor-modal';
 
 interface OrderItem {
   id: string;
@@ -141,11 +144,14 @@ export default function VendorDashboard() {
   const [isWaybillOpen, setIsWaybillOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isAddVendorModalOpen, setIsAddVendorModalOpen] = useState(false);
+  const [isEditVendorModalOpen, setIsEditVendorModalOpen] = useState(false);
   const [showDemoCockpit, setShowDemoCockpit] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'dispatched' | 'delivered'>('all');
+  const [catalogFilterByVendor, setCatalogFilterByVendor] = useState<boolean>(true);
 
-  // Interactive Draft Approval & Price Edit State
+  // Interactive Draft Approval & Live Product Price/Title Edit State
   const [editingPriceProductId, setEditingPriceProductId] = useState<string | null>(null);
+  const [editingTitleInput, setEditingTitleInput] = useState<string>('');
   const [priceEditInput, setPriceEditInput] = useState<string>('R620 per m3');
   const [simUploadCaption, setSimUploadCaption] = useState<string>(
     '19mm Crushed Concrete Stone R640 per m3'
@@ -372,34 +378,57 @@ export default function VendorDashboard() {
     );
   };
 
-  // Interactive Approval Gate: [edit_price_{product_id}] -> WAITING_FOR_PRICE_EDIT
-  const handleApplyPriceEdit = (productId: string) => {
+  // Interactive Approval Gate & Live Product Editor: [edit_price_{product_id}]
+  const handleApplyPriceEdit = async (productId: string) => {
+    const existing = products.find((p) => p.id === productId);
     const priceMatch = priceEditInput.match(/([0-9]+(?:[\.,][0-9]{1,2})?)/);
-    const newPrice = priceMatch ? parseFloat(priceMatch[1].replace(',', '.')) : 620;
+    const newPrice = priceMatch
+      ? parseFloat(priceMatch[1].replace(',', '.'))
+      : existing?.unit_price || 620;
     const lower = priceEditInput.toLowerCase();
+    const afterNumber = priceEditInput.replace(/^(?:R|ZAR)?\s*[0-9]+(?:[\.,][0-9]{1,2})?\s*/i, '').trim();
     const newUnit =
-      lower.includes('m3') || lower.includes('cube')
+      afterNumber.length > 0
+        ? afterNumber
+        : lower.includes('m3') || lower.includes('cube')
         ? 'per m3'
         : lower.includes('1000') || lower.includes('brick')
         ? 'per 1000 bricks'
         : lower.includes('bag')
         ? 'per bag'
-        : undefined;
+        : existing?.unit_of_measure || 'per unit';
+    const newTitle = editingTitleInput.trim() || existing?.title || 'Catalog Item';
 
     setProducts((prev) =>
       prev.map((p) =>
         p.id === productId
           ? {
               ...p,
+              title: newTitle,
               unit_price: newPrice,
-              unit_of_measure: newUnit || p.unit_of_measure,
+              unit_of_measure: newUnit,
             }
           : p
       )
     );
+
+    try {
+      await fetch(`/api/v1/catalog/products/${productId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newTitle,
+          unit_price: newPrice,
+          unit_of_measure: newUnit,
+        }),
+      });
+    } catch {
+      // Optimistic local state update
+    }
+
     setEditingPriceProductId(null);
     showToast(
-      `✏️ WAITING_FOR_PRICE_EDIT applied: Updated draft to R${newPrice.toFixed(2)} ${newUnit || ''} and re-dispatched preview card!`
+      `✅ Updated "${newTitle}" to R${newPrice.toFixed(2)} (${newUnit}) — synced live to WhatsApp Catalog!`
     );
   };
 
@@ -769,21 +798,34 @@ export default function VendorDashboard() {
                   <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full border border-[#25D366]/40 bg-[#005C4B] text-[#DCF8C6]">
                     📞 {selectedVendor.whatsapp_number}
                   </span>
+                  <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-300">
+                    📍 Depot: {selectedVendor.base_location_lat.toFixed(4)}, {selectedVendor.base_location_lon.toFixed(4)} • R{selectedVendor.base_delivery_fee} + R{selectedVendor.per_km_rate}/km ({selectedVendor.max_delivery_radius_km}km zone)
+                  </span>
                 </div>
-                <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight font-display mt-0.5">
-                  {selectedVendor.business_name}
-                </h1>
+                <div className="flex flex-wrap items-center gap-3 mt-0.5">
+                  <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight font-display">
+                    {selectedVendor.business_name}
+                  </h1>
+                  <button
+                    onClick={() => setIsEditVendorModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 text-xs font-extrabold transition"
+                  >
+                    <Settings className="w-3.5 h-3.5" />
+                    ⚙️ Edit Company, Location &amp; Rates
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Right Action Controls */}
             <div className="flex flex-wrap items-center gap-2">
-              <a
-                href="/website"
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#005C4B] hover:bg-[#075E54] text-[#DCF8C6] border border-[#25D366]/40 text-xs font-extrabold transition"
+              <button
+                onClick={() => setIsEditVendorModalOpen(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-200 border border-sky-500/50 text-xs font-extrabold transition"
               >
-                🌐 whatsappeezy.com Website
-              </a>
+                <MapPin className="w-3.5 h-3.5 text-sky-400" />
+                Edit Info / Location / Rates
+              </button>
 
               <button
                 onClick={() => setIsAddVendorModalOpen(true)}
@@ -794,7 +836,10 @@ export default function VendorDashboard() {
               </button>
 
               <button
-                onClick={() => setIsUploadModalOpen(true)}
+                onClick={() => {
+                  setActiveTab('catalog');
+                  setIsUploadModalOpen(true);
+                }}
                 className="wa-gradient-btn flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold transition"
               >
                 <Sparkles className="w-3.5 h-3.5" />
@@ -886,6 +931,14 @@ export default function VendorDashboard() {
                 </button>
               );
             })}
+
+            <button
+              onClick={() => setIsEditVendorModalOpen(true)}
+              className="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/40 transition flex items-center gap-1"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              Edit {selectedVendor.business_name.split(' ')[0]} Settings
+            </button>
 
             <button
               onClick={() => setIsAddVendorModalOpen(true)}
@@ -1623,16 +1676,54 @@ export default function VendorDashboard() {
            ============================================================ */}
         {activeTab === 'catalog' && (
           <div className="space-y-6">
+            {/* Active Company Profile, Location & Delivery Rate Banner */}
+            <div className="bg-industrial-900 border border-emerald-500/40 rounded-xl p-5 flex flex-wrap items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
+                    ACTIVE CATALOG: {selectedVendor.business_name}
+                  </span>
+                  <span className="text-xs font-mono text-slate-300">
+                    📞 {selectedVendor.whatsapp_number}
+                  </span>
+                  <span className="text-xs font-mono text-sky-300">
+                    📍 GPS ({selectedVendor.base_location_lat.toFixed(4)}, {selectedVendor.base_location_lon.toFixed(4)}) • Radius: {selectedVendor.max_delivery_radius_km}km
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300">
+                  Delivery Pricing: <strong className="text-emerald-400 font-mono">R{selectedVendor.base_delivery_fee.toFixed(2)} base + R{selectedVendor.per_km_rate.toFixed(2)}/km</strong> • Payout Bank: <strong className="text-white">{selectedVendor.bank_name} ({selectedVendor.bank_account_number})</strong>
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setCatalogFilterByVendor((prev) => !prev)}
+                  className="px-3.5 py-2 rounded-lg bg-slate-950 hover:bg-slate-900 text-xs font-bold text-slate-200 border border-slate-700 transition"
+                >
+                  {catalogFilterByVendor
+                    ? `Showing: ${selectedVendor.business_name.split(' ')[0]} Only (Click for All)`
+                    : 'Showing: All Companies (Click for Active Only)'}
+                </button>
+                <button
+                  onClick={() => setIsEditVendorModalOpen(true)}
+                  className="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-extrabold transition flex items-center gap-1.5 shadow"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  ⚙️ Edit Company Info, Location &amp; Delivery Rates
+                </button>
+              </div>
+            </div>
+
             {/* Inbound Vendor Media Upload & Pre-Publish Approval Gate Simulator */}
             <div className="bg-industrial-900 border border-sky-500/30 rounded-xl p-5 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h2 className="text-base font-bold text-white flex items-center gap-2">
                     <Layers className="w-5 h-5 text-sky-400" />
-                    Vendor Self-Service Media Upload, Sharp 1024x1024 Normalization &amp; Pre-Publish Approval Gate
+                    Add New Product or Edit Live Catalog Pricing for {selectedVendor.business_name}
                   </h2>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    Inbound vendor photos (`type === &apos;image&apos;`) trigger `PROCESS_CATALOG_INGESTION`: stores `raw_image_url`, normalizes onto a 1024x1024 `#F8F9FA` canvas (`enhanced_image_url`), sets `is_available = FALSE` &amp; `meta_product_retailer_id = NULL`, and awaits interactive WhatsApp approval.
+                    Click <strong>&ldquo;✏️ Edit Item &amp; Price&rdquo;</strong> on any card below to change its title, price, or unit of measure immediately, or click <strong>&ldquo;📸 Upload &amp; AI-Enhance Photo&rdquo;</strong> to add a new product to {selectedVendor.business_name}&apos;s WhatsApp catalog.
                   </p>
                 </div>
 
@@ -1647,13 +1738,13 @@ export default function VendorDashboard() {
                   className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow-lg transition whitespace-nowrap"
                 >
                   <Sparkles className="w-4 h-4" />
-                  📸 Upload &amp; AI-Enhance Photo On-The-Spot (1024×1024 Studio)
+                  📸 Add Product / AI-Enhance Photo (1024×1024 Studio)
                 </button>
                 <input
                   type="text"
                   value={simUploadCaption}
                   onChange={(e) => setSimUploadCaption(e.target.value)}
-                  placeholder="Or enter vendor WhatsApp image caption (e.g. '19mm Concrete Stone R640 per m3')"
+                  placeholder="Or quick-add via WhatsApp caption (e.g. '25L Industrial Sanitizer R640 per 25L drum')"
                   className="flex-1 rounded-lg bg-industrial-950 border border-industrial-700 px-3.5 py-2 text-xs text-white font-mono focus:border-sky-400 focus:outline-none"
                 />
                 <button
@@ -1661,13 +1752,16 @@ export default function VendorDashboard() {
                   className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition whitespace-nowrap"
                 >
                   <PlusCircle className="w-4 h-4" />
-                  Simulate WhatsApp Caption Upload
+                  Quick-Add Draft
                 </button>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {products.map((prod) => {
+              {(catalogFilterByVendor
+                ? products.filter((p) => p.vendor_id === selectedVendor.id)
+                : products
+              ).map((prod) => {
                 const isDraft = !prod.meta_retailer_id;
                 const isEditingThis = editingPriceProductId === prod.id;
 
@@ -1714,23 +1808,36 @@ export default function VendorDashboard() {
                         </p>
 
                         {isEditingThis && (
-                          <div className="mt-3 p-3 rounded-lg bg-industrial-950 border border-amber-500/40 space-y-2">
+                          <div className="mt-3 p-3.5 rounded-lg bg-industrial-950 border border-amber-500/50 space-y-2.5">
                             <div className="text-[11px] font-bold text-amber-300">
-                              WAITING_FOR_PRICE_EDIT — Reply with price &amp; unit:
+                              ✏️ Edit Product Name, Price &amp; Unit (Live WhatsApp Sync):
                             </div>
+                            <input
+                              type="text"
+                              value={editingTitleInput}
+                              onChange={(e) => setEditingTitleInput(e.target.value)}
+                              placeholder="Product Title"
+                              className="w-full rounded bg-industrial-900 border border-industrial-700 px-2.5 py-1.5 text-xs text-white font-semibold"
+                            />
                             <div className="flex gap-2">
                               <input
                                 type="text"
                                 value={priceEditInput}
                                 onChange={(e) => setPriceEditInput(e.target.value)}
                                 placeholder="e.g. R620 per m3"
-                                className="flex-1 rounded bg-industrial-900 border border-industrial-700 px-2.5 py-1 text-xs text-white font-mono"
+                                className="flex-1 rounded bg-industrial-900 border border-industrial-700 px-2.5 py-1.5 text-xs text-emerald-300 font-mono font-bold"
                               />
                               <button
                                 onClick={() => handleApplyPriceEdit(prod.id)}
-                                className="px-2.5 py-1 rounded bg-amber-500 text-slate-950 text-xs font-bold"
+                                className="px-3 py-1.5 rounded bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold"
                               >
-                                Apply
+                                Save
+                              </button>
+                              <button
+                                onClick={() => setEditingPriceProductId(null)}
+                                className="px-2.5 py-1.5 rounded bg-slate-800 text-slate-300 text-xs"
+                              >
+                                Cancel
                               </button>
                             </div>
                           </div>
@@ -1739,7 +1846,7 @@ export default function VendorDashboard() {
                     </div>
 
                     <div className="px-5 py-3.5 border-t border-industrial-800 bg-industrial-950/50 space-y-3">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <div>
                           <span className="text-xs text-slate-400">Unit Price:</span>
                           <div className="text-lg font-extrabold text-emerald-400 font-mono">
@@ -1750,23 +1857,45 @@ export default function VendorDashboard() {
                           </div>
                         </div>
 
-                        {!isDraft && (
+                        <div className="flex items-center gap-1.5">
                           <button
                             onClick={() => {
-                              setProducts((prev) =>
-                                prev.map((p) =>
-                                  p.id === prod.id ? { ...p, is_available: !p.is_available } : p
-                                )
-                              );
-                              showToast(
-                                `Updated "${prod.title}" availability in Meta WhatsApp Catalog`
-                              );
+                              setEditingPriceProductId(prod.id);
+                              setEditingTitleInput(prod.title);
+                              setPriceEditInput(`R${prod.unit_price} ${prod.unit_of_measure}`);
                             }}
-                            className="px-3 py-1.5 rounded-lg bg-industrial-800 hover:bg-industrial-700 text-xs font-semibold text-slate-200 border border-industrial-700 transition"
+                            className="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition flex items-center gap-1"
                           >
-                            Toggle Stock
+                            <Edit3 className="w-3.5 h-3.5" />
+                            Edit Item / Price
                           </button>
-                        )}
+
+                          {!isDraft && (
+                            <button
+                              onClick={async () => {
+                                const nextAvail = !prod.is_available;
+                                setProducts((prev) =>
+                                  prev.map((p) =>
+                                    p.id === prod.id ? { ...p, is_available: nextAvail } : p
+                                  )
+                                );
+                                try {
+                                  await fetch(`/api/v1/catalog/products/${prod.id}`, {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ is_available: nextAvail }),
+                                  });
+                                } catch {}
+                                showToast(
+                                  `Updated "${prod.title}" stock status in Live WhatsApp Catalog`
+                                );
+                              }}
+                              className="px-2.5 py-1.5 rounded-lg bg-industrial-800 hover:bg-industrial-700 text-xs font-semibold text-slate-200 border border-industrial-700 transition"
+                            >
+                              {prod.is_available ? 'In Stock' : 'Out of Stock'}
+                            </button>
+                          )}
+                        </div>
                       </div>
 
                       {isDraft && (
@@ -1781,6 +1910,7 @@ export default function VendorDashboard() {
                           <button
                             onClick={() => {
                               setEditingPriceProductId(prod.id);
+                              setEditingTitleInput(prod.title);
                               setPriceEditInput(`R${prod.unit_price} ${prod.unit_of_measure}`);
                             }}
                             className="px-2 py-1.5 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[11px] font-bold transition flex items-center justify-center gap-1"
@@ -2169,8 +2299,15 @@ export default function VendorDashboard() {
         vendor={selectedVendor}
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
-        onProductCreated={(newProd, asDraft) => {
+        onProductCreated={async (newProd, asDraft) => {
           setProducts((prev) => [newProd, ...prev]);
+          try {
+            await fetch('/api/v1/catalog/products', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(newProd),
+            });
+          } catch {}
           setActiveTab('catalog');
           showToast(
             asDraft
@@ -2180,16 +2317,42 @@ export default function VendorDashboard() {
         }}
       />
 
+      {/* Edit Active Company Info, GPS Location & Delivery Pricing Modal */}
+      <EditVendorModal
+        vendor={selectedVendor}
+        isOpen={isEditVendorModalOpen}
+        onClose={() => setIsEditVendorModalOpen(false)}
+        onVendorUpdated={(updatedVendor) => {
+          setVendorsList((prev) =>
+            prev.map((v) => (v.id === updatedVendor.id ? updatedVendor : v))
+          );
+          setSelectedVendor(updatedVendor);
+          if (updatedVendor.subscription_tier) {
+            setSelectedTier(updatedVendor.subscription_tier);
+          }
+          showToast(
+            `✅ Updated "${updatedVendor.business_name}" (Depot GPS: ${updatedVendor.base_location_lat.toFixed(4)}, ${updatedVendor.base_location_lon.toFixed(4)} • R${updatedVendor.base_delivery_fee} + R${updatedVendor.per_km_rate}/km) — synced live to WhatsApp!`
+          );
+        }}
+      />
+
       {/* Onboard New Customer / Vendor Company Modal (e.g. Higiene) */}
       <AddVendorModal
         isOpen={isAddVendorModalOpen}
         onClose={() => setIsAddVendorModalOpen(false)}
-        onVendorCreated={(newVendor, openCatalogUploadImmediately) => {
+        onVendorCreated={async (newVendor, openCatalogUploadImmediately) => {
           setVendorsList((prev) => [newVendor, ...prev]);
           setSelectedVendor(newVendor);
           if (newVendor.subscription_tier) {
             setSelectedTier(newVendor.subscription_tier);
           }
+          try {
+            await fetch('/api/v1/vendors', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(newVendor),
+            });
+          } catch {}
           setActiveTab('catalog');
           showToast(
             `🏢 Onboarded "${newVendor.business_name}" with isolated WhatsApp ${newVendor.whatsapp_number}!`

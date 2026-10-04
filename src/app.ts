@@ -16,6 +16,8 @@ import { aiBridgeController } from './controllers/ai-bridge.controller';
 import { virtualNumberController } from './controllers/virtual-number.controller';
 import { conversationSessionStore } from './services/state-machine/conversation-session.store';
 import { whatsAppClientService } from './services/whatsapp/whatsapp-client.service';
+import { postgresVendorRepository } from './database/postgres-vendor.repository';
+import { postgresProductRepository } from './database/postgres-product.repository';
 import { config } from './config/env';
 import { db } from './database/db';
 
@@ -420,6 +422,128 @@ export function createApp(): Application {
       gupshupConfigured: Boolean(config.GUPSHUP_API_KEY),
       testMessageId,
       lastOutboundResult: whatsAppClientService.lastOutboundResult,
+    });
+  });
+
+  // Live Vendor & Catalog Management Endpoints (Command Center -> WhatsApp Bot Sync)
+  app.get('/api/v1/vendors', async (_req: Request, res: Response) => {
+    const vendors = await postgresVendorRepository.findAll();
+    res.json({
+      success: true,
+      count: vendors.length,
+      vendors,
+    });
+  });
+
+  app.post('/api/v1/vendors', async (req: Request, res: Response) => {
+    const body = req.body || {};
+    const saved = await postgresVendorRepository.saveVendor(body);
+    res.status(201).json({
+      success: true,
+      vendor: saved,
+    });
+  });
+
+  const handleUpdateVendor = async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const updates = req.body || {};
+    const updated = await postgresVendorRepository.updateVendor(id, updates);
+    if (!updated) {
+      res.status(404).json({
+        success: false,
+        error: 'VendorNotFound',
+        message: `Vendor '${id}' was not found.`,
+      });
+      return;
+    }
+    res.json({
+      success: true,
+      vendor: updated,
+    });
+  };
+
+  app.patch('/api/v1/vendors/:id', handleUpdateVendor);
+  app.put('/api/v1/vendors/:id', handleUpdateVendor);
+
+  app.get('/api/v1/catalog/products', async (req: Request, res: Response) => {
+    const vendorId = req.query.vendor_id ? String(req.query.vendor_id) : undefined;
+    const products = vendorId
+      ? await postgresProductRepository.findByVendor(vendorId)
+      : await postgresProductRepository.findAll();
+    res.json({
+      success: true,
+      count: products.length,
+      products,
+    });
+  });
+
+  app.post('/api/v1/catalog/products', async (req: Request, res: Response) => {
+    const body = req.body || {};
+    const saved = await postgresProductRepository.saveProduct({
+      id: body.id || '',
+      vendor_id: body.vendor_id || 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
+      meta_catalog_id: body.meta_catalog_id || 'cat_higiene_005',
+      meta_product_retailer_id:
+        body.meta_product_retailer_id !== undefined
+          ? body.meta_product_retailer_id
+          : body.meta_retailer_id !== undefined
+          ? body.meta_retailer_id
+          : `SKU-${Date.now().toString().slice(-5)}`,
+      title: body.title || 'New Catalog Item',
+      description: body.description || '',
+      category: body.category || 'general',
+      unit_of_measure: body.unit_of_measure || 'per unit',
+      unit_price: Number(body.unit_price) || 100,
+      raw_image_url: body.raw_image_url || body.image_url,
+      enhanced_image_url: body.enhanced_image_url || body.image_url,
+      is_available: body.is_available !== undefined ? Boolean(body.is_available) : true,
+    });
+    res.status(201).json({
+      success: true,
+      product: saved,
+    });
+  });
+
+  const handleUpdateCatalogProduct = async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const body = req.body || {};
+    const updates: Record<string, any> = {};
+    if (body.title !== undefined) updates.title = String(body.title);
+    if (body.description !== undefined) updates.description = String(body.description);
+    if (body.category !== undefined) updates.category = String(body.category);
+    if (body.unit_of_measure !== undefined) updates.unit_of_measure = String(body.unit_of_measure);
+    if (body.unit_price !== undefined) updates.unit_price = Number(body.unit_price);
+    if (body.is_available !== undefined) updates.is_available = Boolean(body.is_available);
+    if (body.meta_product_retailer_id !== undefined) {
+      updates.meta_product_retailer_id = body.meta_product_retailer_id;
+    } else if (body.meta_retailer_id !== undefined) {
+      updates.meta_product_retailer_id = body.meta_retailer_id;
+    }
+
+    const updated = await postgresProductRepository.updateProduct(id, updates);
+    if (!updated) {
+      res.status(404).json({
+        success: false,
+        error: 'ProductNotFound',
+        message: `Product '${id}' was not found.`,
+      });
+      return;
+    }
+    res.json({
+      success: true,
+      product: updated,
+    });
+  };
+
+  app.patch('/api/v1/catalog/products/:id', handleUpdateCatalogProduct);
+  app.put('/api/v1/catalog/products/:id', handleUpdateCatalogProduct);
+  app.patch('/api/v1/products/:id', handleUpdateCatalogProduct);
+
+  app.delete('/api/v1/catalog/products/:id', async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const deleted = await postgresProductRepository.deleteProduct(id);
+    res.json({
+      success: deleted,
     });
   });
 

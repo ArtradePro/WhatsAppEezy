@@ -44,7 +44,10 @@ export const LiveWhatsAppDemoCockpit: React.FC<LiveWhatsAppDemoCockpitProps> = (
 
   const unitPrice = activeProduct?.unit_price || (isKitchen ? 165 : 550);
   const subtotal = unitPrice * quantity;
-  const deliveryFee = isSalon ? 0 : isKitchen ? 45.0 : 562.4;
+  const sampleDistanceKm = isKitchen ? 3.4 : 14.2;
+  const deliveryFee = isSalon
+    ? 0
+    : Math.round(((vendor.base_delivery_fee ?? 85) + (vendor.per_km_rate ?? 8.5) * sampleDistanceKm) * 100) / 100;
   const totalZar = subtotal + deliveryFee;
 
   return (
