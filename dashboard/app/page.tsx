@@ -148,6 +148,54 @@ export default function VendorDashboard() {
   const [showDemoCockpit, setShowDemoCockpit] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'dispatched' | 'delivered'>('all');
   const [catalogFilterByVendor, setCatalogFilterByVendor] = useState<boolean>(true);
+  const [inboxFilter, setInboxFilter] = useState<'all' | 'human' | 'distributor' | 'order'>('all');
+  const [inboxMessages, setInboxMessages] = useState<
+    Array<{
+      id: string;
+      type: 'human' | 'distributor' | 'order';
+      brand: string;
+      customerName: string;
+      phone: string;
+      town: string;
+      message: string;
+      timeAgo: string;
+      resolved: boolean;
+    }>
+  >([
+    {
+      id: 'inb_1',
+      type: 'distributor',
+      brand: 'FungusNoMore & Higiene',
+      customerName: 'Pieter van der Merwe (Garden Route Pharmacy Group)',
+      phone: '+27824419920',
+      town: 'George & Mossel Bay, WC',
+      message: 'Hi! We want to become an official regional distributor for FungusNoMore & Higiene 5L/25L lines (approx. 150 units/month).',
+      timeAgo: '4 mins ago',
+      resolved: false,
+    },
+    {
+      id: 'inb_2',
+      type: 'human',
+      brand: 'FungusNoMore & Higiene',
+      customerName: 'Chantal Botha',
+      phone: '+27739104412',
+      town: 'Hartenbos, WC',
+      message: 'Typed HUMAN: Can I speak to a person about which FungusNoMore dilution ratio to use on wooden decks and showers?',
+      timeAgo: '11 mins ago',
+      resolved: false,
+    },
+    {
+      id: 'inb_3',
+      type: 'order',
+      brand: 'BrickDirect Industrial',
+      customerName: 'Jaco Steyn Construction',
+      phone: '+27835518821',
+      town: 'Voorbaai, Mossel Bay',
+      message: 'Ordered 4,000pcs Cement Maxi Bricks (R2,600/1000pcs) + Local Free Delivery pin dropped.',
+      timeAgo: '22 mins ago',
+      resolved: false,
+    },
+  ]);
 
   // Interactive Draft Approval & Live Product Price/Title Edit State
   const [editingPriceProductId, setEditingPriceProductId] = useState<string | null>(null);
@@ -1099,6 +1147,117 @@ export default function VendorDashboard() {
                     MoR Ledger →
                   </span>
                 </div>
+              </div>
+            </div>
+
+            {/* Daily WhatsApp Customer Inbox: Speak to a Human, Become a Distributor & Order Enquiries */}
+            <div className="obsidian-card rounded-2xl border border-emerald-500/30 overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-800/80 bg-slate-950/60 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                    <h2 className="text-base font-bold text-white font-display">
+                      Daily WhatsApp Customer Inbox — Speak to a Human, Distributor Leads &amp; Orders
+                    </h2>
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                      {inboxMessages.filter((m) => !m.resolved).length} Open
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Every customer who texts <strong>HUMAN</strong> (speak to a person), <strong>DISTRIBUTOR</strong> (become a distributor), or places an order on your <strong>FungusNoMore</strong> or <strong>Higiene</strong> virtual number lands right here + alerts your phone.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {[
+                    { id: 'all', label: 'All Messages' },
+                    { id: 'human', label: '🧑‍💼 Speak to Human' },
+                    { id: 'distributor', label: '🤝 Become a Distributor' },
+                    { id: 'order', label: '🛒 Orders' },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setInboxFilter(tab.id as any)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                        inboxFilter === tab.id
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-industrial-800 text-slate-300 hover:text-white'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="divide-y divide-slate-800/70">
+                {inboxMessages
+                  .filter((m) => (inboxFilter === 'all' ? true : m.type === inboxFilter))
+                  .map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition ${
+                        msg.resolved ? 'opacity-50 bg-slate-950/30' : 'hover:bg-slate-900/50'
+                      }`}
+                    >
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {msg.type === 'human' && (
+                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                              🧑‍💼 SPEAK TO A HUMAN
+                            </span>
+                          )}
+                          {msg.type === 'distributor' && (
+                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                              🤝 DISTRIBUTOR APPLICATION
+                            </span>
+                          )}
+                          {msg.type === 'order' && (
+                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                              🛒 WHATSAPP ORDER
+                            </span>
+                          )}
+                          <span className="text-xs font-extrabold text-white">{msg.customerName}</span>
+                          <span className="text-xs font-mono text-emerald-400">{msg.phone}</span>
+                          <span className="text-[11px] text-slate-400">• 📍 {msg.town}</span>
+                          <span className="text-[11px] font-mono text-sky-400">({msg.brand})</span>
+                          <span className="text-[11px] text-slate-500">• {msg.timeAgo}</span>
+                        </div>
+                        <p className="text-xs text-slate-200">{msg.message}</p>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <a
+                          href={`https://wa.me/${msg.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
+                            `Hi ${msg.customerName.split(' ')[0]}, this is Vernon from ${msg.brand} following up on your WhatsApp message!`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3.5 py-2 rounded-lg bg-[#25D366] hover:bg-[#34E574] text-[#06130E] text-xs font-extrabold transition inline-flex items-center gap-1.5 shadow"
+                        >
+                          <PhoneCall className="w-3.5 h-3.5" />
+                          💬 Reply 1-on-1 on WhatsApp
+                        </a>
+                        <button
+                          onClick={() => {
+                            setInboxMessages((prev) =>
+                              prev.map((item) =>
+                                item.id === msg.id ? { ...item, resolved: !item.resolved } : item
+                              )
+                            );
+                            showToast(
+                              msg.resolved
+                                ? `Re-opened enquiry from ${msg.customerName}`
+                                : `✅ Marked ${msg.customerName}'s enquiry as handled`
+                            );
+                          }}
+                          className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition"
+                        >
+                          {msg.resolved ? 'Re-open' : '✓ Done'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
               </div>
             </div>
 

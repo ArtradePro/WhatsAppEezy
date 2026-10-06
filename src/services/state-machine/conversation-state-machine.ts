@@ -76,6 +76,16 @@ export class ConversationStateMachine {
         vendor = v;
         switchedVendor = true;
       }
+    } else if (
+      incomingText === '#fungus' ||
+      incomingText === 'fungusnomore' ||
+      incomingText === 'fungus no more'
+    ) {
+      const v = await postgresVendorRepository.findById('e5fffa99-9e5d-4fe8-992a-2dd8df180e55');
+      if (v) {
+        vendor = v;
+        switchedVendor = true;
+      }
     } else if (incomingText === '#sand' || incomingText === '#brick' || incomingText === 'brickdirect') {
       const v = await postgresVendorRepository.findById('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11');
       if (v) {
@@ -231,12 +241,47 @@ export class ConversationStateMachine {
       }
     }
 
-    // Handle dispatch desk support / speak to agent button
-    if (buttonId === 'btn_speak_agent') {
+    // Handle dispatch desk support / speak to a human button or keyword
+    if (
+      buttonId === 'btn_speak_agent' ||
+      incomingText === 'human' ||
+      incomingText === 'agent' ||
+      incomingText === 'speak to a human' ||
+      incomingText === 'talk to a human'
+    ) {
       await whatsAppClientService.sendTextMessage(
         senderWaId,
-        '🟢 *WhatsAppEezy Dispatch Desk*\n\nA coordinator has been notified of your inquiry and will reach out to you shortly on WhatsApp to assist with your order. You can also contact our operations line at +27 76 486 2942.'
+        `🟢 *${vendor.business_name} — Human Specialist Handover*\n\nA team member has been notified of your message and will reply to you directly on WhatsApp shortly.\n\n💬 _You can type your question or message right here and our team will see it in the WhatsAppEezy Command Center._`
       );
+      const alertPhone = (vendor.whatsapp_number || config.VENDOR_DEFAULT_WHATSAPP_NUMBER).replace(/\D/g, '');
+      if (alertPhone && alertPhone !== senderWaId.replace(/\D/g, '')) {
+        await whatsAppClientService.sendTextMessage(
+          alertPhone,
+          `🧑‍💼 *HUMAN HANDOVER REQUEST (${vendor.business_name})*\n• Customer: *${customerName}* (+${senderWaId.replace(/\D/g, '')})\n• Message: "${message.text?.body || 'Requested to speak to a human'}"\n• Tap to Reply Directly: https://wa.me/${senderWaId.replace(/\D/g, '')}`
+        );
+      }
+      return;
+    }
+
+    // Handle "Become a Distributor / Wholesale Enquiry" button or keyword
+    if (
+      buttonId === 'btn_distributor' ||
+      incomingText === 'distributor' ||
+      incomingText === '#distributor' ||
+      incomingText?.includes('become a distributor') ||
+      incomingText?.includes('wholesale')
+    ) {
+      await whatsAppClientService.sendTextMessage(
+        senderWaId,
+        `🤝 *${vendor.business_name} — Official Distributor & Wholesale Desk*\n\nThank you for your interest in becoming a distributor for *FungusNoMore & Higiene*!\n\nPlease reply with:\n1️⃣ Your *Full Name & Business Name*\n2️⃣ Your *Town / Province*\n3️⃣ Estimated monthly volume\n\nOur distribution manager has been alerted and will contact you directly on WhatsApp.`
+      );
+      const alertPhone = (vendor.whatsapp_number || config.VENDOR_DEFAULT_WHATSAPP_NUMBER).replace(/\D/g, '');
+      if (alertPhone && alertPhone !== senderWaId.replace(/\D/g, '')) {
+        await whatsAppClientService.sendTextMessage(
+          alertPhone,
+          `🤝 *NEW DISTRIBUTOR ENQUIRY (${vendor.business_name})*\n• Applicant: *${customerName}* (+${senderWaId.replace(/\D/g, '')})\n• Message: "${message.text?.body || 'Interested in becoming a distributor'}"\n• Tap to Chat with Applicant: https://wa.me/${senderWaId.replace(/\D/g, '')}`
+        );
+      }
       return;
     }
 
@@ -331,7 +376,7 @@ export class ConversationStateMachine {
       await whatsAppClientService.sendInteractiveList(
         session.waId,
         `WhatsAppEezy • ${vendor.business_name}`.slice(0, 60),
-        `🟢 *Welcome to WhatsAppEezy.com!*\nYou are shopping with *${vendor.business_name}*.\n\nReply with an item number (*1-${vendorProducts.length}*) below to add to your order (or reply *#SAND*, *#PIZZA*, *#SALON*, *#HIGIENE* to switch store):`,
+        `🟢 *Welcome to WhatsAppEezy.com!*\nYou are shopping with *${vendor.business_name}*.\n\n• Reply with an item number (*1-${vendorProducts.length}*) below to order\n• Reply *DISTRIBUTOR* to become a distributor / wholesale partner\n• Reply *HUMAN* to speak directly to a person\n• Switch store: *#HIGIENE*, *#FUNGUS*, *#SAND*, *#PIZZA*, *#SALON*`,
         'View Catalog',
         [
           {
