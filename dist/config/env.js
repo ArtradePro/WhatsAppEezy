@@ -37,7 +37,7 @@ const envSchema = zod_1.z.object({
     WHATSAPP_PHONE_NUMBER_ID: zod_1.z.string().default('1359238143940536'),
     WHATSAPP_ACCESS_TOKEN: zod_1.z.string().default('mock-whatsapp-access-token'),
     WHATSAPP_VERIFY_TOKEN: zod_1.z.string().default('whatsappeezy_verify_2026'),
-    WHATSAPP_BUSINESS_ACCOUNT_ID: zod_1.z.string().default('1076037725345370'),
+    WHATSAPP_BUSINESS_ACCOUNT_ID: zod_1.z.string().default('1097308319554548'),
     GUPSHUP_API_KEY: zod_1.z.string().optional().default(process.env.GUPSHUP_API_KEY || 'eyJraWQiOiI1NDhiMTFmMWQ1Y2QxZGMyIiwiYWxnIjoiRWREU0EiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJDQVMtVjIiLCJ0dCI6IkFUIiwic3ViIjoiZDRmMDA1MmItYTEwMi00OWYyLWJmNTMtYzczNzM0OTYyOGVlIiwicnRpIjoiNDAwMDM4NDQ3MSIsImp0aSI6ImF0LTFrdnB3a2NwNXdpZW52ZWRqc3FtZ2dpaTA4eSIsImlhdCI6MTc5MTA5MjYxMSwiZXhwIjoxNzkxMTc5MDExLCJhdWQiOiJzcyIsInJvbGUiOiIqIn0.7mEyK5C2l2kgrR0xi9A6VpAK3DUAseJbMVHm30KubtynqIHw42wFgj1GGSVCNKEOe6-7EbRZc8zq4dUiFINxAg'),
     GUPSHUP_ACCOUNT_SECRET: zod_1.z.string().optional().default(process.env.GUPSHUP_ACCOUNT_SECRET || '6AGMN8SqCaOnjSe011WPRf7O1GV7zthLfH4q8ZCMJTUGFhsSArIKWKNFjVUPLFnC'),
     GUPSHUP_APP_ID: zod_1.z.string().optional().default(process.env.GUPSHUP_APP_ID || 'd4f0052b-a102-49f2-bf53-c737349628ee'),
