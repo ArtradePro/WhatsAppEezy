@@ -48,9 +48,9 @@ const envSchema = zod_1.z.object({
     META_APP_SECRET: zod_1.z.string().default(process.env.META_APP_SECRET || 'meta-app-secret-cargodash-prod'),
     // Distance & Delivery Configuration
     GOOGLE_MAPS_API_KEY: zod_1.z.string().default(''),
-    VENDOR_DEFAULT_LAT: zod_1.z.coerce.number().catch(-26.2041).default(-26.2041), // Central Depot (e.g. Johannesburg)
-    VENDOR_DEFAULT_LNG: zod_1.z.coerce.number().catch(28.0473).default(28.0473),
-    VENDOR_DEFAULT_WHATSAPP_NUMBER: zod_1.z.string().default('27764862942'),
+    VENDOR_DEFAULT_LAT: zod_1.z.coerce.number().catch(-34.1831).default(-34.1831), // Mossel Bay / Garden Route Depot
+    VENDOR_DEFAULT_LNG: zod_1.z.coerce.number().catch(22.1465).default(22.1465),
+    VENDOR_DEFAULT_WHATSAPP_NUMBER: zod_1.z.string().default('27747043506'),
     // PayFast Split-Checkout Configuration
     PAYFAST_MERCHANT_ID: zod_1.z.string().default('10000100'), // Default sandbox test merchant ID
     PAYFAST_MERCHANT_KEY: zod_1.z.string().default('46f0cd694581a'), // Default sandbox test merchant key

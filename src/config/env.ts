@@ -51,9 +51,9 @@ const envSchema = z.object({
 
   // Distance & Delivery Configuration
   GOOGLE_MAPS_API_KEY: z.string().default(''),
-  VENDOR_DEFAULT_LAT: z.coerce.number().catch(-26.2041).default(-26.2041), // Central Depot (e.g. Johannesburg)
-  VENDOR_DEFAULT_LNG: z.coerce.number().catch(28.0473).default(28.0473),
-  VENDOR_DEFAULT_WHATSAPP_NUMBER: z.string().default('27764862942'),
+  VENDOR_DEFAULT_LAT: z.coerce.number().catch(-34.1831).default(-34.1831), // Mossel Bay / Garden Route Depot
+  VENDOR_DEFAULT_LNG: z.coerce.number().catch(22.1465).default(22.1465),
+  VENDOR_DEFAULT_WHATSAPP_NUMBER: z.string().default('27747043506'),
 
   // PayFast Split-Checkout Configuration
   PAYFAST_MERCHANT_ID: z.string().default('10000100'), // Default sandbox test merchant ID
