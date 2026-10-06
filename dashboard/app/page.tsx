@@ -1780,7 +1780,20 @@ export default function VendorDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {(catalogFilterByVendor
-                ? products.filter((p) => p.vendor_id === selectedVendor.id)
+                ? products.filter((p) => {
+                    if (p.vendor_id === selectedVendor.id) return true;
+                    const sharedHygieneIds = [
+                      'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
+                      'e5fffa99-9e5d-4fe8-992a-2dd8df180e55',
+                    ];
+                    if (
+                      sharedHygieneIds.includes(selectedVendor.id) &&
+                      sharedHygieneIds.includes(p.vendor_id)
+                    ) {
+                      return true;
+                    }
+                    return false;
+                  })
                 : products
               ).map((prod) => {
                 const isDraft = !prod.meta_retailer_id;
