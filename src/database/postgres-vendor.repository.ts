@@ -201,10 +201,10 @@ export class PostgresVendorRepository {
 
     const v7: DbVendor = {
       id: '98aaaa11-7b3c-4ef9-881d-9ff0bd270f77',
-      business_name: 'LCSH — la Cock Signature Homes (Pty) Ltd',
+      business_name: 'LCSH Smartspace — la Cock Signature Homes (Pty) Ltd',
       slug: 'lcsh-signature-homes',
-      whatsapp_number: '+15550007777',
-      meta_phone_number_id: 'meta_pnum_lcsh_107',
+      whatsapp_number: '+15553180006',
+      meta_phone_number_id: '1124984863821882',
       meta_catalog_id: 'cat_brickdirect_001',
       business_type: 'retail_delivery',
       contact_email: 'info@higiene.co.za',
