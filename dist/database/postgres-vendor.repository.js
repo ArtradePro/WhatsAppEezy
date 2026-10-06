@@ -132,8 +132,8 @@ class PostgresVendorRepository {
             id: 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
             business_name: 'Higiene Commercial Hygiene & Cleaning (Pty) Ltd',
             slug: 'higiene-commercial-hygiene',
-            whatsapp_number: '+15551946746',
-            meta_phone_number_id: 'meta_pnum_higiene_105',
+            whatsapp_number: '+15553443356',
+            meta_phone_number_id: '1465835996503272',
             meta_catalog_id: 'cat_higiene_005',
             business_type: 'retail_delivery',
             contact_email: 'info@higiene.co.za',
@@ -192,12 +192,45 @@ class PostgresVendorRepository {
             is_active: true,
             created_at: new Date().toISOString(),
         };
+        const v7 = {
+            id: '98aaaa11-7b3c-4ef9-881d-9ff0bd270f77',
+            business_name: 'LCSH — la Cock Signature Homes (Pty) Ltd',
+            slug: 'lcsh-signature-homes',
+            whatsapp_number: '+15550007777',
+            meta_phone_number_id: 'meta_pnum_lcsh_107',
+            meta_catalog_id: 'cat_brickdirect_001',
+            business_type: 'retail_delivery',
+            contact_email: 'info@higiene.co.za',
+            vat_number: 'ZA4920192837',
+            bank_account_holder: 'la Cock Signature Homes (Pty) Ltd',
+            bank_name: 'First National Bank (FNB)',
+            bank_account_number: '62849302918',
+            bank_branch_code: '250655',
+            base_location_lon: 22.1465,
+            base_location_lat: -34.1831,
+            depot_address: 'Mossel Bay / Garden Route Head Office, Western Cape',
+            max_delivery_radius_km: 50.0,
+            free_delivery_radius_km: 15.0,
+            base_delivery_fee: 0.0,
+            per_km_rate: 22.0,
+            vat_inclusive: false,
+            subscription_tier: 'pro',
+            subscription_monthly_fee: 599.0,
+            commission_rate: 0.065,
+            processing_fee_billed_rate: { percentage: 0.029, fixed_fee: 2.0 },
+            processing_fee_actual_cost: { percentage: 0.02, fixed_fee: 1.5 },
+            payfast_subscription_token: 'pf_token_lcsh_007',
+            auto_ledger_setoff: true,
+            is_active: true,
+            created_at: new Date().toISOString(),
+        };
         this.inMemoryVendors.set(v1.id, v1);
         this.inMemoryVendors.set(v2.id, v2);
         this.inMemoryVendors.set(v3.id, v3);
         this.inMemoryVendors.set(v4.id, v4);
         this.inMemoryVendors.set(v5.id, v5);
         this.inMemoryVendors.set(v6.id, v6);
+        this.inMemoryVendors.set(v7.id, v7);
     }
     async saveVendor(vendor) {
         const id = vendor.id || (0, crypto_1.randomUUID)();
