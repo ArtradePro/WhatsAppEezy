@@ -259,9 +259,14 @@ class PostgresProductRepository {
         return null;
     }
     async findByVendor(vendorId) {
-        const normalizedVendorId = vendorId === 'e5fffa99-9e5d-4fe8-992a-2dd8df180e55'
-            ? 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55'
-            : vendorId;
+        let normalizedVendorId = vendorId;
+        if (vendorId === 'e5fffa99-9e5d-4fe8-992a-2dd8df180e55' ||
+            vendorId === '77bbbb22-8c4d-4ef0-992e-8aa1ce380a88') {
+            normalizedVendorId = 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55';
+        }
+        else if (vendorId === '98aaaa11-7b3c-4ef9-881d-9ff0bd270f77') {
+            normalizedVendorId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+        }
         const pool = db_1.db.getPool();
         if (pool) {
             try {

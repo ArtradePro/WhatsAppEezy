@@ -346,11 +346,7 @@ export class PostgresVendorRepository {
   }
 
   async updateVendor(id: string, updates: Partial<DbVendor>): Promise<DbVendor | null> {
-    const normalizedId =
-      id === 'e5fffa99-9e5d-4fe8-992a-2dd8df180e55'
-        ? 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55'
-        : id;
-    const existing = await this.findById(normalizedId);
+    const existing = await this.findById(id);
     if (!existing) return null;
 
     const updated: DbVendor = {
@@ -365,23 +361,22 @@ export class PostgresVendorRepository {
   }
 
   async findById(id: string): Promise<DbVendor | null> {
-    const normalizedId =
-      id === 'e5fffa99-9e5d-4fe8-992a-2dd8df180e55'
-        ? 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55'
-        : id;
+    if (this.inMemoryVendors.has(id)) {
+      return this.inMemoryVendors.get(id) || null;
+    }
     const pool = db.getPool();
     if (pool) {
       try {
         const res = await pool.query(
           'SELECT *, ST_X(base_location::geometry) as base_location_lon, ST_Y(base_location::geometry) as base_location_lat FROM vendors WHERE id = $1::uuid',
-          [normalizedId]
+          [id]
         );
         if (res.rows[0]) return res.rows[0];
       } catch (err) {
         console.warn('[PostgresVendorRepo] FindById fallback:', err);
       }
     }
-    return this.inMemoryVendors.get(normalizedId) || null;
+    return this.inMemoryVendors.get(id) || null;
   }
 
   async findBySlug(slug: string): Promise<DbVendor | null> {
@@ -394,6 +389,12 @@ export class PostgresVendorRepository {
   async findByMetaPhoneNumberId(phoneNumberId: string): Promise<DbVendor | null> {
     if (!phoneNumberId) return null;
     const trimmed = phoneNumberId.trim();
+
+    for (const v of this.inMemoryVendors.values()) {
+      if (v.meta_phone_number_id === trimmed) {
+        return v;
+      }
+    }
 
     const pool = db.getPool();
     if (pool) {
@@ -408,11 +409,6 @@ export class PostgresVendorRepository {
       }
     }
 
-    for (const v of this.inMemoryVendors.values()) {
-      if (v.meta_phone_number_id === trimmed) {
-        return v;
-      }
-    }
     return null;
   }
 
@@ -433,6 +429,14 @@ export class PostgresVendorRepository {
 
   async findByWhatsAppNumber(phoneNumber: string): Promise<DbVendor | null> {
     const cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
+
+    for (const v of this.inMemoryVendors.values()) {
+      const vClean = v.whatsapp_number.replace(/[^0-9]/g, '');
+      if (vClean === cleanPhone || v.whatsapp_number === phoneNumber) {
+        return v;
+      }
+    }
+
     const pool = db.getPool();
     if (pool) {
       try {
@@ -446,12 +450,6 @@ export class PostgresVendorRepository {
       }
     }
 
-    for (const v of this.inMemoryVendors.values()) {
-      const vClean = v.whatsapp_number.replace(/[^0-9]/g, '');
-      if (vClean === cleanPhone || v.whatsapp_number === phoneNumber) {
-        return v;
-      }
-    }
     return null;
   }
 

@@ -334,10 +334,7 @@ class PostgresVendorRepository {
         return normalized;
     }
     async updateVendor(id, updates) {
-        const normalizedId = id === 'e5fffa99-9e5d-4fe8-992a-2dd8df180e55'
-            ? 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55'
-            : id;
-        const existing = await this.findById(normalizedId);
+        const existing = await this.findById(id);
         if (!existing)
             return null;
         const updated = {
@@ -350,13 +347,13 @@ class PostgresVendorRepository {
         return updated;
     }
     async findById(id) {
-        const normalizedId = id === 'e5fffa99-9e5d-4fe8-992a-2dd8df180e55'
-            ? 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55'
-            : id;
+        if (this.inMemoryVendors.has(id)) {
+            return this.inMemoryVendors.get(id) || null;
+        }
         const pool = db_1.db.getPool();
         if (pool) {
             try {
-                const res = await pool.query('SELECT *, ST_X(base_location::geometry) as base_location_lon, ST_Y(base_location::geometry) as base_location_lat FROM vendors WHERE id = $1::uuid', [normalizedId]);
+                const res = await pool.query('SELECT *, ST_X(base_location::geometry) as base_location_lon, ST_Y(base_location::geometry) as base_location_lat FROM vendors WHERE id = $1::uuid', [id]);
                 if (res.rows[0])
                     return res.rows[0];
             }
@@ -364,7 +361,7 @@ class PostgresVendorRepository {
                 console.warn('[PostgresVendorRepo] FindById fallback:', err);
             }
         }
-        return this.inMemoryVendors.get(normalizedId) || null;
+        return this.inMemoryVendors.get(id) || null;
     }
     async findBySlug(slug) {
         for (const v of this.inMemoryVendors.values()) {
@@ -377,6 +374,11 @@ class PostgresVendorRepository {
         if (!phoneNumberId)
             return null;
         const trimmed = phoneNumberId.trim();
+        for (const v of this.inMemoryVendors.values()) {
+            if (v.meta_phone_number_id === trimmed) {
+                return v;
+            }
+        }
         const pool = db_1.db.getPool();
         if (pool) {
             try {
@@ -386,11 +388,6 @@ class PostgresVendorRepository {
             }
             catch (err) {
                 console.warn('[PostgresVendorRepo] FindByMetaPhoneNumberId fallback:', err);
-            }
-        }
-        for (const v of this.inMemoryVendors.values()) {
-            if (v.meta_phone_number_id === trimmed) {
-                return v;
             }
         }
         return null;
@@ -410,6 +407,12 @@ class PostgresVendorRepository {
     }
     async findByWhatsAppNumber(phoneNumber) {
         const cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
+        for (const v of this.inMemoryVendors.values()) {
+            const vClean = v.whatsapp_number.replace(/[^0-9]/g, '');
+            if (vClean === cleanPhone || v.whatsapp_number === phoneNumber) {
+                return v;
+            }
+        }
         const pool = db_1.db.getPool();
         if (pool) {
             try {
@@ -419,12 +422,6 @@ class PostgresVendorRepository {
             }
             catch (err) {
                 console.warn('[PostgresVendorRepo] FindByPhone fallback:', err);
-            }
-        }
-        for (const v of this.inMemoryVendors.values()) {
-            const vClean = v.whatsapp_number.replace(/[^0-9]/g, '');
-            if (vClean === cleanPhone || v.whatsapp_number === phoneNumber) {
-                return v;
             }
         }
         return null;
