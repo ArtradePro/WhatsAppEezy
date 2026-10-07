@@ -224,6 +224,38 @@ class PostgresVendorRepository {
             is_active: true,
             created_at: new Date().toISOString(),
         };
+        const v8 = {
+            id: '77bbbb22-8c4d-4ef0-992e-8aa1ce380a88',
+            business_name: 'WhatsAppEezy Platform HQ (Merchant Onboarding)',
+            slug: 'whatsappeezy-hq',
+            whatsapp_number: '+15553925662',
+            meta_phone_number_id: '1299119249956752',
+            meta_catalog_id: 'cat_higiene_005',
+            business_type: 'retail_delivery',
+            contact_email: 'info@higiene.co.za',
+            vat_number: 'ZA4950112233',
+            bank_account_holder: 'Hygienical (Pty) Ltd T/A Higiene',
+            bank_name: 'First National Bank (FNB)',
+            bank_account_number: '62991100442',
+            bank_branch_code: '250655',
+            base_location_lon: 22.1465,
+            base_location_lat: -34.1831,
+            depot_address: 'Mossel Bay / Garden Route HQ, Western Cape',
+            max_delivery_radius_km: 50.0,
+            free_delivery_radius_km: 15.0,
+            base_delivery_fee: 0.0,
+            per_km_rate: 8.5,
+            vat_inclusive: false,
+            subscription_tier: 'enterprise',
+            subscription_monthly_fee: 999.0,
+            commission_rate: 0.05,
+            processing_fee_billed_rate: { percentage: 0.025, fixed_fee: 1.5 },
+            processing_fee_actual_cost: { percentage: 0.02, fixed_fee: 1.5 },
+            payfast_subscription_token: 'pf_token_whatsappeezy_008',
+            auto_ledger_setoff: true,
+            is_active: true,
+            created_at: new Date().toISOString(),
+        };
         this.inMemoryVendors.set(v1.id, v1);
         this.inMemoryVendors.set(v2.id, v2);
         this.inMemoryVendors.set(v3.id, v3);
@@ -231,6 +263,7 @@ class PostgresVendorRepository {
         this.inMemoryVendors.set(v5.id, v5);
         this.inMemoryVendors.set(v6.id, v6);
         this.inMemoryVendors.set(v7.id, v7);
+        this.inMemoryVendors.set(v8.id, v8);
     }
     async saveVendor(vendor) {
         const id = vendor.id || (0, crypto_1.randomUUID)();
