@@ -111,6 +111,7 @@ class WhatsAppQueueWorker {
     async routeMessage(msg, contactNameMap, metadata) {
         const senderWaId = msg.from;
         const customerName = contactNameMap.get(senderWaId) || 'Customer';
+        whatsapp_client_service_1.whatsAppClientService.setActiveInboundLine(metadata?.phoneNumberId, metadata?.displayPhoneNumber);
         try {
             // 1. Supplier route: if sender is a registered vendor matching vendors.whatsapp_number
             const vendor = await vendor_product_ingestion_service_1.vendorProductIngestionService.getRegisteredVendor(senderWaId);

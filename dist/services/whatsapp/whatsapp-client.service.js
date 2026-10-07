@@ -14,6 +14,8 @@ class WhatsAppClientService {
     isConfigured;
     runtimeGupshupApiKey = '';
     runtimeGupshupAppId = '';
+    activeSourceNumber = '';
+    activeAppName = '';
     lastOutboundResult = null;
     constructor() {
         this.baseUrl = env_1.config.META_GRAPH_BASE_URL;
@@ -22,11 +24,38 @@ class WhatsAppClientService {
         this.accessToken = env_1.config.WHATSAPP_ACCESS_TOKEN;
         this.runtimeGupshupApiKey = env_1.config.GUPSHUP_API_KEY || '';
         this.runtimeGupshupAppId = env_1.config.GUPSHUP_APP_ID || 'd4f0052b-a102-49f2-bf53-c737349628ee';
+        this.activeSourceNumber = (env_1.config.GUPSHUP_SOURCE_NUMBER || '15554629242').replace(/\D/g, '');
+        this.activeAppName = env_1.config.GUPSHUP_APP_NAME || 'WhatsAppEezy';
         this.isConfigured =
             Boolean(this.accessToken) &&
                 this.accessToken !== 'mock-whatsapp-access-token' &&
                 Boolean(this.phoneNumberId) &&
                 this.phoneNumberId !== 'mock-phone-number-id';
+    }
+    setActiveInboundLine(phoneNumberId, displayPhoneNumber) {
+        const cleanPhone = (displayPhoneNumber || '').replace(/\D/g, '');
+        const cleanId = (phoneNumberId || '').trim();
+        if (cleanPhone === '15553426540' || cleanId === '1279806698557702') {
+            this.activeSourceNumber = '15553426540';
+            this.activeAppName = 'WhatsAppEezyHQ';
+            this.runtimeGupshupAppId = 'fb00d434-1036-453f-84f5-c9f8f3f08357';
+        }
+        else if (cleanPhone === '15553180006' || cleanId === '1124984863821882') {
+            this.activeSourceNumber = '15553180006';
+            this.activeAppName = 'LCSHSmartspace';
+        }
+        else if (cleanPhone === '15553443356' || cleanId === '1465835996503272') {
+            this.activeSourceNumber = '15553443356';
+            this.activeAppName = 'Higiene';
+        }
+        else if (cleanPhone === '15554629242' || cleanId === '1359238143940536') {
+            this.activeSourceNumber = '15554629242';
+            this.activeAppName = 'WhatsAppEezy';
+            this.runtimeGupshupAppId = 'd4f0052b-a102-49f2-bf53-c737349628ee';
+        }
+        else if (cleanPhone) {
+            this.activeSourceNumber = cleanPhone;
+        }
     }
     configureGupshup(apiKey, appId) {
         this.runtimeGupshupApiKey = apiKey.trim();
@@ -523,9 +552,9 @@ class WhatsAppClientService {
             }
             const formData = new URLSearchParams();
             formData.append('channel', 'whatsapp');
-            formData.append('source', (env_1.config.GUPSHUP_SOURCE_NUMBER || '917834811114').replace(/^\+/, ''));
+            formData.append('source', (this.activeSourceNumber || env_1.config.GUPSHUP_SOURCE_NUMBER || '15554629242').replace(/^\+/, ''));
             formData.append('destination', cleanDestination);
-            formData.append('src.name', env_1.config.GUPSHUP_APP_NAME || 'WhatsAppEezy');
+            formData.append('src.name', this.activeAppName || env_1.config.GUPSHUP_APP_NAME || 'WhatsAppEezy');
             formData.append('message', JSON.stringify({ type: 'text', text: bodyText }));
             try {
                 const response = await axios_1.default.post('https://api.gupshup.io/wa/api/v1/msg', formData.toString(), {
