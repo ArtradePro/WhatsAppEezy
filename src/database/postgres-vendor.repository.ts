@@ -234,10 +234,10 @@ export class PostgresVendorRepository {
 
     const v8: DbVendor = {
       id: '77bbbb22-8c4d-4ef0-992e-8aa1ce380a88',
-      business_name: 'WhatsAppEezy Platform HQ (Merchant Onboarding)',
+      business_name: 'AppEezy / WhatsAppEezy Platform HQ (Merchant Onboarding)',
       slug: 'whatsappeezy-hq',
-      whatsapp_number: '+15553925662',
-      meta_phone_number_id: '1299119249956752',
+      whatsapp_number: '+15553426540',
+      meta_phone_number_id: '1279806698557702',
       meta_catalog_id: 'cat_higiene_005',
       business_type: 'retail_delivery',
       contact_email: 'info@higiene.co.za',
