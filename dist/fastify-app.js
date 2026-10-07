@@ -112,6 +112,13 @@ function createFastifyApp() {
     app.post('/webhook', async (request, reply) => {
         await whatsapp_webhook_controller_1.whatsAppWebhookController.handleInboundEvents(request, reply);
     });
+    // Gupshup WhatsApp Webhook Handshake & Event Ingestion (v2 & v3 Meta format)
+    app.get('/api/webhooks/gupshup', async (request, reply) => {
+        await whatsapp_webhook_controller_1.whatsAppWebhookController.handleGupshupWebhook(request, reply);
+    });
+    app.post('/api/webhooks/gupshup', async (request, reply) => {
+        await whatsapp_webhook_controller_1.whatsAppWebhookController.handleGupshupWebhook(request, reply);
+    });
     // PayFast Instant Transaction Notification (ITN) webhook (Primary Route)
     app.post('/api/webhooks/payfast/itn', async (request, reply) => {
         await payfast_webhook_controller_1.payFastWebhookController.handleITN(request, reply);
