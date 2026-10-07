@@ -73,6 +73,10 @@ class WhatsAppClientService {
         const currentToken = this.runtimeGupshupApiKey || env_1.config.GUPSHUP_API_KEY || '';
         const secret = env_1.config.GUPSHUP_ACCOUNT_SECRET;
         const appId = this.runtimeGupshupAppId || env_1.config.GUPSHUP_APP_ID || 'd4f0052b-a102-49f2-bf53-c737349628ee';
+        // If currentToken is a permanent Gupshup Account API Key (not a 3-part JWT), use it directly!
+        if (currentToken && currentToken.split('.').length !== 3) {
+            return currentToken;
+        }
         if (!force && currentToken.split('.').length === 3) {
             try {
                 const payloadJson = JSON.parse(Buffer.from(currentToken.split('.')[1], 'base64url').toString('utf8'));
@@ -556,13 +560,16 @@ class WhatsAppClientService {
             formData.append('destination', cleanDestination);
             formData.append('src.name', this.activeAppName || env_1.config.GUPSHUP_APP_NAME || 'WhatsAppEezy');
             formData.append('message', JSON.stringify({ type: 'text', text: bodyText }));
+            const headers = {
+                apikey: gupshupKey,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            };
+            if (gupshupKey.split('.').length === 3) {
+                headers.Authorization = gupshupKey.startsWith('Bearer ') ? gupshupKey : `Bearer ${gupshupKey}`;
+            }
             try {
                 const response = await axios_1.default.post('https://api.gupshup.io/wa/api/v1/msg', formData.toString(), {
-                    headers: {
-                        apikey: gupshupKey,
-                        Authorization: gupshupKey.startsWith('Bearer ') ? gupshupKey : `Bearer ${gupshupKey}`,
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
+                    headers,
                 });
                 this.lastOutboundResult = {
                     ok: true,
