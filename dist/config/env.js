@@ -38,8 +38,8 @@ const envSchema = zod_1.z.object({
     WHATSAPP_ACCESS_TOKEN: zod_1.z.string().default('mock-whatsapp-access-token'),
     WHATSAPP_VERIFY_TOKEN: zod_1.z.string().default('whatsappeezy_verify_2026'),
     WHATSAPP_BUSINESS_ACCOUNT_ID: zod_1.z.string().default('1097308319554548'),
-    GUPSHUP_API_KEY: zod_1.z.string().optional().default(process.env.GUPSHUP_API_KEY || '1jyeu4hjqrdlmzonsgbklotw7gllpquj'),
-    GUPSHUP_ACCOUNT_SECRET: zod_1.z.string().optional().default(process.env.GUPSHUP_ACCOUNT_SECRET || '6AGMN8SqCaOnjSe011WPRf7O1GV7zthLfH4q8ZCMJTUGFhsSArIKWKNFjVUPLFnC'),
+    GUPSHUP_API_KEY: zod_1.z.string().optional().default(process.env.GUPSHUP_API_KEY || ''),
+    GUPSHUP_ACCOUNT_SECRET: zod_1.z.string().optional().default(process.env.GUPSHUP_ACCOUNT_SECRET || ''),
     GUPSHUP_APP_ID: zod_1.z.string().optional().default(process.env.GUPSHUP_APP_ID || 'd4f0052b-a102-49f2-bf53-c737349628ee'),
     GUPSHUP_APP_NAME: zod_1.z.string().optional().default(process.env.GUPSHUP_APP_NAME || 'WhatsAppEezy'),
     GUPSHUP_SOURCE_NUMBER: zod_1.z.string().optional().default(process.env.GUPSHUP_SOURCE_NUMBER || '15554629242'),
@@ -70,6 +70,7 @@ const envSchema = zod_1.z.object({
         .default(process.env.AUTO_MIGRATE_ON_STARTUP || 'false')
         .transform((val) => val === 'true'),
     // Optional Supabase Platform Configuration
+    SUPABASE_ANON_KEY: zod_1.z.string().default(''),
     SUPABASE_URL: zod_1.z.string().optional().default(process.env.SUPABASE_URL || ''),
     SUPABASE_SERVICE_ROLE_KEY: zod_1.z.string().optional().default(process.env.SUPABASE_SERVICE_ROLE_KEY || ''),
     // Railway Redis Configuration

@@ -117,10 +117,9 @@ export class WhatsAppQueueWorker {
         }
 
         for (const msg of value.messages) {
-          await this.routeMessage(msg, contactNameMap, {
-            phoneNumberId,
-            displayPhoneNumber,
-          });
+          await whatsAppClientService.withInboundLine(phoneNumberId, displayPhoneNumber, () =>
+            this.routeMessage(msg, contactNameMap, { phoneNumberId, displayPhoneNumber })
+          );
         }
       }
     }

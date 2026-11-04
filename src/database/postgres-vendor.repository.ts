@@ -135,7 +135,7 @@ export class PostgresVendorRepository {
 
     const v5: DbVendor = {
       id: 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
-      business_name: 'Higiene Commercial Hygiene & Cleaning (Pty) Ltd',
+      business_name: 'Hygienical (Pty) Ltd T/A Higiene',
       slug: 'higiene-commercial-hygiene',
       whatsapp_number: '+15553443356',
       meta_phone_number_id: '1465835996503272',
@@ -168,7 +168,7 @@ export class PostgresVendorRepository {
 
     const v6: DbVendor = {
       id: 'e5fffa99-9e5d-4fe8-992a-2dd8df180e55',
-      business_name: 'Fungus No More (Shared Higiene Catalog)',
+      business_name: 'Fungus No More by Higiene',
       slug: 'fungusnomore-hygiene',
       whatsapp_number: '+15554629242',
       meta_phone_number_id: '1359238143940536',
@@ -205,9 +205,9 @@ export class PostgresVendorRepository {
       slug: 'lcsh-signature-homes',
       whatsapp_number: '+15553180006',
       meta_phone_number_id: '1124984863821882',
-      meta_catalog_id: 'cat_brickdirect_001',
-      business_type: 'retail_delivery',
-      contact_email: 'info@higiene.co.za',
+      meta_catalog_id: 'cat_lcsh_007',
+      business_type: 'construction_quotes',
+      contact_email: 'info@lcsh.co.za',
       vat_number: 'ZA4920192837',
       bank_account_holder: 'la Cock Signature Homes (Pty) Ltd',
       bank_name: 'First National Bank (FNB)',

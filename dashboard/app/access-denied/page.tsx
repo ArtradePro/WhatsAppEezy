@@ -1,0 +1,3 @@
+export default function AccessDenied() {
+  return <main className="min-h-screen flex items-center justify-center p-6"><section className="max-w-lg rounded-2xl bg-slate-900 border border-slate-700 p-8"><h1 className="text-2xl font-bold mb-4">Company access is not ready</h1><p className="text-slate-300 mb-5">Your account needs an assigned company and permission level before you can use the dashboard. Please contact the platform owner.</p><form action="/api/auth/logout" method="post"><button className="bg-emerald-500 text-slate-950 rounded-lg px-4 py-2 font-bold">Sign out</button></form></section></main>;
+}

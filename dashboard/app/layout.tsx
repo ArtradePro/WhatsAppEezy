@@ -21,9 +21,10 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'WhatsAppEezy.com | AI-Powered WhatsApp Commerce, PayFast MoR & Dispatch Portal',
+  icons: { icon: '/branding/whatsappeezy-logo.png', apple: '/branding/whatsappeezy-logo.png' },
+  title: 'WhatsAppEezy | AI-Powered WhatsApp Commerce, PayFast MoR & Dispatch Portal',
   description:
-    'Turn any WhatsApp number into an AI-enhanced store, instant PayFast checkout, and automated kitchen/yard dispatch engine at WhatsAppEezy.com.',
+    'Turn any WhatsApp number into an AI-enhanced store, instant PayFast checkout, and automated kitchen/yard dispatch engine at WhatsAppEezy.',
 };
 
 export default function RootLayout({

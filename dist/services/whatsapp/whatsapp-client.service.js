@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.whatsAppClientService = exports.WhatsAppClientService = void 0;
 const axios_1 = __importDefault(require("axios"));
+const node_async_hooks_1 = require("node:async_hooks");
 const env_1 = require("../../config/env");
 class WhatsAppClientService {
     baseUrl;
@@ -14,8 +15,25 @@ class WhatsAppClientService {
     isConfigured;
     runtimeGupshupApiKey = '';
     runtimeGupshupAppId = '';
-    activeSourceNumber = '';
-    activeAppName = '';
+    inboundLine = new node_async_hooks_1.AsyncLocalStorage();
+    defaultSourceNumber = '';
+    defaultAppName = '';
+    get activeSourceNumber() { return this.inboundLine.getStore()?.source ?? this.defaultSourceNumber; }
+    set activeSourceNumber(value) { const line = this.inboundLine.getStore(); if (line)
+        line.source = value;
+    else
+        this.defaultSourceNumber = value; }
+    get activeAppName() { return this.inboundLine.getStore()?.appName ?? this.defaultAppName; }
+    set activeAppName(value) { const line = this.inboundLine.getStore(); if (line)
+        line.appName = value;
+    else
+        this.defaultAppName = value; }
+    async withInboundLine(phoneNumberId, displayPhoneNumber, work) {
+        return this.inboundLine.run({ source: this.defaultSourceNumber, appName: this.defaultAppName, appId: env_1.config.GUPSHUP_APP_ID || '' }, async () => {
+            this.setActiveInboundLine(phoneNumberId, displayPhoneNumber);
+            return work();
+        });
+    }
     lastOutboundResult = null;
     constructor() {
         this.baseUrl = env_1.config.META_GRAPH_BASE_URL;
@@ -38,7 +56,8 @@ class WhatsAppClientService {
         if (cleanPhone === '15553426540' || cleanId === '1279806698557702') {
             this.activeSourceNumber = '15553426540';
             this.activeAppName = 'WhatsAppEezyHQ';
-            this.runtimeGupshupAppId = 'fb00d434-1036-453f-84f5-c9f8f3f08357';
+            if (this.inboundLine.getStore())
+                this.inboundLine.getStore().appId = 'fb00d434-1036-453f-84f5-c9f8f3f08357';
         }
         else if (cleanPhone === '15553180006' || cleanId === '1124984863821882') {
             this.activeSourceNumber = '15553180006';
@@ -51,7 +70,8 @@ class WhatsAppClientService {
         else if (cleanPhone === '15554629242' || cleanId === '1359238143940536') {
             this.activeSourceNumber = '15554629242';
             this.activeAppName = 'WhatsAppEezy';
-            this.runtimeGupshupAppId = 'd4f0052b-a102-49f2-bf53-c737349628ee';
+            if (this.inboundLine.getStore())
+                this.inboundLine.getStore().appId = 'd4f0052b-a102-49f2-bf53-c737349628ee';
         }
         else if (cleanPhone) {
             this.activeSourceNumber = cleanPhone;
@@ -72,7 +92,7 @@ class WhatsAppClientService {
     async refreshGupshupCustomerAppTokenIfNeeded(force = false) {
         const currentToken = this.runtimeGupshupApiKey || env_1.config.GUPSHUP_API_KEY || '';
         const secret = env_1.config.GUPSHUP_ACCOUNT_SECRET;
-        const appId = this.runtimeGupshupAppId || env_1.config.GUPSHUP_APP_ID || 'd4f0052b-a102-49f2-bf53-c737349628ee';
+        const appId = this.inboundLine.getStore()?.appId || this.runtimeGupshupAppId || env_1.config.GUPSHUP_APP_ID || 'd4f0052b-a102-49f2-bf53-c737349628ee';
         // If currentToken is a permanent Gupshup Account API Key (not a 3-part JWT), use it directly!
         if (currentToken && currentToken.split('.').length !== 3) {
             return currentToken;
@@ -514,6 +534,12 @@ class WhatsAppClientService {
      */
     async sendPayload(to, payload) {
         const cleanDestination = to.replace(/^\+/, '');
+        // Mock mode must precede token refresh and every provider request.
+        if (env_1.config.MOCK_EXTERNAL_APIS) {
+            const messageId = 'wamid.mock_' + Date.now();
+            this.lastOutboundResult = { ok: true, provider: 'mock', to: cleanDestination, messageId };
+            return messageId;
+        }
         // 1. If Gupshup API Key / Customer App Token is configured, dispatch via Gupshup API
         const gupshupKey = await this.refreshGupshupCustomerAppTokenIfNeeded(false);
         if (gupshupKey) {
@@ -579,7 +605,9 @@ class WhatsAppClientService {
                     data: response.data,
                     at: new Date().toISOString(),
                 };
-                return response.data?.messageId || `gup_${Date.now()}`;
+                if (!response.data?.messageId)
+                    throw new Error('Gupshup did not acknowledge the message');
+                return response.data.messageId;
             }
             catch (err) {
                 this.lastOutboundResult = {
@@ -590,14 +618,12 @@ class WhatsAppClientService {
                     at: new Date().toISOString(),
                 };
                 console.error(`Failed to send Gupshup WhatsApp message to ${to}:`, err?.response?.data || err.message);
-                return `gup.fallback_${Date.now()}`;
+                throw new Error('Gupshup message delivery request failed');
             }
         }
         // 2. Fallback to Mock Mode or Direct Meta Cloud API
-        if (!this.isConfigured || env_1.config.MOCK_EXTERNAL_APIS) {
-            const mockMsgId = `wamid.HBgL${Date.now()}`;
-            return mockMsgId;
-        }
+        if (!this.isConfigured)
+            throw new Error('No WhatsApp provider is configured');
         try {
             const url = `${this.baseUrl}/${this.version}/${this.phoneNumberId}/messages`;
             const response = await axios_1.default.post(url, payload, {
@@ -610,7 +636,7 @@ class WhatsAppClientService {
         }
         catch (err) {
             console.error(`Failed to send WhatsApp message to ${to}:`, err?.response?.data || err.message);
-            return `wamid.fallback_${Date.now()}`;
+            throw new Error('Meta WhatsApp message delivery request failed');
         }
     }
 }

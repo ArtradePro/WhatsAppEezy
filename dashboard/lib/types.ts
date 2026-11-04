@@ -2,7 +2,7 @@ export type OrderStatus = 'draft' | 'pending_payment' | 'paid' | 'dispatched' | 
 
 export type VendorSubscriptionTier = 'starter' | 'pro' | 'enterprise';
 
-export type VendorBusinessType = 'retail_delivery' | 'service_booking';
+export type VendorBusinessType = 'retail_delivery' | 'service_booking' | 'construction_quotes';
 
 export interface Vendor {
   id: string;

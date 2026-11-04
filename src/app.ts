@@ -1,3 +1,4 @@
+import { adminAccessService, AdminAccessError, protectedAdminPath } from './services/auth/admin-access.service';
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import fs from 'fs';
@@ -78,6 +79,17 @@ export function createApp(): Application {
     })
   );
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  app.use(async (req: Request, res: Response, next) => {
+    if (!protectedAdminPath(req.path)) return next();
+    try {
+      const principal = await adminAccessService.authenticate(req.headers.authorization);
+      await adminAccessService.authorize(principal, req.method, req.path, req.query as Record<string, unknown>, req.body || {});
+      next();
+    } catch (error) {
+      const status = error instanceof AdminAccessError ? error.status : 503;
+      res.status(status).json({ success: false, message: error instanceof AdminAccessError ? error.message : 'Permissions could not be verified' });
+    }
+  });
 
   // Health check endpoint (Railway & Docker Healthcheck + Supabase Pooler diagnostics)
   app.get('/health', async (req: Request, res: Response) => {

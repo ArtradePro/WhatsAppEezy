@@ -61,6 +61,7 @@ export const EditVendorModal: React.FC<EditVendorModalProps> = ({
   const [baseLon, setBaseLon] = useState<number>(vendor.base_location_lon);
   const [depotAddress, setDepotAddress] = useState<string>(vendor.depot_address || '');
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     if (vendor && isOpen) {
@@ -95,6 +96,7 @@ export const EditVendorModal: React.FC<EditVendorModalProps> = ({
 
   const handleSave = async () => {
     setSaving(true);
+    setSaveError('');
     const updatedVendor: Vendor = {
       ...vendor,
       business_name: businessName.trim() || vendor.business_name,
@@ -122,13 +124,17 @@ export const EditVendorModal: React.FC<EditVendorModalProps> = ({
     };
 
     try {
-      await fetch(`/api/v1/vendors/${vendor.id}`, {
+      const response = await fetch(`/api/v1/vendors/${vendor.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedVendor),
       });
+      const result = await response.json();
+      if (!response.ok || result.success !== true) throw new Error('Company settings were not saved. The dashboard save service is unavailable.');
     } catch {
-      // Fallback to local state if backend is offline
+      setSaveError('Company settings were not saved. Connect the dashboard to its company settings service and try again.');
+      setSaving(false);
+      return;
     }
 
     setSaving(false);
@@ -459,6 +465,7 @@ export const EditVendorModal: React.FC<EditVendorModalProps> = ({
             </div>
           </div>
 
+          {saveError && <p role="alert" className="text-sm text-red-300">{saveError}</p>}
           <div className="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-slate-800">
             <button
               type="button"

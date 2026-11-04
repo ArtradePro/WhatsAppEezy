@@ -136,7 +136,7 @@ export default function WhatsAppEezyOfficialWebsite() {
         <div className="max-w-7xl mx-auto px-6 py-2 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-white font-semibold">
             <span className="w-2 h-2 rounded-full bg-[#25D366] animate-ping" />
-            <span>WHATSAPPEEZY.COM // OFFICIAL SOUTH AFRICAN WHATSAPP COMMERCE &amp; PAYFAST MoR PORTAL</span>
+            <span>WHATSAPPEEZY // OFFICIAL SOUTH AFRICAN WHATSAPP COMMERCE &amp; PAYFAST MoR PORTAL</span>
           </div>
           <div className="flex items-center gap-4">
             <a
@@ -153,13 +153,11 @@ export default function WhatsAppEezyOfficialWebsite() {
       <header className="sticky top-0 z-40 bg-[#111B21]/95 backdrop-blur-xl border-b border-[#25D366]/20">
         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-4">
           <a href="/website" className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#25D366] to-[#128C7E] flex items-center justify-center shadow-lg glow-emerald">
-              <MessageCircle className="w-6 h-6 text-[#06130E] fill-[#06130E]" />
-            </div>
+            <img src="/branding/whatsappeezy-logo.png" alt="WhatsAppEezy" width={48} height={48} className="rounded-xl" />
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xl font-extrabold tracking-tight text-white font-display">
-                  WhatsApp<span className="text-[#25D366]">eezy</span>
+                  WhatsApp<span className="text-[#25D366]">Eezy</span>
                 </span>
                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#005C4B] text-[#DCF8C6] border border-[#25D366]/40">
                   .COM
@@ -227,7 +225,7 @@ export default function WhatsAppEezyOfficialWebsite() {
 
             <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl">
               No apps to download. No complex websites to maintain. With{' '}
-              <strong className="text-white">WhatsAppEezy.com</strong>, we load your catalog on the
+              <strong className="text-white">WhatsAppEezy</strong>, we load your catalog on the
               spot with <strong className="text-[#25D366]">AI-enhanced 1024×1024 photos</strong>,
               collect 100% verified <strong className="text-[#25D366]">PayFast &amp; Capitec Pay</strong>{' '}
               payments into our Master Merchant Account, and fire instant{' '}
@@ -403,7 +401,7 @@ export default function WhatsAppEezyOfficialWebsite() {
       <section id="how-it-works" className="py-16 max-w-7xl mx-auto px-6 space-y-10">
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#25D366]">
-            HOW WHATSAPPEEZY.COM WORKS
+            HOW WHATSAPPEEZY WORKS
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-display">
             From In-Person Demo to Automated Dispatch in 4 Steps
@@ -609,7 +607,7 @@ export default function WhatsAppEezyOfficialWebsite() {
               GEMINI FLASH + ANTIGRAVITY AI ENGINE
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white font-display mt-1">
-              Built-In Gemini AI Prompts Powering WhatsAppEezy.com
+              Built-In Gemini AI Prompts Powering WhatsAppEezy
             </h2>
           </div>
           <a
@@ -661,7 +659,7 @@ export default function WhatsAppEezyOfficialWebsite() {
         <div className="max-w-4xl mx-auto px-6">
           <div className="obsidian-card rounded-3xl p-8 sm:p-10 border-2 border-[#25D366]/50 space-y-6 text-center">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#005C4B] text-[#DCF8C6] text-xs font-mono">
-              🚀 LIVE ON WHATSAPPEEZY.COM
+              🚀 LIVE ON WHATSAPPEEZY
             </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-display">
               Ready to Load Your Customer&apos;s Catalog on WhatsAppEezy?
@@ -716,7 +714,7 @@ export default function WhatsAppEezyOfficialWebsite() {
       <footer className="bg-[#080F14] border-t border-[#1F2C34] py-8 text-xs text-slate-400">
         <div className="max-w-7xl mx-auto px-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-white font-display">WhatsAppEezy.com</span>
+            <span className="font-bold text-white font-display">WhatsAppEezy</span>
             <span>• Official South African WhatsApp Commerce &amp; PayFast MoR Aggregator</span>
           </div>
           <div className="flex items-center gap-4 font-mono">

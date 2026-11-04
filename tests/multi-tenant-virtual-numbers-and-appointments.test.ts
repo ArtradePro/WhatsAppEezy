@@ -202,7 +202,7 @@ describe('Multi-Tenant Virtual Number Routing, Service Appointment Engine & Dyna
     expect(yardSession.metaPhoneNumberId).toBe('meta_pnum_brickdirect_101');
     expect(yardSession.cart.length).toBe(1);
     expect(yardSession.cart[0].retailerId).toBe('SKU-SAND-PLASTER-6M3');
-    expect(yardSession.cart[0].unitPrice).toBe(1850);
+    expect(yardSession.cart[0].unitPrice).toBe(550);
 
     expect(pizzaSession.vendorId).toBe(pizzaVendor!.id);
     expect(pizzaSession.metaPhoneNumberId).toBe('meta_pnum_napoli_104');

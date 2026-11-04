@@ -1,3 +1,4 @@
+import { adminAccessService, AdminAccessError, protectedAdminPath } from './services/auth/admin-access.service';
 import fastify, { FastifyInstance } from 'fastify';
 import formbody from '@fastify/formbody';
 import cors from '@fastify/cors';
@@ -19,6 +20,17 @@ import { db } from './database/db';
 export function createFastifyApp(): FastifyInstance {
   const app = fastify({
     logger: false,
+  });
+
+  app.addHook('preHandler', async (request, reply) => {
+    if (!protectedAdminPath(request.url)) return;
+    try {
+      const principal = await adminAccessService.authenticate(request.headers.authorization);
+      await adminAccessService.authorize(principal, request.method, request.url.split('?')[0], (request.query || {}) as Record<string, unknown>, (request.body || {}) as Record<string, unknown>);
+    } catch (error) {
+      const status = error instanceof AdminAccessError ? error.status : 503;
+      return reply.status(status).send({ success: false, message: error instanceof AdminAccessError ? error.message : 'Permissions could not be verified' });
+    }
   });
 
   // Register custom JSON content type parser to preserve raw buffer for HMAC-SHA256 signature verification

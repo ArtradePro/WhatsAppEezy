@@ -59,6 +59,7 @@ export interface CheckoutOrder {
 }
 
 export interface CustomerSession {
+  supportBusiness?: 'lcsh' | 'higiene';
   waId: string;
   vendorId?: string;
   metaPhoneNumberId?: string;

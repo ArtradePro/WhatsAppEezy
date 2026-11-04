@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createFastifyApp = createFastifyApp;
+const admin_access_service_1 = require("./services/auth/admin-access.service");
 const fastify_1 = __importDefault(require("fastify"));
 const formbody_1 = __importDefault(require("@fastify/formbody"));
 const cors_1 = __importDefault(require("@fastify/cors"));
@@ -24,6 +25,18 @@ const db_1 = require("./database/db");
 function createFastifyApp() {
     const app = (0, fastify_1.default)({
         logger: false,
+    });
+    app.addHook('preHandler', async (request, reply) => {
+        if (!(0, admin_access_service_1.protectedAdminPath)(request.url))
+            return;
+        try {
+            const principal = await admin_access_service_1.adminAccessService.authenticate(request.headers.authorization);
+            await admin_access_service_1.adminAccessService.authorize(principal, request.method, request.url.split('?')[0], (request.query || {}), (request.body || {}));
+        }
+        catch (error) {
+            const status = error instanceof admin_access_service_1.AdminAccessError ? error.status : 503;
+            return reply.status(status).send({ success: false, message: error instanceof admin_access_service_1.AdminAccessError ? error.message : 'Permissions could not be verified' });
+        }
     });
     // Register custom JSON content type parser to preserve raw buffer for HMAC-SHA256 signature verification
     app.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, done) => {

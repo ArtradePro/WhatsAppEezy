@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+import { selectSupportBusiness, higieneSupportReply } from './business-support';
 import { conversationSessionStore } from './conversation-session.store';
 import { freightCalculatorService } from '../delivery/freight-calculator.service';
 import { payFastService } from '../payment/payfast.service';
@@ -44,16 +45,14 @@ export class ConversationStateMachine {
       if (byMeta) return byMeta;
     }
 
-    if (metadata?.displayPhoneNumber === '917834811114') {
-      const higiene = await postgresVendorRepository.findById('f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55');
-      if (higiene) return higiene;
+    if (metadata?.vendorId || metadata?.phoneNumberId || metadata?.displayPhoneNumber) {
+      throw new Error('Unknown WhatsApp business line; refusing to route to another company');
     }
-
-    return (
-      (await postgresVendorRepository.findById('f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55')) ||
-      (await postgresVendorRepository.findById('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11')) ||
-      (await postgresVendorRepository.findAll())[0]
-    );
+    if (config.MOCK_EXTERNAL_APIS) {
+      const demoVendor = await postgresVendorRepository.findById('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11');
+      if (demoVendor) return demoVendor;
+    }
+    throw new Error('WhatsApp business line metadata is required');
   }
 
   /**
@@ -70,6 +69,8 @@ export class ConversationStateMachine {
 
     // Multi-Vendor Keyword Switcher (for single master WhatsApp number aggregation)
     let switchedVendor = false;
+    // Keep shared-number enquiries on the LCSH transport and order tenant.
+    if (config.MOCK_EXTERNAL_APIS && !metadata?.vendorId && !metadata?.phoneNumberId && !metadata?.displayPhoneNumber) {
     if (incomingText === '#higiene' || incomingText === 'higiene') {
       const v = await postgresVendorRepository.findById('f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55');
       if (v) {
@@ -104,6 +105,8 @@ export class ConversationStateMachine {
         vendor = v;
         switchedVendor = true;
       }
+    }
+
     }
 
     const businessType = vendor.business_type || 'retail_delivery';
@@ -313,6 +316,18 @@ export class ConversationStateMachine {
       return;
     }
 
+    // Dedicated flow 1: AppEezy / WhatsAppEezy Mother Company Platform (+1 555-342-6540)
+    if (vendor.id === '77bbbb22-8c4d-4ef0-992e-8aa1ce380a88') {
+      await this.handleAppEezyMotherPlatformFlow(session, senderWaId, customerName, message);
+      return;
+    }
+
+    // Dedicated flow 2: LCSH Smartspace — la Cock Signature Homes Construction & Quote Concierge (+1 555-318-0006)
+    if (vendor.id === '98aaaa11-7b3c-4ef9-881d-9ff0bd270f77' || vendor.business_type === 'construction_quotes') {
+      await this.handleLcshConstructionFlow(session, senderWaId, customerName, message, vendor);
+      return;
+    }
+
     // State machine dispatch based on current stage
     switch (session.currentStage) {
       case 'IDLE':
@@ -353,6 +368,316 @@ export class ConversationStateMachine {
     }
   }
 
+  /**
+   * Dedicated Mother Company Flow: AppEezy / WhatsAppEezy Platform HQ (+1 555-342-6540)
+   * Not a retail store — guides businesses on onboarding and connects users to live partner stores.
+   */
+  private async handleAppEezyMotherPlatformFlow(
+    session: CustomerSession,
+    senderWaId: string,
+    customerName: string,
+    message: WhatsAppInboundMessage
+  ): Promise<void> {
+    const raw = (message.text?.body || '').trim().toLowerCase();
+    const buttonId = message.interactive?.button_reply?.id || message.interactive?.list_reply?.id || '';
+
+    if (raw === '1' || buttonId === 'appeezy_onboard' || raw.includes('onboard') || raw.includes('register')) {
+      await whatsAppClientService.sendTextMessage(
+        senderWaId,
+        `🚀 *Onboard Your Business on WhatsAppEezy*\n\nTurn your WhatsApp into an automated storefront in 3 steps:\n1️⃣ *Snap-to-Sell AI Catalog*: Send product photos via WhatsApp and our AI builds your studio catalog.\n2️⃣ *Automated Delivery & Quotes*: PostGIS distance pricing & instant quote generation.\n3️⃣ *Split-Payment Checkout*: Instant PayFast EFT/Card settlement straight to your bank account.\n\n🌐 *Register Online*: https://whatsappeezy.com\n💬 Or reply with your *Business Name & Industry* right here and our onboarding team will set up your account!`
+      );
+      return;
+    }
+
+    if (raw === '2' || buttonId === 'appeezy_pricing' || raw.includes('price') || raw.includes('plan')) {
+      await whatsAppClientService.sendTextMessage(
+        senderWaId,
+        `💳 *WhatsAppEezy SaaS Plans (South Africa)*\n\n• *Starter Plan — R299/pm*: Up to 50 catalog items, AI Snap-to-Sell, PayFast checkout.\n• *Pro Plan — R599/pm*: Unlimited catalog items, PostGIS delivery calculator, Xero/Sage accounting sync.\n• *Enterprise — R999/pm*: Dedicated virtual numbers, custom AI concierge workflows & multi-branch routing.\n\nReply *1* to onboard your business or *3* to explore our live partner stores.`
+      );
+      return;
+    }
+
+    if (raw === '3' || buttonId === 'appeezy_directory' || raw.includes('store') || raw.includes('directory')) {
+      await whatsAppClientService.sendTextMessage(
+        senderWaId,
+        `🏬 *Live Businesses Powered by WhatsAppEezy*\n\nTap any link below to chat directly with our verified businesses:\n\n🧼 *Higiene (Personal & Commercial Hygiene)*\n👉 https://wa.me/15553443356?text=hi\n\n🛡️ *Fungus No More (Anti-Fungal & Hygiene Solutions)*\n👉 https://wa.me/15554629242?text=hi\n\n🏗️ *LCSH Smartspace (la Cock Signature Homes — Construction & Quotes)*\n👉 https://wa.me/15553180006?text=hi`
+      );
+      return;
+    }
+
+    if (raw === '4' || buttonId === 'appeezy_support' || raw.includes('human') || raw.includes('support')) {
+      await whatsAppClientService.sendTextMessage(
+        senderWaId,
+        `🧑‍💻 *WhatsAppEezy HQ Support*\n\nHi ${customerName}, please type your question or business details below and a founder/specialist will reply to you directly in this chat.`
+      );
+      return;
+    }
+
+    session.currentStage = 'BROWSING';
+    await conversationSessionStore.saveSession(session);
+
+    await whatsAppClientService.sendTextMessage(
+      senderWaId,
+      `🟢 *Welcome to AppEezy (WhatsAppEezy Official Platform HQ)*\n\n*WhatsAppEezy* is the mother platform powering automated WhatsApp storefronts, AI catalog ingestion, and instant checkout for South African businesses.\n\n_(Please note: This is the WhatsAppEezy corporate hub, not a retail store.)_\n\nHow can we assist you today? Reply with a number:\n*1.* 🚀 Onboard My Business onto WhatsAppEezy\n*2.* 💳 View Platform Pricing & Features\n*3.* 🏬 Browse Live Partner Stores (Higiene, Fungus No More, LCSH)\n*4.* 🧑‍💻 Speak to WhatsAppEezy Team`
+    );
+  }
+
+  /**
+   * Dedicated Construction & Quote Concierge Flow: LCSH Smartspace — la Cock Signature Homes (+1 555-318-0006)
+   */
+  private async handleLcshConstructionFlow(
+    session: CustomerSession,
+    senderWaId: string,
+    customerName: string,
+    message: WhatsAppInboundMessage,
+    vendor: DbVendor
+  ): Promise<void> {
+    const raw = (message.text?.body || '').trim().toLowerCase();
+    const rawOriginal = (message.text?.body || '').trim();
+
+    const selected = selectSupportBusiness(raw, session.supportBusiness);
+    if (selected === 'clarify') {
+      await whatsAppClientService.sendTextMessage(senderWaId,
+        'Would you like help with an LCSH home project or a Higiene / Fungus No More product first?');
+      return;
+    }
+    session.supportBusiness = selected;
+    await conversationSessionStore.saveSession(session);
+    if (selected === 'higiene') {
+      await whatsAppClientService.sendTextMessage(senderWaId, higieneSupportReply(raw));
+      return;
+    }
+
+    // Comprehensive inquiry combining Modular Pods + Luxury Builds / Pricing (website lead)
+    if (
+      (raw.includes('modular') || raw.includes('pod') || raw.includes('smartspace')) &&
+      (raw.includes('luxury') || raw.includes('build') || raw.includes('pricing') || raw.includes('price'))
+    ) {
+      const combinedOverview =
+        `🏗️ *Welcome to la Cock Signature Homes (LCSH Smartspace)*\n` +
+        `_Your Home, Your Way — Built with Precision_\n\n` +
+        `Thank you *${customerName}*! We are delighted to assist with your inquiry regarding our *SmartSpace Modular Pods* and *Turnkey Luxury Builds*.\n\n` +
+        `🏡 *1. SmartSpace Modular Units (Plans A–F)*:\n` +
+        `• Turnkey factory-precision units erected on your site in 7–12 days.\n` +
+        `• 100% off-grid ready (solar, gas geyser, rainwater harvesting) with zero wet masonry mess.\n` +
+        `• Standard inclusions: Electrical & Plumbing with COC, thermal insulation, luxury bathroom & braai boma.\n\n` +
+        `🏗️ *2. Luxury Architectural Builds (LSF & Brick & Mortar)*:\n` +
+        `• *Light Frame Steel (LSF)*: Computer-modeled to 1mm tolerance, 40–60% faster, superior thermal R-value insulation.\n` +
+        `• *Traditional Brick & Mortar*: High-end bespoke residential & commercial construction, NHBRC certified.\n\n` +
+        `🔨 *3. Specialist Works*: Pergolas, carports, paving, foundations, formwork & luxury alterations.\n\n` +
+        `👉 How would you like to proceed?\n` +
+        `• Reply *1* — Sizing & Specifications for SmartSpace Units (Plans A–F)\n` +
+        `• Reply *2* — Light Frame Steel (LSF) vs Brick & Mortar Breakdown\n` +
+        `• Reply *3* — Pergolas, Carports, Paving & Additions\n` +
+        `• Reply *4* — 📐 Request an Itemized Cost Estimate / Project Quote\n` +
+        `• Reply *5* — 👷 Speak Directly with Vernon la Cock (+27 76 486 2942)`;
+
+      await whatsAppClientService.sendTextMessage(senderWaId, combinedOverview);
+
+      // Alert Vernon
+      const alertPhone = '27764862942';
+      if (senderWaId.replace(/\D/g, '') !== alertPhone) {
+        await whatsAppClientService.sendTextMessage(
+          alertPhone,
+          `🏗️ *NEW LCSH MODULAR & LUXURY BUILD INQUIRY*\n• Client: *${customerName}* (+${senderWaId.replace(/\D/g, '')})\n• Message: "${rawOriginal}"\n• Tap to Chat: https://wa.me/${senderWaId.replace(/\D/g, '')}`
+        ).catch(() => {});
+      }
+      return;
+    }
+
+    // 1. SmartSpace Modular Living & Pods
+    if (
+      raw === '1' ||
+      raw.includes('modular') ||
+      raw.includes('pod') ||
+      raw.includes('smartspace') ||
+      raw.includes('unit a') ||
+      raw.includes('unit b') ||
+      raw.includes('unit c') ||
+      raw.includes('unit d') ||
+      raw.includes('unit e') ||
+      raw.includes('unit f') ||
+      raw.includes('leaflet') ||
+      raw.includes('storage')
+    ) {
+      const modularText =
+        `🏡 *SmartSpace Modular Homes & Pods by LCSH*\n` +
+        `_Your Home, Your Way — Built with Precision_\n\n` +
+        `Our factory-precision SmartSpace units are erected on-site in 7–12 days with zero wet masonry mess, full SABS/Agrément compliance, and 100% off-grid capability.\n\n` +
+        `📦 *Precision Modular Range (Plans A–F)*:\n` +
+        `• *Unit A (Cozy Retreat - 21.6 m²)*: Luxury 3m x 7.2m studio living with kitchenette, en-suite bathroom, stoep & braai pit.\n` +
+        `• *Unit B (Practical Living - 21.6 m²)*: 1-bedroom pod with acoustic partition, designer bathroom & gas geyser.\n` +
+        `• *Unit C & D (Expanded Multi-Pod)*: Executive home office or expanded living sanctuaries.\n` +
+        `• *Unit E & F (Tranquil Twins)*: Multi-room luxury dwellings for families or high-yield eco-resorts.\n` +
+        `• *Site Pods*: Commercial site offices, washrooms & tool storage.\n\n` +
+        `✨ *Standard Inclusions*: Electrical & Plumbing with COC, gas geyser, insulation, roofing, interior/exterior paint, braai pit.\n\n` +
+        `👉 Reply *4* to request a Preliminary Pricing / Cost Estimate, or *5* to speak directly with Vernon la Cock.`;
+
+      await whatsAppClientService.sendTextMessage(senderWaId, modularText);
+      return;
+    }
+
+    // 2. Light Frame Steel (LSF) vs Brick & Mortar Home Builds
+    if (
+      raw === '2' ||
+      raw.includes('steel') ||
+      raw.includes('lsf') ||
+      raw.includes('light frame') ||
+      raw.includes('brick') ||
+      raw.includes('mortar') ||
+      raw.includes('luxury build') ||
+      raw.includes('architectural') ||
+      raw.includes('turnkey')
+    ) {
+      const buildText =
+        `🏗️ *Turnkey Residential Construction — LSF & Brick & Mortar*\n\n` +
+        `*la Cock Signature Homes* delivers high-end architectural residences tailored to your stand across the Western Cape and South Africa.\n\n` +
+        `⚡ *Light Frame Steel (LSF) Construction*:\n` +
+        `• 40%–60% faster build times than traditional brick.\n` +
+        `• Computer-modeled CAD engineering to 1mm tolerance (no warped walls or structural cracking).\n` +
+        `• Exceptional thermal blanket insulation (Tyvek & R-value cavity batts) — warm in winter, cool in summer.\n` +
+        `• Approved for eco-estates and nature developments with zero site waste.\n\n` +
+        `🧱 *Traditional Brick & Mortar Luxury Builds*:\n` +
+        `• Complete bespoke structural concrete, masonry, foundation civil works & NHBRC warranty.\n` +
+        `• Turnkey architectural management from municipal plan approvals to key handover.\n\n` +
+        `👉 Reply *4* to Request a Project Quote / Site Assessment, or *5* to discuss plans directly with Vernon.`;
+
+      await whatsAppClientService.sendTextMessage(senderWaId, buildText);
+      return;
+    }
+
+    // 3. Specialist Construction Additions: Pergolas, Carports, Paving, Formwork & Bomas
+    if (
+      raw === '3' ||
+      raw.includes('pergola') ||
+      raw.includes('carport') ||
+      raw.includes('paving') ||
+      raw.includes('formwork') ||
+      raw.includes('boma') ||
+      raw.includes('braai') ||
+      raw.includes('renovat') ||
+      raw.includes('addition') ||
+      raw.includes('alteration') ||
+      raw.includes('civil') ||
+      raw.includes('deck')
+    ) {
+      const additionsText =
+        `🔨 *Specialist Construction, Additions & Outdoor Living*\n\n` +
+        `We execute all structural civil and architectural additions with precision:\n` +
+        `• *Pergolas & Verandahs*: Custom timber and steel pergolas, covered entertainment decks & outdoor living.\n` +
+        `• *Carports & Garages*: Cantilevered, steel-framed, and brick-built vehicle protection.\n` +
+        `• *Paving & Driveways*: Interlocking, bevel, and exposed aggregate paving with certified ground compaction.\n` +
+        `• *Formwork & Foundations*: Engineered reinforced concrete formwork, retaining walls, and civil slabs.\n` +
+        `• *Braai Bomas & Fire Pits*: Custom outdoor entertainment areas with integrated benches.\n` +
+        `• *Luxury Remodels & Extensions*: Full structural alterations and renovations.\n\n` +
+        `👉 Reply *4* to request an itemized Estimate, or reply with your stand address & project details!`;
+
+      await whatsAppClientService.sendTextMessage(senderWaId, additionsText);
+      return;
+    }
+
+    // 4. Request a Quote / Preliminary Cost Estimate
+    if (
+      raw === '4' ||
+      raw.includes('quote') ||
+      raw.includes('estimate') ||
+      raw.includes('pricing') ||
+      raw.includes('price list') ||
+      raw.includes('cost')
+    ) {
+      const quoteText =
+        `📐 *Request an Official LCSH Project Quote*\n\n` +
+        `Hi *${customerName}*, to prepare your preliminary estimate or schedule a site visit with our engineering desk, please reply in a single message with:\n\n` +
+        `1️⃣ *Project Type*: (Modular SmartSpace Pod / LSF Home / Brick Build / Pergola & Carport / Paving & Formwork / Renovation)\n` +
+        `2️⃣ *Stand / Location*: (Town, Suburb or Estate name)\n` +
+        `3️⃣ *Approximate Size*: (m² or number of bedrooms / bays)\n` +
+        `4️⃣ *Architectural Plans*: (Do you have approved plans, sketches, or need full plan design?)\n` +
+        `5️⃣ *Timeline*: (Immediate 1–4 weeks / 1–3 months / Planning stage)\n\n` +
+        `💬 Type your project details below and our estimating director will review and contact you directly!`;
+
+      await whatsAppClientService.sendTextMessage(senderWaId, quoteText);
+      return;
+    }
+
+    // 5. Direct Project Consultation with Vernon la Cock
+    if (
+      raw === '5' ||
+      raw.includes('consult') ||
+      raw.includes('vernon') ||
+      raw.includes('call') ||
+      raw.includes('speak') ||
+      raw.includes('human') ||
+      raw.includes('director') ||
+      raw.includes('meeting')
+    ) {
+      const contactText =
+        `👷‍♂️ *Direct Project Consultation with Vernon la Cock*\n\n` +
+        `Thank you *${customerName}*! You can connect directly with our Managing Director & Engineering Team:\n\n` +
+        `👤 *Vernon la Cock* — Managing Director, LCSH\n` +
+        `📞 Phone / Direct WhatsApp: *+27 76 486 2942*\n` +
+        `📧 Email: *info@lcsh.co.za* / *orders@lcsh.co.za*\n` +
+        `📍 Office: *8 Ferox Street, Aloe Park, Albertinia, Western Cape, 6695*\n` +
+        `🌐 Website: *https://lcsh.co.za*\n\n` +
+        `💬 Feel free to reply with your questions, stand details, or blueprints right here and Vernon will reply directly!`;
+
+      await whatsAppClientService.sendTextMessage(senderWaId, contactText);
+
+      // Alert Vernon directly
+      const alertPhone = '27764862942';
+      if (senderWaId.replace(/\D/g, '') !== alertPhone) {
+        await whatsAppClientService.sendTextMessage(
+          alertPhone,
+          `👷‍♂️ *LCSH CONSULTATION REQUEST*\n• Client: *${customerName}* (+${senderWaId.replace(/\D/g, '')})\n• Message: "${rawOriginal}"\n• Tap to Chat: https://wa.me/${senderWaId.replace(/\D/g, '')}`
+        ).catch(() => {});
+      }
+      return;
+    }
+
+    // If the client submitted detailed project details or a website lead message
+    if (raw.length > 20 && raw !== 'hi' && raw !== 'hello' && raw !== 'hi there') {
+      const ackText =
+        `✅ *LCSH Project Inquiry Received*\n\n` +
+        `Thank you *${customerName}*! Your project requirements have been registered:\n` +
+        `_"${rawOriginal}"_\n\n` +
+        `Our architectural & construction team at *la Cock Signature Homes* will review your stand location and specifications.\n\n` +
+        `📞 Vernon la Cock / LCSH Engineering will follow up with you directly on WhatsApp or at +27 76 486 2942.\n\n` +
+        `👉 To explore further while you wait, reply:\n` +
+        `*1* — 🏡 View SmartSpace Modular Pods\n` +
+        `*2* — 🏗️ Turnkey LSF vs Brick Home Builds\n` +
+        `*3* — 🔨 Pergolas, Carports, Paving & Formwork\n` +
+        `*4* — 📐 Complete Full Quote Intake`;
+
+      await whatsAppClientService.sendTextMessage(senderWaId, ackText);
+
+      // Alert Vernon with the new project inquiry
+      const alertPhone = '27764862942';
+      if (senderWaId.replace(/\D/g, '') !== alertPhone) {
+        await whatsAppClientService.sendTextMessage(
+          alertPhone,
+          `🏗️ *NEW LCSH PROJECT INQUIRY*\n• Client: *${customerName}* (+${senderWaId.replace(/\D/g, '')})\n• Details: "${rawOriginal}"\n• Tap to Reply: https://wa.me/${senderWaId.replace(/\D/g, '')}`
+        ).catch(() => {});
+      }
+      return;
+    }
+
+    // Default Greeting & Menu
+    session.currentStage = 'BROWSING';
+    await conversationSessionStore.saveSession(session);
+
+    const welcome =
+      `🏗️ *Welcome to LCSH Smartspace — la Cock Signature Homes*\n` +
+      `_Your Home, Your Way — Built with Precision_\n\n` +
+      `We are an NHBRC-certified architectural construction firm specializing in precision modular homes, Light Steel Frame (LSF) builds, luxury brick residences, and complete civil additions.\n\n` +
+      `How can we assist with your project today? Reply with a number:\n` +
+      `*1.* 🏡 Explore SmartSpace Modular Units (Plans A–F)\n` +
+      `*2.* 🏗️ Turnkey Residential Builds (Light Steel Frame vs Brick & Mortar)\n` +
+      `*3.* 🔨 Pergolas, Carports, Paving, Formwork & Additions\n` +
+      `*4.* 📐 Request a Construction Quote / Cost Estimate\n` +
+      `*5.* 👷 Speak Directly with Vernon / Book Consultation`;
+
+    await whatsAppClientService.sendTextMessage(senderWaId, welcome);
+  }
+
   // --------------------------------------------------------------------------
   // STAGE HANDLERS
   // --------------------------------------------------------------------------
@@ -365,6 +690,11 @@ export class ConversationStateMachine {
     _message: WhatsAppInboundMessage,
     vendor: DbVendor
   ): Promise<void> {
+    if (vendor.id === '98aaaa11-7b3c-4ef9-881d-9ff0bd270f77' || vendor.business_type === 'construction_quotes') {
+      await this.handleLcshConstructionFlow(session, session.waId, session.customerName, _message, vendor);
+      return;
+    }
+
     if (vendor.business_type === 'service_booking') {
       const welcome = `🟢 *Welcome to WhatsAppEezy — ${vendor.business_name}!*\n\nBook appointments, treatments, and professional services directly on WhatsApp.\n\nSelect an option below to get started:`;
       await whatsAppClientService.sendInteractiveButtons(session.waId, welcome, [
@@ -403,6 +733,11 @@ export class ConversationStateMachine {
     message: WhatsAppInboundMessage,
     vendor: DbVendor
   ): Promise<void> {
+    if (vendor.id === '98aaaa11-7b3c-4ef9-881d-9ff0bd270f77' || vendor.business_type === 'construction_quotes') {
+      await this.handleLcshConstructionFlow(session, session.waId, session.customerName, message, vendor);
+      return;
+    }
+
     const buttonId = message.interactive?.button_reply?.id;
     const listId = message.interactive?.list_reply?.id;
 

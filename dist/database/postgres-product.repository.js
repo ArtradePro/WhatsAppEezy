@@ -60,7 +60,43 @@ class PostgresProductRepository {
                 vat_inclusive: false,
                 is_available: true,
             },
-            // Vendor E: Higiene Commercial Hygiene & Cleaning (Pty) Ltd (retail_delivery)
+            // Vendor E & F: Higiene (+1 555-344-3356) & Fungus No More (+1 555-462-9242) Shared Catalog (cat_higiene_005)
+            {
+                id: '55555555-5555-4555-8555-555555555506',
+                vendor_id: 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
+                meta_catalog_id: 'cat_higiene_005',
+                meta_product_retailer_id: 'FNM-SPRAY-ANTIFUNGAL',
+                title: 'Fungus No More — Intensive Anti-Fungal Spray',
+                description: 'Fast-acting anti-fungal & mould eradication treatment spray for skin, nails, footwear, and damp surfaces.',
+                category: 'hygiene_cleaning',
+                unit_of_measure: 'per spray bottle',
+                unit_price: 195.0,
+                is_available: true,
+            },
+            {
+                id: '55555555-5555-4555-8555-555555555507',
+                vendor_id: 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
+                meta_catalog_id: 'cat_higiene_005',
+                meta_product_retailer_id: 'HYG-SHOWER-GEL-ACTIVE',
+                title: 'Higiene & Fungus No More — Anti-Fungal Shower Gel',
+                description: 'pH-balanced therapeutic anti-fungal & antibacterial daily body wash and shower gel for complete skin protection.',
+                category: 'hygiene_cleaning',
+                unit_of_measure: 'per bottle',
+                unit_price: 165.0,
+                is_available: true,
+            },
+            {
+                id: '55555555-5555-4555-8555-555555555508',
+                vendor_id: 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
+                meta_catalog_id: 'cat_higiene_005',
+                meta_product_retailer_id: 'HYG-SHOWER-GEL-FAMILY',
+                title: 'Higiene — Tea Tree & Mint Hygiene Shower Gel',
+                description: 'Refreshing botanical tea tree & mint antibacterial shower gel for active sports and family skin hygiene.',
+                category: 'hygiene_cleaning',
+                unit_of_measure: 'per bottle',
+                unit_price: 155.0,
+                is_available: true,
+            },
             {
                 id: '55555555-5555-4555-8555-555555555501',
                 vendor_id: 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
@@ -183,6 +219,79 @@ class PostgresProductRepository {
                 unit_price: 185.0,
                 is_available: true,
             },
+            // Vendor G: LCSH Smartspace — la Cock Signature Homes (Pty) Ltd (construction_quotes)
+            {
+                id: '99999999-9999-4999-8999-999999999901',
+                vendor_id: '98aaaa11-7b3c-4ef9-881d-9ff0bd270f77',
+                meta_catalog_id: 'cat_lcsh_007',
+                meta_product_retailer_id: 'LCSH-MOD-UNITA',
+                title: 'SmartSpace Unit A (Cozy Retreat - 21.6m²)',
+                description: 'Luxury turnkey studio modular living pod (3m x 7.2m) with kitchenette, en-suite bathroom, stoep & braai pit.',
+                category: 'modular_homes',
+                unit_of_measure: 'turnkey pod',
+                unit_price: 185000.0,
+                is_available: true,
+            },
+            {
+                id: '99999999-9999-4999-8999-999999999902',
+                vendor_id: '98aaaa11-7b3c-4ef9-881d-9ff0bd270f77',
+                meta_catalog_id: 'cat_lcsh_007',
+                meta_product_retailer_id: 'LCSH-MOD-UNITB',
+                title: 'SmartSpace Unit B (Practical Living 1-Bed - 21.6m²)',
+                description: 'Turnkey 1-bedroom modular pod (3m x 7.2m) with private bedroom, acoustic partition wall, designer bathroom & gas geyser.',
+                category: 'modular_homes',
+                unit_of_measure: 'turnkey pod',
+                unit_price: 215000.0,
+                is_available: true,
+            },
+            {
+                id: '99999999-9999-4999-8999-999999999903',
+                vendor_id: '98aaaa11-7b3c-4ef9-881d-9ff0bd270f77',
+                meta_catalog_id: 'cat_lcsh_007',
+                meta_product_retailer_id: 'LCSH-MOD-UNITCD',
+                title: 'SmartSpace Unit C & D (Expanded Multi-Pod / Office)',
+                description: 'Expanded executive modular workspace or multi-pod living with floor-to-ceiling glass and flexible layout.',
+                category: 'modular_homes',
+                unit_of_measure: 'custom unit',
+                unit_price: 265000.0,
+                is_available: true,
+            },
+            {
+                id: '99999999-9999-4999-8999-999999999904',
+                vendor_id: '98aaaa11-7b3c-4ef9-881d-9ff0bd270f77',
+                meta_catalog_id: 'cat_lcsh_007',
+                meta_product_retailer_id: 'LCSH-BUILD-LSF',
+                title: 'Turnkey Light Frame Steel (LSF) Home Construction',
+                description: 'SABS/Agrément certified precision CAD steel framing, 40-60% faster erection, superior thermal R-value insulation.',
+                category: 'architectural_builds',
+                unit_of_measure: 'per m² build estimate',
+                unit_price: 9500.0,
+                is_available: true,
+            },
+            {
+                id: '99999999-9999-4999-8999-999999999905',
+                vendor_id: '98aaaa11-7b3c-4ef9-881d-9ff0bd270f77',
+                meta_catalog_id: 'cat_lcsh_007',
+                meta_product_retailer_id: 'LCSH-BUILD-BRICK',
+                title: 'Traditional Luxury Brick & Mortar Home Build',
+                description: 'Full bespoke architectural residential construction, foundation engineering, council submissions & NHBRC warranty.',
+                category: 'architectural_builds',
+                unit_of_measure: 'per m² build estimate',
+                unit_price: 11500.0,
+                is_available: true,
+            },
+            {
+                id: '99999999-9999-4999-8999-999999999906',
+                vendor_id: '98aaaa11-7b3c-4ef9-881d-9ff0bd270f77',
+                meta_catalog_id: 'cat_lcsh_007',
+                meta_product_retailer_id: 'LCSH-STRUCT-ADDS',
+                title: 'Pergolas, Carports, Paving, Formwork & Braai Bomas',
+                description: 'Specialist construction additions, structural alterations, formwork, paving, covered carports & luxury outdoor entertainment areas.',
+                category: 'specialty_construction',
+                unit_of_measure: 'custom project quote',
+                unit_price: 0.0,
+                is_available: true,
+            },
         ];
         for (const p of seeded) {
             this.inMemoryProducts.set(p.id, p);
@@ -260,25 +369,25 @@ class PostgresProductRepository {
     }
     async findByVendor(vendorId) {
         let normalizedVendorId = vendorId;
-        if (vendorId === 'e5fffa99-9e5d-4fe8-992a-2dd8df180e55' ||
-            vendorId === '77bbbb22-8c4d-4ef0-992e-8aa1ce380a88') {
+        if (vendorId === 'e5fffa99-9e5d-4fe8-992a-2dd8df180e55') {
             normalizedVendorId = 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a55';
         }
-        else if (vendorId === '98aaaa11-7b3c-4ef9-881d-9ff0bd270f77') {
-            normalizedVendorId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
-        }
+        const inMem = Array.from(this.inMemoryProducts.values()).filter((p) => p.vendor_id === normalizedVendorId);
         const pool = db_1.db.getPool();
         if (pool) {
             try {
                 const res = await pool.query('SELECT * FROM products WHERE vendor_id = $1::uuid', [normalizedVendorId]);
-                if (res.rows.length > 0)
-                    return res.rows;
+                if (res.rows.length > 0) {
+                    const existingIds = new Set(res.rows.map((r) => r.id));
+                    const merged = [...inMem.filter((p) => !existingIds.has(p.id)), ...res.rows];
+                    return merged;
+                }
             }
             catch (err) {
                 console.warn('[PostgresProductRepo] FindByVendor fallback:', err);
             }
         }
-        return Array.from(this.inMemoryProducts.values()).filter((p) => p.vendor_id === normalizedVendorId);
+        return inMem;
     }
     async findById(id) {
         const pool = db_1.db.getPool();

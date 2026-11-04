@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createApp = createApp;
+const admin_access_service_1 = require("./services/auth/admin-access.service");
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const fs_1 = __importDefault(require("fs"));
@@ -78,6 +79,19 @@ function createApp() {
         },
     }));
     app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
+    app.use(async (req, res, next) => {
+        if (!(0, admin_access_service_1.protectedAdminPath)(req.path))
+            return next();
+        try {
+            const principal = await admin_access_service_1.adminAccessService.authenticate(req.headers.authorization);
+            await admin_access_service_1.adminAccessService.authorize(principal, req.method, req.path, req.query, req.body || {});
+            next();
+        }
+        catch (error) {
+            const status = error instanceof admin_access_service_1.AdminAccessError ? error.status : 503;
+            res.status(status).json({ success: false, message: error instanceof admin_access_service_1.AdminAccessError ? error.message : 'Permissions could not be verified' });
+        }
+    });
     // Health check endpoint (Railway & Docker Healthcheck + Supabase Pooler diagnostics)
     app.get('/health', async (req, res) => {
         const deep = req.query.deep === 'true';

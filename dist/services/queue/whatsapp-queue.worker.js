@@ -96,10 +96,7 @@ class WhatsAppQueueWorker {
                     contactNameMap.set(c.wa_id, c.profile?.name || 'Customer');
                 }
                 for (const msg of value.messages) {
-                    await this.routeMessage(msg, contactNameMap, {
-                        phoneNumberId,
-                        displayPhoneNumber,
-                    });
+                    await whatsapp_client_service_1.whatsAppClientService.withInboundLine(phoneNumberId, displayPhoneNumber, () => this.routeMessage(msg, contactNameMap, { phoneNumberId, displayPhoneNumber }));
                 }
             }
         }

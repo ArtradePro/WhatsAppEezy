@@ -18,7 +18,7 @@ export type DbLedgerEntryType =
 
 export type VendorSubscriptionTier = 'starter' | 'pro' | 'enterprise';
 
-export type VendorBusinessType = 'retail_delivery' | 'service_booking';
+export type VendorBusinessType = 'retail_delivery' | 'service_booking' | 'construction_quotes';
 
 export type DbAppointmentStatus = 'hold' | 'confirmed' | 'cancelled' | 'completed';
 
