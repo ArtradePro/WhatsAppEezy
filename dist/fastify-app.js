@@ -311,7 +311,7 @@ function createFastifyApp() {
             lastOutboundResult: whatsapp_client_service_1.whatsAppClientService.lastOutboundResult,
         };
     });
-    app.get('/api/debug/outbound', async () => {
+    app.get('/debug/outbound', async () => {
         return {
             lastOutboundResult: whatsapp_client_service_1.whatsAppClientService.lastOutboundResult,
             gupshupApiKeySet: Boolean(env_1.config.GUPSHUP_API_KEY),

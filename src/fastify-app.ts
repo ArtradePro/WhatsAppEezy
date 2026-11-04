@@ -358,7 +358,7 @@ export function createFastifyApp(): FastifyInstance {
     };
   });
 
-  app.get('/api/debug/outbound', async () => {
+  app.get('/debug/outbound', async () => {
     return {
       lastOutboundResult: whatsAppClientService.lastOutboundResult,
       gupshupApiKeySet: Boolean(config.GUPSHUP_API_KEY),
