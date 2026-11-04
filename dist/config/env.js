@@ -78,9 +78,11 @@ const envSchema = zod_1.z.object({
     // Operational Flags
     MOCK_EXTERNAL_APIS: zod_1.z
         .string()
-        .default(process.env.OPENAI_API_KEY && process.env.META_ACCESS_TOKEN && process.env.CLOUDINARY_CLOUD_NAME !== 'mock-cloud'
-        ? 'false'
-        : 'true')
+        .default(process.env.MOCK_EXTERNAL_APIS !== undefined
+        ? process.env.MOCK_EXTERNAL_APIS
+        : process.env.NODE_ENV === 'production' || process.env.GUPSHUP_API_KEY
+            ? 'false'
+            : 'false')
         .transform((val) => val === 'true'),
 });
 exports.config = envSchema.parse(process.env);
