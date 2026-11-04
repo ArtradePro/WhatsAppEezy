@@ -127,6 +127,14 @@ function createApp() {
             },
         });
     });
+    app.get('/debug/outbound', async (_req, res) => {
+        res.json({
+            lastOutboundResult: whatsapp_client_service_1.whatsAppClientService.lastOutboundResult,
+            gupshupApiKeyConfigured: Boolean(env_1.config.GUPSHUP_API_KEY),
+            gupshupAppId: env_1.config.GUPSHUP_APP_ID,
+            defaultSource: env_1.config.GUPSHUP_SOURCE_NUMBER,
+        });
+    });
     // System Database Profile & On-Demand Migration Endpoints
     app.get('/api/v1/system/database-profile', async (_req, res) => {
         const profile = db_1.db.getProfile();
