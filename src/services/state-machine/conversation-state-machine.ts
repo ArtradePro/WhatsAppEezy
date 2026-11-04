@@ -607,6 +607,34 @@ export class ConversationStateMachine {
       return;
     }
 
+    // Technical Downloads, Leaflets & FAQs (/downloads/)
+    if (
+      raw === '6' ||
+      raw.includes('brochure') ||
+      raw.includes('download') ||
+      raw.includes('leaflet') ||
+      raw.includes('pdf') ||
+      raw.includes('faq') ||
+      raw.includes('finishing schedule') ||
+      raw.includes('floor plan') ||
+      raw.includes('blueprint')
+    ) {
+      const docsText =
+        `📑 *Official LCSH Architectural & Technical Downloads*\n` +
+        `_Access genuine blueprints, schedules and brochures directly from our engineering desk:_\n\n` +
+        `📥 *Technical Leaflets & Guides*:\n` +
+        `• 🏡 *Modular Living Leaflet*: https://www.lcsh.co.za/wp-content/uploads/2024/11/SS-Modular-Leaflet.pdf\n` +
+        `• 📦 *Storage & Site Pods Leaflet*: https://www.lcsh.co.za/wp-content/uploads/2024/11/SS-Storage-Leaflet.pdf\n` +
+        `• 📋 *Plans A–F Finishing Schedule*: https://www.lcsh.co.za/wp-content/uploads/2025/01/SS-Finishing-Schedule-A-F-Combined.pdf\n` +
+        `• ⚡ *Light Frame Steel vs Brick Comparison*: https://www.lcsh.co.za/wp-content/uploads/2024/11/SS-Light-Frame-Steel-vs-Bricks.pdf\n` +
+        `• 🌡️ *Thermal R-Value Insulation Guide*: https://www.lcsh.co.za/wp-content/uploads/2024/11/SS-R-Value-Comparison.pdf\n` +
+        `• ❓ *Frequently Asked Questions (FAQ)*: https://www.lcsh.co.za/wp-content/uploads/2024/11/FAQ-Compressed.pdf\n\n` +
+        `👉 Reply *4* to request a Project Quote, or *5* to speak directly with Vernon.`;
+
+      await whatsAppClientService.sendTextMessage(senderWaId, docsText);
+      return;
+    }
+
     // 4. Request a Quote / Preliminary Cost Estimate
     if (
       raw === '4' ||
@@ -705,7 +733,8 @@ export class ConversationStateMachine {
       `*2.* 🏗️ Turnkey Residential Builds (Light Steel Frame vs Brick & Mortar)\n` +
       `*3.* 🔨 Pergolas, Carports, Paving, Formwork & Additions\n` +
       `*4.* 📐 Request a Construction Quote / Cost Estimate\n` +
-      `*5.* 👷 Speak Directly with Vernon / Book Consultation\n\n` +
+      `*5.* 👷 Speak Directly with Vernon / Book Consultation\n` +
+      `*6.* 📑 Technical Leaflets, Blueprints & FAQs (PDFs)\n\n` +
       `✨ Explore 3D Virtual Showroom: https://www.lcsh.co.za/virtual-showroom/`;
 
     await whatsAppClientService.sendTextMessage(senderWaId, welcome);

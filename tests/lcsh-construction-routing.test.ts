@@ -150,4 +150,24 @@ describe('LCSH Construction & SmartSpace Modular Routing', () => {
     expect(sentText).toContain('Eco Gas Geyser Systems');
     expect(sentText).toContain('https://www.lcsh.co.za/energy/');
   });
+
+  it('delivers technical PDF brochures and finishing schedules when requested (option 6)', async () => {
+    const stateMachine = new ConversationStateMachine();
+    const sendSpy = vi.spyOn(whatsAppClientService, 'sendTextMessage').mockResolvedValue('wamid.test');
+
+    await conversationSessionStore.resetSession('27764862942', LCSH_VENDOR_ID);
+
+    await stateMachine.handleInboundMessage(
+      '27764862942',
+      'Vernon la Cock',
+      createInboundMessage('6'),
+      { vendorId: LCSH_VENDOR_ID, displayPhoneNumber: '+15553180006' }
+    );
+
+    const sentText = sendSpy.mock.calls[0][1];
+    expect(sentText).toContain('Official LCSH Architectural & Technical Downloads');
+    expect(sentText).toContain('Modular Living Leaflet');
+    expect(sentText).toContain('SS-Finishing-Schedule-A-F-Combined.pdf');
+    expect(sentText).toContain('SS-Light-Frame-Steel-vs-Bricks.pdf');
+  });
 });
