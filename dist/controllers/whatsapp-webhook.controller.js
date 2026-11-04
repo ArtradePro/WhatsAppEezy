@@ -84,7 +84,41 @@ class WhatsAppWebhookController {
             const p = gupshupBody.payload || {};
             const fromPhone = String(p.source || p.sender?.phone || '').replace(/^\+/, '');
             const senderName = p.sender?.name || 'WhatsApp Customer';
-            const destinationPhone = String(p.destination || env_1.config.WHATSAPP_PHONE_NUMBER_ID || '27600104005').replace(/^\+/, '');
+            let destinationPhone = String(p.destination || '').replace(/^\+/, '');
+            let phoneNumberId = destinationPhone;
+            const appName = gupshupBody.app || '';
+            if (!destinationPhone) {
+                if (appName === 'LCSHSmartspace') {
+                    destinationPhone = '15553180006';
+                    phoneNumberId = '1124984863821882';
+                }
+                else if (appName === 'WhatsAppEezyHQ') {
+                    destinationPhone = '15553426540';
+                    phoneNumberId = '1279806698557702';
+                }
+                else if (appName === 'Higiene') {
+                    destinationPhone = '15553443356';
+                    phoneNumberId = '1465835996503272';
+                }
+                else if (appName === 'WhatsAppEezy') {
+                    destinationPhone = '15554629242';
+                    phoneNumberId = '1359238143940536';
+                }
+                else {
+                    destinationPhone = String(env_1.config.WHATSAPP_PHONE_NUMBER_ID || '15554629242').replace(/^\+/, '');
+                    phoneNumberId = destinationPhone;
+                }
+            }
+            else {
+                if (destinationPhone === '15553180006')
+                    phoneNumberId = '1124984863821882';
+                else if (destinationPhone === '15553426540')
+                    phoneNumberId = '1279806698557702';
+                else if (destinationPhone === '15553443356')
+                    phoneNumberId = '1465835996503272';
+                else if (destinationPhone === '15554629242')
+                    phoneNumberId = '1359238143940536';
+            }
             const msgId = p.id || `gup_${Date.now()}`;
             const msgType = p.type || 'text';
             const messageObj = {
@@ -118,7 +152,7 @@ class WhatsAppWebhookController {
                                     messaging_product: 'whatsapp',
                                     metadata: {
                                         display_phone_number: destinationPhone,
-                                        phone_number_id: destinationPhone,
+                                        phone_number_id: phoneNumberId,
                                     },
                                     contacts: [
                                         {
