@@ -432,20 +432,174 @@ export class ConversationStateMachine {
     message: WhatsAppInboundMessage,
     vendor: DbVendor
   ): Promise<void> {
-    const raw = (message.text?.body || '').trim().toLowerCase();
+    const raw = (message.text?.body || '').trim().replace(/[\r\n\t]/g, ' ').toLowerCase();
     const rawOriginal = (message.text?.body || '').trim();
 
+    // Clean customer name to avoid echoing back the business name if testing from business WhatsApp account
+    const cleanCustomerName =
+      customerName &&
+      !customerName.toLowerCase().includes('signature homes') &&
+      !customerName.toLowerCase().includes('lcsh') &&
+      !customerName.toLowerCase().includes('whatsapp customer') &&
+      !customerName.toLowerCase().includes('customer')
+        ? customerName
+        : 'Valued Client';
+
+    // Specific check if the customer is answering the 5-point questionnaire (e.g. plans, stand, size, timeline)
+    const isIntakeAnswer =
+      !raw.includes('quote') &&
+      !raw.includes('estimate') &&
+      (raw.includes('approved plan') ||
+        raw.includes('have plans') ||
+        raw.includes('own plans') ||
+        raw.includes('need plans') ||
+        raw.includes('sketches') ||
+        raw.includes('stand location') ||
+        raw.includes('my stand') ||
+        raw.includes('our stand') ||
+        raw.includes('sqm') ||
+        raw.includes('m²') ||
+        raw.includes('bedrooms') ||
+        raw.includes('timeline:') ||
+        (raw.length > 30 && !raw.includes('how much') && !raw.includes('pricing')));
+
+    // Option 4: Quote / Estimate Questionnaire Intake
+    const isOption4 =
+      !isIntakeAnswer && (
+        raw === '4' ||
+        raw === '4.' ||
+        raw === '#4' ||
+        raw.startsWith('4 ') ||
+        raw.startsWith('4-') ||
+        raw.startsWith('4 -') ||
+        raw.startsWith('option 4') ||
+        raw === 'quote' ||
+        raw === 'pricing' ||
+        raw === 'estimate' ||
+        raw === 'cost' ||
+        raw === 'price list' ||
+        raw.includes('quote') ||
+        raw.includes('estimate') ||
+        raw.includes('pricing') ||
+        raw.includes('cost')
+      );
+
+    // Option 1: Modular Living & SmartSpace Pods
+    const isOption1 =
+      raw === '1' ||
+      raw === '1.' ||
+      raw === '#1' ||
+      raw.startsWith('1 ') ||
+      raw.startsWith('1-') ||
+      raw.startsWith('1 -') ||
+      raw.startsWith('option 1') ||
+      raw.includes('modular') ||
+      raw.includes('pod') ||
+      raw.includes('smartspace') ||
+      raw.includes('unit a') ||
+      raw.includes('unit b') ||
+      raw.includes('unit c') ||
+      raw.includes('unit d') ||
+      raw.includes('unit e') ||
+      raw.includes('unit f') ||
+      raw.includes('storage pod');
+
+    // Option 2: LSF vs Brick & Mortar Home Builds
+    const isOption2 =
+      raw === '2' ||
+      raw === '2.' ||
+      raw === '#2' ||
+      raw.startsWith('2 ') ||
+      raw.startsWith('2-') ||
+      raw.startsWith('2 -') ||
+      raw.startsWith('option 2') ||
+      raw.includes('steel') ||
+      raw.includes('lsf') ||
+      raw.includes('light frame') ||
+      raw.includes('brick') ||
+      raw.includes('mortar') ||
+      raw.includes('luxury build') ||
+      raw.includes('architectural') ||
+      raw.includes('turnkey');
+
+    // Option 3: Specialist Works: Pergolas, Carports, Paving, Formwork & Bomas
+    const isOption3 =
+      raw === '3' ||
+      raw === '3.' ||
+      raw === '#3' ||
+      raw.startsWith('3 ') ||
+      raw.startsWith('3-') ||
+      raw.startsWith('3 -') ||
+      raw.startsWith('option 3') ||
+      raw.includes('pergola') ||
+      raw.includes('carport') ||
+      raw.includes('paving') ||
+      raw.includes('formwork') ||
+      raw.includes('boma') ||
+      raw.includes('braai') ||
+      raw.includes('renovat') ||
+      raw.includes('addition') ||
+      raw.includes('alteration') ||
+      raw.includes('civil') ||
+      raw.includes('deck');
+
+    // Option 5: Direct Project Consultation with Vernon la Cock
+    const isOption5 =
+      raw === '5' ||
+      raw === '5.' ||
+      raw === '#5' ||
+      raw.startsWith('5 ') ||
+      raw.startsWith('5-') ||
+      raw.startsWith('5 -') ||
+      raw.startsWith('option 5') ||
+      raw.includes('consult') ||
+      raw.includes('vernon') ||
+      raw.includes('call') ||
+      raw.includes('speak') ||
+      raw.includes('human') ||
+      raw.includes('director') ||
+      raw.includes('meeting');
+
+    // Option 6: Technical Downloads, Leaflets & FAQs (/downloads/)
+    const isOption6 =
+      raw === '6' ||
+      raw === '6.' ||
+      raw === '#6' ||
+      raw.startsWith('6 ') ||
+      raw.startsWith('6-') ||
+      raw.startsWith('6 -') ||
+      raw.startsWith('option 6') ||
+      raw.includes('brochure') ||
+      raw.includes('download') ||
+      raw.includes('leaflet') ||
+      raw.includes('pdf') ||
+      raw.includes('faq') ||
+      raw.includes('finishing schedule') ||
+      raw.includes('floor plan') ||
+      raw.includes('blueprint');
+
+    const isLCSHMenuOption = isOption1 || isOption2 || isOption3 || isOption4 || isOption5 || isOption6 || isIntakeAnswer;
+
+    // Mixed & support business check
     const selected = selectSupportBusiness(raw, session.supportBusiness);
     if (selected === 'clarify') {
-      await whatsAppClientService.sendTextMessage(senderWaId,
-        'Would you like help with an LCSH home project or a Higiene / Fungus No More product first?');
+      await whatsAppClientService.sendTextMessage(
+        senderWaId,
+        'Would you like help with an LCSH home project or a Higiene / Fungus No More product first?'
+      );
       return;
     }
-    session.supportBusiness = selected;
-    await conversationSessionStore.saveSession(session);
-    if (selected === 'higiene') {
-      await whatsAppClientService.sendTextMessage(senderWaId, higieneSupportReply(raw));
-      return;
+
+    if (!isLCSHMenuOption) {
+      session.supportBusiness = selected;
+      await conversationSessionStore.saveSession(session);
+      if (selected === 'higiene') {
+        await whatsAppClientService.sendTextMessage(senderWaId, higieneSupportReply(raw));
+        return;
+      }
+    } else {
+      session.supportBusiness = 'lcsh';
+      await conversationSessionStore.saveSession(session);
     }
 
     // Comprehensive inquiry combining Modular Pods + Luxury Builds / Pricing (website lead)
@@ -457,7 +611,7 @@ export class ConversationStateMachine {
         `🏗️ *Welcome to la Cock Signature Homes (LCSH Smartspace)*\n` +
         `_Your Home, Your Way — Built with Precision_\n` +
         `🌐 *https://www.lcsh.co.za*\n\n` +
-        `Thank you *${customerName}*! We are delighted to assist with your inquiry regarding our *SmartSpace Modular Pods* and *Turnkey Luxury Builds*.\n\n` +
+        `Thank you *${cleanCustomerName}*! We are delighted to assist with your inquiry regarding our *SmartSpace Modular Pods* and *Turnkey Luxury Builds*.\n\n` +
         `🏡 *1. SmartSpace Modular Units (Plans A–F)*:\n` +
         `• Turnkey factory-precision units erected on your site in 7–12 days.\n` +
         `• 100% off-grid ready (solar, gas geyser, rainwater harvesting) with zero wet masonry mess.\n` +
@@ -474,7 +628,8 @@ export class ConversationStateMachine {
         `• Reply *2* — Light Frame Steel (LSF) vs Brick & Mortar Breakdown\n` +
         `• Reply *3* — Pergolas, Carports, Paving & Additions\n` +
         `• Reply *4* — 📐 Request an Itemized Cost Estimate / Project Quote\n` +
-        `• Reply *5* — 👷 Speak Directly with Vernon la Cock (+27 76 486 2942)`;
+        `• Reply *5* — 👷 Speak Directly with Vernon la Cock (+27 76 486 2942)\n` +
+        `• Reply *6* — 📑 Architectural Leaflets, Blueprints & FAQs (PDFs)`;
 
       await whatsAppClientService.sendTextMessage(senderWaId, combinedOverview);
 
@@ -483,27 +638,30 @@ export class ConversationStateMachine {
       if (senderWaId.replace(/\D/g, '') !== alertPhone) {
         await whatsAppClientService.sendTextMessage(
           alertPhone,
-          `🏗️ *NEW LCSH MODULAR & LUXURY BUILD INQUIRY*\n• Client: *${customerName}* (+${senderWaId.replace(/\D/g, '')})\n• Message: "${rawOriginal}"\n• Tap to Chat: https://wa.me/${senderWaId.replace(/\D/g, '')}`
+          `🏗️ *NEW LCSH MODULAR & LUXURY BUILD INQUIRY*\n• Client: *${cleanCustomerName}* (+${senderWaId.replace(/\D/g, '')})\n• Message: "${rawOriginal}"\n• Tap to Chat: https://wa.me/${senderWaId.replace(/\D/g, '')}`
         ).catch(() => {});
       }
       return;
     }
 
+    // 4. Request a Quote / Preliminary Cost Estimate
+    if (isOption4) {
+      const quoteText =
+        `📐 *Request an Official LCSH Project Quote*\n\n` +
+        `Hi *${cleanCustomerName}*, to prepare your preliminary estimate or schedule a site visit with our engineering desk, please reply in a single message with:\n\n` +
+        `1️⃣ *Project Type*: (Modular SmartSpace Pod / LSF Home / Brick Build / Pergola & Carport / Paving & Formwork / Renovation)\n` +
+        `2️⃣ *Stand / Location*: (Town, Suburb or Estate name)\n` +
+        `3️⃣ *Approximate Size*: (m² or number of bedrooms / bays)\n` +
+        `4️⃣ *Architectural Plans*: (Do you have approved plans, sketches, or need full plan design?)\n` +
+        `5️⃣ *Timeline*: (Immediate 1–4 weeks / 1–3 months / Planning stage)\n\n` +
+        `💬 Type your project details below and our estimating director will review and contact you directly!`;
+
+      await whatsAppClientService.sendTextMessage(senderWaId, quoteText);
+      return;
+    }
+
     // 1. SmartSpace Modular Living & Pods
-    if (
-      raw === '1' ||
-      raw.includes('modular') ||
-      raw.includes('pod') ||
-      raw.includes('smartspace') ||
-      raw.includes('unit a') ||
-      raw.includes('unit b') ||
-      raw.includes('unit c') ||
-      raw.includes('unit d') ||
-      raw.includes('unit e') ||
-      raw.includes('unit f') ||
-      raw.includes('leaflet') ||
-      raw.includes('storage')
-    ) {
+    if (isOption1) {
       const modularText =
         `🏡 *SmartSpace Modular Homes & Pods by LCSH*\n` +
         `_Your Home, Your Way — Built with Precision_\n\n` +
@@ -522,17 +680,7 @@ export class ConversationStateMachine {
     }
 
     // 2. Light Frame Steel (LSF) vs Brick & Mortar Home Builds
-    if (
-      raw === '2' ||
-      raw.includes('steel') ||
-      raw.includes('lsf') ||
-      raw.includes('light frame') ||
-      raw.includes('brick') ||
-      raw.includes('mortar') ||
-      raw.includes('luxury build') ||
-      raw.includes('architectural') ||
-      raw.includes('turnkey')
-    ) {
+    if (isOption2) {
       const buildText =
         `🏗️ *Turnkey Residential Construction — LSF & Brick & Mortar*\n\n` +
         `*la Cock Signature Homes* delivers high-end architectural residences tailored to your stand across the Western Cape and South Africa.\n\n` +
@@ -551,20 +699,7 @@ export class ConversationStateMachine {
     }
 
     // 3. Specialist Construction Additions: Pergolas, Carports, Paving, Formwork & Bomas
-    if (
-      raw === '3' ||
-      raw.includes('pergola') ||
-      raw.includes('carport') ||
-      raw.includes('paving') ||
-      raw.includes('formwork') ||
-      raw.includes('boma') ||
-      raw.includes('braai') ||
-      raw.includes('renovat') ||
-      raw.includes('addition') ||
-      raw.includes('alteration') ||
-      raw.includes('civil') ||
-      raw.includes('deck')
-    ) {
+    if (isOption3) {
       const additionsText =
         `🔨 *Specialist Construction, Additions & Outdoor Living*\n\n` +
         `We execute all structural civil and architectural additions with precision:\n` +
@@ -608,17 +743,7 @@ export class ConversationStateMachine {
     }
 
     // Technical Downloads, Leaflets & FAQs (/downloads/)
-    if (
-      raw === '6' ||
-      raw.includes('brochure') ||
-      raw.includes('download') ||
-      raw.includes('leaflet') ||
-      raw.includes('pdf') ||
-      raw.includes('faq') ||
-      raw.includes('finishing schedule') ||
-      raw.includes('floor plan') ||
-      raw.includes('blueprint')
-    ) {
+    if (isOption6) {
       const docsText =
         `📑 *Official LCSH Architectural & Technical Downloads*\n` +
         `_Access genuine blueprints, schedules and brochures directly from our engineering desk:_\n\n` +
@@ -635,43 +760,11 @@ export class ConversationStateMachine {
       return;
     }
 
-    // 4. Request a Quote / Preliminary Cost Estimate
-    if (
-      raw === '4' ||
-      raw.includes('quote') ||
-      raw.includes('estimate') ||
-      raw.includes('pricing') ||
-      raw.includes('price list') ||
-      raw.includes('cost')
-    ) {
-      const quoteText =
-        `📐 *Request an Official LCSH Project Quote*\n\n` +
-        `Hi *${customerName}*, to prepare your preliminary estimate or schedule a site visit with our engineering desk, please reply in a single message with:\n\n` +
-        `1️⃣ *Project Type*: (Modular SmartSpace Pod / LSF Home / Brick Build / Pergola & Carport / Paving & Formwork / Renovation)\n` +
-        `2️⃣ *Stand / Location*: (Town, Suburb or Estate name)\n` +
-        `3️⃣ *Approximate Size*: (m² or number of bedrooms / bays)\n` +
-        `4️⃣ *Architectural Plans*: (Do you have approved plans, sketches, or need full plan design?)\n` +
-        `5️⃣ *Timeline*: (Immediate 1–4 weeks / 1–3 months / Planning stage)\n\n` +
-        `💬 Type your project details below and our estimating director will review and contact you directly!`;
-
-      await whatsAppClientService.sendTextMessage(senderWaId, quoteText);
-      return;
-    }
-
     // 5. Direct Project Consultation with Vernon la Cock
-    if (
-      raw === '5' ||
-      raw.includes('consult') ||
-      raw.includes('vernon') ||
-      raw.includes('call') ||
-      raw.includes('speak') ||
-      raw.includes('human') ||
-      raw.includes('director') ||
-      raw.includes('meeting')
-    ) {
+    if (isOption5) {
       const contactText =
         `👷‍♂️ *Direct Project Consultation with Vernon la Cock*\n\n` +
-        `Thank you *${customerName}*! You can connect directly with our Managing Director & Engineering Team:\n\n` +
+        `Thank you *${cleanCustomerName}*! You can connect directly with our Managing Director & Engineering Team:\n\n` +
         `👤 *Vernon la Cock* — Managing Director, LCSH\n` +
         `📞 Phone / Direct WhatsApp: *+27 76 486 2942*\n` +
         `📧 Email: *info@lcsh.co.za* / *orders@lcsh.co.za*\n` +
@@ -686,17 +779,17 @@ export class ConversationStateMachine {
       if (senderWaId.replace(/\D/g, '') !== alertPhone) {
         await whatsAppClientService.sendTextMessage(
           alertPhone,
-          `👷‍♂️ *LCSH CONSULTATION REQUEST*\n• Client: *${customerName}* (+${senderWaId.replace(/\D/g, '')})\n• Message: "${rawOriginal}"\n• Tap to Chat: https://wa.me/${senderWaId.replace(/\D/g, '')}`
+          `👷‍♂️ *LCSH CONSULTATION REQUEST*\n• Client: *${cleanCustomerName}* (+${senderWaId.replace(/\D/g, '')})\n• Message: "${rawOriginal}"\n• Tap to Chat: https://wa.me/${senderWaId.replace(/\D/g, '')}`
         ).catch(() => {});
       }
       return;
     }
 
     // If the client submitted detailed project details or a website lead message
-    if (raw.length > 20 && raw !== 'hi' && raw !== 'hello' && raw !== 'hi there') {
+    if (raw.length > 15 && raw !== 'hi' && raw !== 'hello' && raw !== 'hi there') {
       const ackText =
         `✅ *LCSH Project Inquiry Received*\n\n` +
-        `Thank you *${customerName}*! Your project requirements have been registered:\n` +
+        `Thank you *${cleanCustomerName}*! Your project requirements have been registered:\n` +
         `_"${rawOriginal}"_\n\n` +
         `Our architectural & construction team at *la Cock Signature Homes* will review your stand location and specifications.\n\n` +
         `📞 Vernon la Cock / LCSH Engineering will follow up with you directly on WhatsApp or at +27 76 486 2942.\n\n` +
@@ -704,7 +797,9 @@ export class ConversationStateMachine {
         `*1* — 🏡 View SmartSpace Modular Pods\n` +
         `*2* — 🏗️ Turnkey LSF vs Brick Home Builds\n` +
         `*3* — 🔨 Pergolas, Carports, Paving & Formwork\n` +
-        `*4* — 📐 Complete Full Quote Intake`;
+        `*4* — 📐 Complete Full Quote Intake\n` +
+        `*5* — 👷 Speak Directly with Vernon la Cock\n` +
+        `*6* — 📑 Technical Leaflets, Blueprints & FAQs (PDFs)`;
 
       await whatsAppClientService.sendTextMessage(senderWaId, ackText);
 
@@ -713,7 +808,7 @@ export class ConversationStateMachine {
       if (senderWaId.replace(/\D/g, '') !== alertPhone) {
         await whatsAppClientService.sendTextMessage(
           alertPhone,
-          `🏗️ *NEW LCSH PROJECT INQUIRY*\n• Client: *${customerName}* (+${senderWaId.replace(/\D/g, '')})\n• Details: "${rawOriginal}"\n• Tap to Reply: https://wa.me/${senderWaId.replace(/\D/g, '')}`
+          `🏗️ *NEW LCSH PROJECT INQUIRY*\n• Client: *${cleanCustomerName}* (+${senderWaId.replace(/\D/g, '')})\n• Details: "${rawOriginal}"\n• Tap to Reply: https://wa.me/${senderWaId.replace(/\D/g, '')}`
         ).catch(() => {});
       }
       return;

@@ -170,4 +170,65 @@ describe('LCSH Construction & SmartSpace Modular Routing', () => {
     expect(sentText).toContain('SS-Finishing-Schedule-A-F-Combined.pdf');
     expect(sentText).toContain('SS-Light-Frame-Steel-vs-Bricks.pdf');
   });
+
+  it('reliably responds to single digit "4", "4.", and "option 4" with quote intake', async () => {
+    const stateMachine = new ConversationStateMachine();
+    const sendSpy = vi.spyOn(whatsAppClientService, 'sendTextMessage').mockResolvedValue('wamid.test');
+
+    for (const reply of ['4', '4.', 'option 4', '#4', '4 - Quote']) {
+      sendSpy.mockClear();
+      await conversationSessionStore.resetSession('27764862942', LCSH_VENDOR_ID);
+
+      await stateMachine.handleInboundMessage(
+        '27764862942',
+        'la Cock Signature Homes',
+        createInboundMessage(reply),
+        { vendorId: LCSH_VENDOR_ID, displayPhoneNumber: '+15553180006' }
+      );
+
+      expect(sendSpy).toHaveBeenCalled();
+      const sentText = sendSpy.mock.calls[0][1];
+      expect(sentText).toContain('Request an Official LCSH Project Quote');
+      expect(sentText).toContain('1️⃣ *Project Type*');
+      expect(sentText).toContain('2️⃣ *Stand / Location*');
+      // Should not echo back 'la Cock Signature Homes' as customer name
+      expect(sentText).not.toContain('Hi *la Cock Signature Homes*');
+      expect(sentText).toContain('Hi *Valued Client*');
+    }
+  });
+
+  it('handles customer project requirement answer "4. we have approved plans" followed by "4"', async () => {
+    const stateMachine = new ConversationStateMachine();
+    const sendSpy = vi.spyOn(whatsAppClientService, 'sendTextMessage').mockResolvedValue('wamid.test');
+
+    await conversationSessionStore.resetSession('27764862942', LCSH_VENDOR_ID);
+
+    // Step 1: User sends requirement answer
+    await stateMachine.handleInboundMessage(
+      '27764862942',
+      'la Cock Signature Homes',
+      createInboundMessage('4. we have approved plans'),
+      { vendorId: LCSH_VENDOR_ID, displayPhoneNumber: '+15553180006' }
+    );
+
+    expect(sendSpy).toHaveBeenCalled();
+    const sentText1 = sendSpy.mock.calls[0][1];
+    expect(sentText1).toContain('LCSH Project Inquiry Received');
+    expect(sentText1).toContain('"4. we have approved plans"');
+    expect(sentText1).toContain('Vernon la Cock / LCSH Engineering');
+
+    // Step 2: User sends "4" to complete full quote intake
+    sendSpy.mockClear();
+    await stateMachine.handleInboundMessage(
+      '27764862942',
+      'la Cock Signature Homes',
+      createInboundMessage('4'),
+      { vendorId: LCSH_VENDOR_ID, displayPhoneNumber: '+15553180006' }
+    );
+
+    expect(sendSpy).toHaveBeenCalled();
+    const sentText2 = sendSpy.mock.calls[0][1];
+    expect(sentText2).toContain('Request an Official LCSH Project Quote');
+    expect(sentText2).toContain('1️⃣ *Project Type*');
+  });
 });
