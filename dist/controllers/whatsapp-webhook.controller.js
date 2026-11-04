@@ -5,6 +5,7 @@ const env_1 = require("../config/env");
 const meta_signature_util_1 = require("../utils/meta-signature.util");
 const whatsapp_queue_worker_1 = require("../services/queue/whatsapp-queue.worker");
 class WhatsAppWebhookController {
+    static latestEvents = [];
     /**
      * Meta Webhook Verification Challenge (GET /api/webhooks/whatsapp & GET /webhook)
      *
@@ -68,6 +69,15 @@ class WhatsAppWebhookController {
         const body = req.body;
         if (!body)
             return;
+        WhatsAppWebhookController.latestEvents.unshift({
+            time: new Date().toISOString(),
+            type: body.type || body.object || 'unknown',
+            app: body.app,
+            payload: body.payload || body,
+        });
+        if (WhatsAppWebhookController.latestEvents.length > 50) {
+            WhatsAppWebhookController.latestEvents.pop();
+        }
         if (body.object === 'whatsapp_business_account') {
             await whatsapp_queue_worker_1.whatsAppQueueWorker.enqueueWebhook(body);
             return;

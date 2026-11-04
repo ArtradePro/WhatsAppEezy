@@ -6,7 +6,7 @@ import path from 'path';
 import { ingestRouter } from './routes/ingest.routes';
 import { catalogRouter } from './routes/catalog.routes';
 import { errorHandler } from './middleware/error.middleware';
-import { whatsAppWebhookController } from './controllers/whatsapp-webhook.controller';
+import { whatsAppWebhookController, WhatsAppWebhookController } from './controllers/whatsapp-webhook.controller';
 import { payFastWebhookController } from './controllers/payfast-webhook.controller';
 import { dashboardController } from './controllers/dashboard.controller';
 import { payoutController } from './controllers/payout.controller';
@@ -131,6 +131,7 @@ export function createApp(): Application {
   app.get('/debug/outbound', async (_req: Request, res: Response) => {
     res.json({
       lastOutboundResult: whatsAppClientService.lastOutboundResult,
+      latestGupshupEvents: WhatsAppWebhookController.latestEvents.slice(0, 10),
       gupshupApiKeyConfigured: Boolean(config.GUPSHUP_API_KEY),
       gupshupAppId: config.GUPSHUP_APP_ID,
       defaultSource: config.GUPSHUP_SOURCE_NUMBER,

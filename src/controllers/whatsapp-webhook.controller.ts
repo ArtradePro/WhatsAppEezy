@@ -5,6 +5,8 @@ import { validateMetaSignature } from '../utils/meta-signature.util';
 import { whatsAppQueueWorker } from '../services/queue/whatsapp-queue.worker';
 
 export class WhatsAppWebhookController {
+  public static latestEvents: Array<{ time: string; type: string; app?: string; payload: any }> = [];
+
   /**
    * Meta Webhook Verification Challenge (GET /api/webhooks/whatsapp & GET /webhook)
    *
@@ -81,6 +83,16 @@ export class WhatsAppWebhookController {
 
     const body = req.body as any;
     if (!body) return;
+
+    WhatsAppWebhookController.latestEvents.unshift({
+      time: new Date().toISOString(),
+      type: body.type || body.object || 'unknown',
+      app: body.app,
+      payload: body.payload || body,
+    });
+    if (WhatsAppWebhookController.latestEvents.length > 50) {
+      WhatsAppWebhookController.latestEvents.pop();
+    }
 
     if (body.object === 'whatsapp_business_account') {
       await whatsAppQueueWorker.enqueueWebhook(body as WhatsAppWebhookPayload);

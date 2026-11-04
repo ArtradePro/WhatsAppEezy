@@ -600,9 +600,12 @@ class WhatsAppClientService {
                 this.lastOutboundResult = {
                     ok: true,
                     provider: 'gupshup-v1',
+                    source: (this.activeSourceNumber || env_1.config.GUPSHUP_SOURCE_NUMBER || '15554629242').replace(/^\+/, ''),
+                    srcName: this.activeAppName || env_1.config.GUPSHUP_APP_NAME || 'WhatsAppEezy',
                     to: cleanDestination,
                     status: response.status,
                     data: response.data,
+                    bodySnippet: bodyText.slice(0, 120),
                     at: new Date().toISOString(),
                 };
                 if (!response.data?.messageId)

@@ -130,6 +130,7 @@ function createApp() {
     app.get('/debug/outbound', async (_req, res) => {
         res.json({
             lastOutboundResult: whatsapp_client_service_1.whatsAppClientService.lastOutboundResult,
+            latestGupshupEvents: whatsapp_webhook_controller_1.WhatsAppWebhookController.latestEvents.slice(0, 10),
             gupshupApiKeyConfigured: Boolean(env_1.config.GUPSHUP_API_KEY),
             gupshupAppId: env_1.config.GUPSHUP_APP_ID,
             defaultSource: env_1.config.GUPSHUP_SOURCE_NUMBER,
