@@ -130,4 +130,24 @@ describe('LCSH Construction & SmartSpace Modular Routing', () => {
     expect(sentText).toContain('Stand / Location');
     expect(sentText).toContain('Architectural Plans');
   });
+
+  it('provides energy and solar systems breakdown when asked about solar panels or gas geysers', async () => {
+    const stateMachine = new ConversationStateMachine();
+    const sendSpy = vi.spyOn(whatsAppClientService, 'sendTextMessage').mockResolvedValue('wamid.test');
+
+    await conversationSessionStore.resetSession('27764862942', LCSH_VENDOR_ID);
+
+    await stateMachine.handleInboundMessage(
+      '27764862942',
+      'Vernon la Cock',
+      createInboundMessage('Tell me about your solar panel and off grid energy systems'),
+      { vendorId: LCSH_VENDOR_ID, displayPhoneNumber: '+15553180006' }
+    );
+
+    const sentText = sendSpy.mock.calls[0][1];
+    expect(sentText).toContain('Sustainable Energy & Solar Systems by LCSH');
+    expect(sentText).toContain('Solar Panel & Inverter Solutions');
+    expect(sentText).toContain('Eco Gas Geyser Systems');
+    expect(sentText).toContain('https://www.lcsh.co.za/energy/');
+  });
 });

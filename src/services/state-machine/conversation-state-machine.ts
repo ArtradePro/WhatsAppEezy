@@ -455,16 +455,20 @@ export class ConversationStateMachine {
     ) {
       const combinedOverview =
         `🏗️ *Welcome to la Cock Signature Homes (LCSH Smartspace)*\n` +
-        `_Your Home, Your Way — Built with Precision_\n\n` +
+        `_Your Home, Your Way — Built with Precision_\n` +
+        `🌐 *https://www.lcsh.co.za*\n\n` +
         `Thank you *${customerName}*! We are delighted to assist with your inquiry regarding our *SmartSpace Modular Pods* and *Turnkey Luxury Builds*.\n\n` +
         `🏡 *1. SmartSpace Modular Units (Plans A–F)*:\n` +
         `• Turnkey factory-precision units erected on your site in 7–12 days.\n` +
         `• 100% off-grid ready (solar, gas geyser, rainwater harvesting) with zero wet masonry mess.\n` +
-        `• Standard inclusions: Electrical & Plumbing with COC, thermal insulation, luxury bathroom & braai boma.\n\n` +
+        `• Standard inclusions: Electrical & Plumbing with COC, thermal insulation, luxury bathroom & braai boma.\n` +
+        `• Explore online: https://www.lcsh.co.za/modular-homes/\n\n` +
         `🏗️ *2. Luxury Architectural Builds (LSF & Brick & Mortar)*:\n` +
         `• *Light Frame Steel (LSF)*: Computer-modeled to 1mm tolerance, 40–60% faster, superior thermal R-value insulation.\n` +
         `• *Traditional Brick & Mortar*: High-end bespoke residential & commercial construction, NHBRC certified.\n\n` +
         `🔨 *3. Specialist Works*: Pergolas, carports, paving, foundations, formwork & luxury alterations.\n\n` +
+        `⚡ *4. Sustainable Energy*: Hybrid solar systems, eco gas geysers & whisper climate control (https://www.lcsh.co.za/energy/)\n\n` +
+        `✨ *DreamSpace™ AI Studio*: Design & visualize your layout in 3D: https://www.lcsh.co.za/virtual-showroom/\n\n` +
         `👉 How would you like to proceed?\n` +
         `• Reply *1* — Sizing & Specifications for SmartSpace Units (Plans A–F)\n` +
         `• Reply *2* — Light Frame Steel (LSF) vs Brick & Mortar Breakdown\n` +
@@ -576,6 +580,33 @@ export class ConversationStateMachine {
       return;
     }
 
+    // Energy & Solar Systems (/energy/)
+    if (
+      raw.includes('energy') ||
+      raw.includes('solar') ||
+      raw.includes('geyser') ||
+      raw.includes('inverter') ||
+      raw.includes('battery') ||
+      raw.includes('off-grid') ||
+      raw.includes('off grid')
+    ) {
+      const energyText =
+        `⚡ *Sustainable Energy & Solar Systems by LCSH*\n` +
+        `_Power Your Space Sustainably — https://www.lcsh.co.za/energy/_\n\n` +
+        `We design and install turnkey renewable energy systems tailored for residential and modular builds:\n\n` +
+        `☀️ *Solar Panel & Inverter Solutions*:\n` +
+        `• Tier-1 high-efficiency monocrystalline solar arrays\n` +
+        `• Hybrid lithium-ion battery backup systems for load-shedding immunity and complete off-grid living\n\n` +
+        `🔥 *Eco Gas Geyser Systems*:\n` +
+        `• On-demand constant-temperature water heating saving up to 40% on household energy bills\n\n` +
+        `❄️ *Whisper Inverter Climate Control*:\n` +
+        `• Ultra-quiet, low-wattage heating and cooling designed for optimal thermal regulation\n\n` +
+        `👉 Reply *4* to book a Free Energy Assessment / Cost Estimate, or *5* to speak with Vernon!`;
+
+      await whatsAppClientService.sendTextMessage(senderWaId, energyText);
+      return;
+    }
+
     // 4. Request a Quote / Preliminary Cost Estimate
     if (
       raw === '4' ||
@@ -666,14 +697,16 @@ export class ConversationStateMachine {
 
     const welcome =
       `🏗️ *Welcome to LCSH Smartspace — la Cock Signature Homes*\n` +
-      `_Your Home, Your Way — Built with Precision_\n\n` +
+      `_Your Home, Your Way — Built with Precision_\n` +
+      `🌐 *https://www.lcsh.co.za*\n\n` +
       `We are an NHBRC-certified architectural construction firm specializing in precision modular homes, Light Steel Frame (LSF) builds, luxury brick residences, and complete civil additions.\n\n` +
       `How can we assist with your project today? Reply with a number:\n` +
       `*1.* 🏡 Explore SmartSpace Modular Units (Plans A–F)\n` +
       `*2.* 🏗️ Turnkey Residential Builds (Light Steel Frame vs Brick & Mortar)\n` +
       `*3.* 🔨 Pergolas, Carports, Paving, Formwork & Additions\n` +
       `*4.* 📐 Request a Construction Quote / Cost Estimate\n` +
-      `*5.* 👷 Speak Directly with Vernon / Book Consultation`;
+      `*5.* 👷 Speak Directly with Vernon / Book Consultation\n\n` +
+      `✨ Explore 3D Virtual Showroom: https://www.lcsh.co.za/virtual-showroom/`;
 
     await whatsAppClientService.sendTextMessage(senderWaId, welcome);
   }
