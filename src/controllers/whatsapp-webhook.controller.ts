@@ -43,6 +43,13 @@ export class WhatsAppWebhookController {
    * 3. Asynchronously enqueues payload to worker queue for routing
    */
   async handleInboundEvents(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+    const payload = req.body as any;
+
+    // If the inbound request is from Gupshup (has app or Gupshup message structure), delegate to handleGupshupWebhook
+    if (payload?.app || (payload?.type === 'message' && payload?.payload) || payload?.type === 'message-event') {
+      return this.handleGupshupWebhook(req, reply);
+    }
+
     const signatureHeader = req.headers['x-hub-signature-256'] as string | undefined;
     const isProductionPath = req.url.startsWith('/api/webhooks/whatsapp');
 
@@ -62,15 +69,9 @@ export class WhatsAppWebhookController {
     // Immediate non-blocking response to satisfy Meta <500ms requirement
     reply.status(200).send({ status: 'EVENT_RECEIVED' });
 
-    const payload = req.body as any;
     if (payload?.object === 'whatsapp_business_account') {
       // Hand off to queue worker asynchronously
       await whatsAppQueueWorker.enqueueWebhook(payload as WhatsAppWebhookPayload);
-    } else if (payload?.app && payload?.type === 'message') {
-      const normalized = this.normalizeGupshupPayload(payload);
-      if (normalized) {
-        await whatsAppQueueWorker.enqueueWebhook(normalized);
-      }
     }
   }
 

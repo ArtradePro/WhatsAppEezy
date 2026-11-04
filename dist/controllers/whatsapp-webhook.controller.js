@@ -33,6 +33,11 @@ class WhatsAppWebhookController {
      * 3. Asynchronously enqueues payload to worker queue for routing
      */
     async handleInboundEvents(req, reply) {
+        const payload = req.body;
+        // If the inbound request is from Gupshup (has app or Gupshup message structure), delegate to handleGupshupWebhook
+        if (payload?.app || (payload?.type === 'message' && payload?.payload) || payload?.type === 'message-event') {
+            return this.handleGupshupWebhook(req, reply);
+        }
         const signatureHeader = req.headers['x-hub-signature-256'];
         const isProductionPath = req.url.startsWith('/api/webhooks/whatsapp');
         // Cryptographic Signature Verification
@@ -48,16 +53,9 @@ class WhatsAppWebhookController {
         }
         // Immediate non-blocking response to satisfy Meta <500ms requirement
         reply.status(200).send({ status: 'EVENT_RECEIVED' });
-        const payload = req.body;
         if (payload?.object === 'whatsapp_business_account') {
             // Hand off to queue worker asynchronously
             await whatsapp_queue_worker_1.whatsAppQueueWorker.enqueueWebhook(payload);
-        }
-        else if (payload?.app && payload?.type === 'message') {
-            const normalized = this.normalizeGupshupPayload(payload);
-            if (normalized) {
-                await whatsapp_queue_worker_1.whatsAppQueueWorker.enqueueWebhook(normalized);
-            }
         }
     }
     /**
