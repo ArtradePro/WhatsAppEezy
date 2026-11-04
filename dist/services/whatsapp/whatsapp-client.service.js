@@ -534,8 +534,8 @@ class WhatsAppClientService {
      */
     async sendPayload(to, payload) {
         const cleanDestination = to.replace(/^\+/, '');
-        // Mock mode must precede token refresh and every provider request.
-        if (env_1.config.MOCK_EXTERNAL_APIS) {
+        // Mock mode only applies in test environments or when Gupshup is unconfigured
+        if (env_1.config.MOCK_EXTERNAL_APIS && (env_1.config.NODE_ENV === 'test' || !env_1.config.GUPSHUP_API_KEY)) {
             const messageId = 'wamid.mock_' + Date.now();
             this.lastOutboundResult = { ok: true, provider: 'mock', to: cleanDestination, messageId };
             return messageId;

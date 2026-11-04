@@ -133,6 +133,8 @@ function createApp() {
             gupshupApiKeyConfigured: Boolean(env_1.config.GUPSHUP_API_KEY),
             gupshupAppId: env_1.config.GUPSHUP_APP_ID,
             defaultSource: env_1.config.GUPSHUP_SOURCE_NUMBER,
+            mockExternalApis: env_1.config.MOCK_EXTERNAL_APIS,
+            nodeEnv: env_1.config.NODE_ENV,
         });
     });
     // System Database Profile & On-Demand Migration Endpoints

@@ -134,6 +134,8 @@ export function createApp(): Application {
       gupshupApiKeyConfigured: Boolean(config.GUPSHUP_API_KEY),
       gupshupAppId: config.GUPSHUP_APP_ID,
       defaultSource: config.GUPSHUP_SOURCE_NUMBER,
+      mockExternalApis: config.MOCK_EXTERNAL_APIS,
+      nodeEnv: config.NODE_ENV,
     });
   });
 
