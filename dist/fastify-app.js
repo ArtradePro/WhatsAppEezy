@@ -20,6 +20,7 @@ const revenue_controller_1 = require("./controllers/revenue.controller");
 const ai_bridge_controller_1 = require("./controllers/ai-bridge.controller");
 const virtual_number_controller_1 = require("./controllers/virtual-number.controller");
 const conversation_session_store_1 = require("./services/state-machine/conversation-session.store");
+const whatsapp_client_service_1 = require("./services/whatsapp/whatsapp-client.service");
 const env_1 = require("./config/env");
 const db_1 = require("./database/db");
 function createFastifyApp() {
@@ -307,6 +308,15 @@ function createFastifyApp() {
         return {
             success: true,
             session,
+            lastOutboundResult: whatsapp_client_service_1.whatsAppClientService.lastOutboundResult,
+        };
+    });
+    app.get('/api/debug/outbound', async () => {
+        return {
+            lastOutboundResult: whatsapp_client_service_1.whatsAppClientService.lastOutboundResult,
+            gupshupApiKeySet: Boolean(env_1.config.GUPSHUP_API_KEY),
+            gupshupAppId: env_1.config.GUPSHUP_APP_ID,
+            defaultSource: env_1.config.GUPSHUP_SOURCE_NUMBER,
         };
     });
     return app;

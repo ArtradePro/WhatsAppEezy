@@ -14,6 +14,7 @@ import { revenueController } from './controllers/revenue.controller';
 import { aiBridgeController } from './controllers/ai-bridge.controller';
 import { virtualNumberController } from './controllers/virtual-number.controller';
 import { conversationSessionStore } from './services/state-machine/conversation-session.store';
+import { whatsAppClientService } from './services/whatsapp/whatsapp-client.service';
 import { config } from './config/env';
 import { db } from './database/db';
 
@@ -353,6 +354,16 @@ export function createFastifyApp(): FastifyInstance {
     return {
       success: true,
       session,
+      lastOutboundResult: whatsAppClientService.lastOutboundResult,
+    };
+  });
+
+  app.get('/api/debug/outbound', async () => {
+    return {
+      lastOutboundResult: whatsAppClientService.lastOutboundResult,
+      gupshupApiKeySet: Boolean(config.GUPSHUP_API_KEY),
+      gupshupAppId: config.GUPSHUP_APP_ID,
+      defaultSource: config.GUPSHUP_SOURCE_NUMBER,
     };
   });
 
