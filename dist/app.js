@@ -79,6 +79,7 @@ function createApp() {
         },
     }));
     app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
+    app.use('/assets', express_1.default.static(path_1.default.join(__dirname, '../public/assets')));
     app.use(async (req, res, next) => {
         if (!(0, admin_access_service_1.protectedAdminPath)(req.path))
             return next();
