@@ -79,6 +79,7 @@ export function createApp(): Application {
     })
   );
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  app.use('/assets', express.static(path.join(__dirname, '../public/assets')));
   app.use(async (req: Request, res: Response, next) => {
     if (!protectedAdminPath(req.path)) return next();
     try {

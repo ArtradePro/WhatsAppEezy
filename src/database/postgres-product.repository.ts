@@ -133,11 +133,11 @@ export class PostgresProductRepository {
         meta_catalog_id: 'cat_higiene_005',
         meta_product_retailer_id: 'FNM-MIX-2X500',
         title: 'Duo Balance Pack (Sea Breeze + Pomegranate)',
-        description: 'Customer Favourite: 1x Sea Breeze (500 ml) + 1x Pomegranate (500 ml). Morning energy & evening relaxation in one value pack.',
+        description: 'Experience both marine coolness and fruity comfort in one pack. Dual ritual: Morning Sea Breeze energy + Evening Pomegranate relaxation. Direct manufacturer savings.',
         category: 'value_bundles',
         unit_of_measure: 'twin pack (1000 ml)',
         unit_price: 285.0,
-        enhanced_image_url: 'https://fungusnomore.co.za/wp-content/uploads/2026/02/FNM-Mix-2-Pack.png',
+        enhanced_image_url: 'https://whatsappeezy.up.railway.app/assets/products/duo-balance-pack.jpg',
         is_available: true,
       },
       {
