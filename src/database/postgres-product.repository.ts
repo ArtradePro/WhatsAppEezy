@@ -94,11 +94,11 @@ export class PostgresProductRepository {
         meta_catalog_id: 'cat_higiene_005',
         meta_product_retailer_id: 'FNM-COC-050',
         title: 'Coconut Antifungal Spray (50 ml)',
-        description: 'Targeted precision spray for instant topical defense against friction, moisture, and fungal discomfort. Pure fractionated coconut oil.',
+        description: 'Fast-absorbing targeted spray for feet, body folds & gym bags. Ultra-fine mist penetrates deep between toes. Fractionated coconut oil & botanical actives. Non-greasy & non-staining.',
         category: 'topical_spray',
         unit_of_measure: '50 ml bottle',
         unit_price: 189.0,
-        enhanced_image_url: 'https://fungusnomore.co.za/wp-content/uploads/2026/10/sku_coc_050ml_58124216-6807-4d48-a481-66d629cee5bb.png',
+        enhanced_image_url: 'https://whatsappeezy.up.railway.app/assets/products/coconut-spray-50ml.jpg',
         is_available: true,
       },
       {
