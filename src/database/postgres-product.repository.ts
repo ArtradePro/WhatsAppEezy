@@ -124,7 +124,7 @@ export class PostgresProductRepository {
         category: 'value_bundles',
         unit_of_measure: 'twin pack (1000 ml)',
         unit_price: 285.0,
-        enhanced_image_url: 'https://fungusnomore.co.za/wp-content/uploads/2026/02/FNM-Pomegranate-2-Pack.png',
+        enhanced_image_url: 'https://whatsappeezy.up.railway.app/assets/products/pomegranate-2-pack.jpg',
         is_available: true,
       },
       {
