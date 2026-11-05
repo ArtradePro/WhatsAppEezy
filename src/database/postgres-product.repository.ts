@@ -146,11 +146,11 @@ export class PostgresProductRepository {
         meta_catalog_id: 'cat_higiene_005',
         meta_product_retailer_id: 'FNM-BNDL-ALL',
         title: 'Complete Regimen Bundle (3-Piece)',
-        description: 'Premier 3-step skin defense protocol: 1x Sea Breeze (500 ml) + 1x Pomegranate (500 ml) + 1x Coconut Spray (50 ml). Unlocks FREE Courier Delivery!',
+        description: 'Complete 3-step head-to-toe skin defense: both 500 ml shower gels + high-potency coconut antifungal spray. Qualifies for FREE Courier Delivery across SA!',
         category: 'value_bundles',
         unit_of_measure: '3-piece kit',
         unit_price: 449.0,
-        enhanced_image_url: 'https://fungusnomore.co.za/wp-content/uploads/2026/02/FNM-Bundle-3-Pack.png',
+        enhanced_image_url: 'https://whatsappeezy.up.railway.app/assets/products/complete-regimen-bundle.jpg',
         is_available: true,
       },
       // Vendor C: Aura Luxe Hair & Wellness Studio (service_booking)
