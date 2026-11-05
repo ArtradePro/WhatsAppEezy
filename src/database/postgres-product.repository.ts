@@ -81,11 +81,11 @@ export class PostgresProductRepository {
         meta_catalog_id: 'cat_higiene_005',
         meta_product_retailer_id: 'FNM-POM-500',
         title: 'Pomegranate Shower Gel (500 ml)',
-        description: 'Fruity antioxidant-rich body wash crafted with pure pomegranate extract. Supports skin barrier defense and soothes sensitive skin.',
+        description: 'Antioxidant-rich pomegranate seed extract promotes skin barrier vitality. Uplifting botanical aroma. Formulated for sensitive or dry-prone skin requiring daily comfort.',
         category: 'body_wash',
         unit_of_measure: '500 ml bottle',
         unit_price: 149.0,
-        enhanced_image_url: 'https://fungusnomore.co.za/wp-content/uploads/2026/02/FNM-Pomegranate.png',
+        enhanced_image_url: 'https://whatsappeezy.up.railway.app/assets/products/pomegranate-500ml.jpg',
         is_available: true,
       },
       {
