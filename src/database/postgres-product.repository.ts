@@ -68,11 +68,11 @@ export class PostgresProductRepository {
         meta_catalog_id: 'cat_higiene_005',
         meta_product_retailer_id: 'FNM-SB-500',
         title: 'Sea Breeze Shower Gel (500 ml)',
-        description: 'Invigorating daily cooling body wash formulated with active Australian tea tree and eucalyptus. Crisp oceanic fragrance for active lifestyles.',
+        description: 'Invigorating marine cooling sensation powered by tea tree and menthol. Gently purifies pores without stripping hydration. Ideal for post-workout defense & humid climates.',
         category: 'body_wash',
         unit_of_measure: '500 ml bottle',
         unit_price: 149.0,
-        enhanced_image_url: 'https://fungusnomore.co.za/wp-content/uploads/2026/02/FNM-Sea-Breeze.png',
+        enhanced_image_url: 'https://whatsappeezy.up.railway.app/assets/products/sea-breeze-500ml.jpg',
         is_available: true,
       },
       {
