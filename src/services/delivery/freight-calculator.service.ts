@@ -115,7 +115,7 @@ export class FreightCalculatorService {
     deliveryAddress?: string,
     vendorCoords?: Coordinates,
     items?: CartItem[],
-    customRates?: { baseDeliveryFee?: number; perKmRate?: number; freeDeliveryRadiusKm?: number }
+    customRates?: { baseDeliveryFee?: number; perKmRate?: number; freeDeliveryRadiusKm?: number; isRetailDelivery?: boolean }
   ): Promise<FreightDeliveryQuote> {
     const origin = vendorCoords || {
       lat: config.VENDOR_DEFAULT_LAT,
@@ -125,6 +125,35 @@ export class FreightCalculatorService {
     const distanceResult = await distanceMatrixService.calculateDistance(origin, customerCoords);
     const distanceKm = distanceResult.distanceKm;
     const totalCubicMeters = items && items.length > 0 ? this.calculateAggregatedVolume(items) : 0;
+
+    // Check for retail courier delivery (Higiene, Fungus No More, etc.)
+    if (customRates?.isRetailDelivery) {
+      const itemsSubtotal = (items || []).reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+      const isFreeCourier = itemsSubtotal >= 400 || (customRates.freeDeliveryRadiusKm !== undefined && distanceKm <= customRates.freeDeliveryRadiusKm);
+      const courierFee = isFreeCourier ? 0 : (customRates.baseDeliveryFee ?? 99.0);
+      const tierName = isFreeCourier
+        ? itemsSubtotal >= 400
+          ? 'FREE Door-to-Door Courier Delivery (Orders R400+)'
+          : `FREE Local Courier (Within ${customRates.freeDeliveryRadiusKm}km Zone)`
+        : 'Door-to-Door Courier Delivery (Nationwide)';
+
+      return {
+        distanceKm,
+        durationMinutes: distanceResult.durationMinutes,
+        durationText: distanceResult.durationText,
+        freightTier: tierName,
+        baseFlagFall: courierFee,
+        ratePerKm: 0,
+        mileageCost: 0,
+        totalCubicMeters: 0,
+        tipperSurcharge: 0,
+        totalFreightCost: courierFee,
+        customerCoordinates: customerCoords,
+        deliveryAddress:
+          deliveryAddress || `GPS Pin (${customerCoords.lat.toFixed(4)}, ${customerCoords.lng.toFixed(4)})`,
+        vendorDepotCoordinates: origin,
+      };
+    }
 
     const freeRadiusKm = customRates?.freeDeliveryRadiusKm ?? 0;
     const isWithinFreeLocalZone =

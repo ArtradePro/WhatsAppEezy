@@ -93,4 +93,64 @@ describe('Higiene & Fungus No More Catalog & WhatsApp Commerce Flow', () => {
     const rows = sections[0].rows;
     expect(rows.length).toBe(7);
   });
+
+  it('delivers product image, cart confirmation, and nationwide courier delivery quote without tipper errors', async () => {
+    const stateMachine = new ConversationStateMachine();
+    const imageSpy = vi.spyOn(whatsAppClientService, 'sendImageMessage').mockResolvedValue('wamid.img');
+    const buttonSpy = vi.spyOn(whatsAppClientService, 'sendInteractiveButtons').mockResolvedValue('wamid.btn');
+    const quoteSpy = vi.spyOn(whatsAppClientService, 'sendOrderQuoteInteractiveButtons').mockResolvedValue('wamid.quote');
+
+    await conversationSessionStore.resetSession('27764862942', HIGIENE_VENDOR_ID);
+
+    // 0. Customer initiates chat with "hi" -> transitions IDLE to BROWSING with catalog
+    await stateMachine.handleInboundMessage(
+      '27764862942',
+      'Vernon',
+      createInboundMessage('hi'),
+      { vendorId: HIGIENE_VENDOR_ID, displayPhoneNumber: '+15553443356' }
+    );
+
+    // 1. Customer adds item #1 (Sea Breeze 500ml) from BROWSING
+    await stateMachine.handleInboundMessage(
+      '27764862942',
+      'Vernon',
+      createInboundMessage('1'),
+      { vendorId: HIGIENE_VENDOR_ID, displayPhoneNumber: '+15553443356' }
+    );
+
+    // Product image was sent!
+    expect(imageSpy).toHaveBeenCalled();
+    const [, imageUrl, caption] = imageSpy.mock.calls[0];
+    expect(imageUrl).toContain('sea-breeze-500ml.jpg');
+    expect(caption).toContain('Sea Breeze Shower Gel');
+
+    // Cart confirmation sent with "Cart Subtotal" (not Materials Subtotal) and "Courier Checkout"
+    expect(buttonSpy).toHaveBeenCalled();
+    const [, cartBody, buttons] = buttonSpy.mock.calls[0];
+    expect(cartBody).toContain('Cart Subtotal');
+    expect(cartBody).not.toContain('Materials Subtotal');
+    expect(buttons[0].title).toBe('🚚 Courier Checkout');
+
+    // 2. Customer proceeds to checkout
+    await stateMachine.handleInboundMessage(
+      '27764862942',
+      'Vernon',
+      createInboundMessage('1'),
+      { vendorId: HIGIENE_VENDOR_ID, displayPhoneNumber: '+15553443356' }
+    );
+
+    // 3. Customer submits Albertinia address/location (51.72 km away)
+    await stateMachine.handleInboundMessage(
+      '27764862942',
+      'Vernon',
+      createInboundMessage('38 Station St, Albertinia, 6695, Western Cape, ZA'),
+      { vendorId: HIGIENE_VENDOR_ID, displayPhoneNumber: '+15553443356' }
+    );
+
+    // Quote was generated without "out of delivery zone" or "tipper" errors
+    expect(quoteSpy).toHaveBeenCalled();
+    const [, , quoteDetails] = quoteSpy.mock.calls[0];
+    expect(quoteDetails.deliverySummary).toContain('Courier Delivery');
+    expect(quoteDetails.deliverySummary).not.toContain('Tipper');
+  });
 });

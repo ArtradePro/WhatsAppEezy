@@ -254,11 +254,27 @@ class WhatsAppClientService {
         });
     }
     /**
+     * Sends a native WhatsApp image message with an optional caption
+     */
+    async sendImageMessage(to, imageUrl, caption) {
+        const cleanPhone = to.startsWith('+') ? to : `+${to}`;
+        return this.sendPayload(cleanPhone, {
+            messaging_product: 'whatsapp',
+            recipient_type: 'individual',
+            to: cleanPhone,
+            type: 'image',
+            image: {
+                link: imageUrl,
+                caption: caption || '',
+            },
+        });
+    }
+    /**
      * Sends a native WhatsApp interactive location request message
      */
     async sendLocationRequestMessage(to, customBodyText) {
         const text = customBodyText ||
-            'To calculate accurate delivery fees and direct tipper transport from our nearest yard, please share your site location using the button below:';
+            '📍 To calculate accurate delivery fees and transit ETA, please share your delivery location or address:';
         return this.sendPayload(to, {
             messaging_product: 'whatsapp',
             recipient_type: 'individual',
@@ -279,11 +295,16 @@ class WhatsAppClientService {
      * Sends the official Order Quote interactive button message
      */
     async sendOrderQuoteInteractiveButtons(to, orderRef, quoteDetails) {
-        const yard = quoteDetails.yardName || 'Fonsi-Colquake Yard';
-        const bodyText = `📍 *Site Destination:* ${quoteDetails.deliveryAddress}\n` +
-            `🚚 *Distance:* ${quoteDetails.distanceKm} km from ${yard}\n\n` +
-            `*Materials:*\n${quoteDetails.materialsSummary}\n\n` +
-            `*Delivery & Handling:*\n${quoteDetails.deliverySummary}\n\n` +
+        const isRetail = Boolean(quoteDetails.isRetailDelivery);
+        const originLabel = isRetail ? 'Dispatched From:' : 'Supply Depot:';
+        const destinationLabel = isRetail ? 'Delivery Address:' : 'Site Destination:';
+        const itemsLabel = isRetail ? 'Order Items:' : 'Materials:';
+        const headerTitle = isRetail ? `Order Summary: #${orderRef}` : `Order Quote: #${orderRef}`;
+        const yard = quoteDetails.yardName || (isRetail ? 'Higiene Distribution Hub' : 'Fonsi-Colquake Yard');
+        const bodyText = `📍 *${destinationLabel}* ${quoteDetails.deliveryAddress}\n` +
+            `🚚 *${originLabel}* ${yard} (${quoteDetails.distanceKm.toFixed(1)} km)\n\n` +
+            `*${itemsLabel}*\n${quoteDetails.materialsSummary}\n\n` +
+            `*Delivery & Shipping:*\n${quoteDetails.deliverySummary}\n\n` +
             `*Total Amount Due:* *${quoteDetails.totalFormatted}* (Incl. VAT)\n\n` +
             `Select an option below to proceed:`;
         return this.sendPayload(to, {
@@ -295,7 +316,7 @@ class WhatsAppClientService {
                 type: 'button',
                 header: {
                     type: 'text',
-                    text: `Order Quote: #${orderRef}`,
+                    text: headerTitle,
                 },
                 body: {
                     text: bodyText,
@@ -335,11 +356,11 @@ class WhatsAppClientService {
      * Sends an interactive message when the customer's delivery pin exceeds the vendor's maximum operating zone
      */
     async sendOutOfDeliveryZoneButtons(to, details) {
-        const yard = details.yardName || 'our nearest supply yard';
+        const yard = details.yardName || 'our supply depot';
         const bodyText = `📍 *Your Location:* ${details.addressName}\n` +
             `📏 *Straight-Line Distance:* ${details.distanceKm} km from ${yard}\n\n` +
-            `⚠️ *Exceeds Operating Radius:* Our direct tipper delivery zone is limited to *${details.maxRadiusKm} km* to ensure timely offloading and standard haulage rates.\n\n` +
-            `You can share an alternate delivery pin closer to the yard, or connect with our logistics desk for custom long-distance dispatch:`;
+            `⚠️ *Exceeds Operating Radius:* Our direct local delivery zone is limited to *${details.maxRadiusKm} km* to ensure timely fulfillment.\n\n` +
+            `You can share an alternate delivery pin closer to our depot, or connect with our dispatch desk for custom long-distance shipping:`;
         return this.sendPayload(to, {
             messaging_product: 'whatsapp',
             recipient_type: 'individual',
@@ -355,7 +376,7 @@ class WhatsAppClientService {
                     text: bodyText,
                 },
                 footer: {
-                    text: 'Yard Delivery Radius Exceeded',
+                    text: 'Delivery Radius Exceeded',
                 },
                 action: {
                     buttons: [
@@ -585,7 +606,27 @@ class WhatsAppClientService {
             formData.append('source', (this.activeSourceNumber || env_1.config.GUPSHUP_SOURCE_NUMBER || '15554629242').replace(/^\+/, ''));
             formData.append('destination', cleanDestination);
             formData.append('src.name', this.activeAppName || env_1.config.GUPSHUP_APP_NAME || 'WhatsAppEezy');
-            formData.append('message', JSON.stringify({ type: 'text', text: bodyText }));
+            let gupshupMsg;
+            if (payload?.type === 'image' && payload?.image?.link) {
+                gupshupMsg = {
+                    type: 'image',
+                    originalUrl: payload.image.link,
+                    previewUrl: payload.image.link,
+                    caption: payload.image.caption || bodyText || '',
+                };
+            }
+            else if (payload?.interactive?.header?.type === 'image' && payload?.interactive?.header?.image?.link) {
+                gupshupMsg = {
+                    type: 'image',
+                    originalUrl: payload.interactive.header.image.link,
+                    previewUrl: payload.interactive.header.image.link,
+                    caption: bodyText,
+                };
+            }
+            else {
+                gupshupMsg = { type: 'text', text: bodyText };
+            }
+            formData.append('message', JSON.stringify(gupshupMsg));
             const headers = {
                 apikey: gupshupKey,
                 'Content-Type': 'application/x-www-form-urlencoded',

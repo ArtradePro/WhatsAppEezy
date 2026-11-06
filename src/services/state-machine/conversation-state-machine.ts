@@ -1033,8 +1033,11 @@ export class ConversationStateMachine {
       session.currentStage = 'ADDRESS_INPUT';
       await conversationSessionStore.saveSession(session);
 
-      // Send native WhatsApp location request message
-      await whatsAppClientService.sendLocationRequestMessage(session.waId);
+      const locationPrompt =
+        vendor.business_type === 'retail_delivery'
+          ? '📍 To calculate your door-to-door courier delivery, please share your delivery location pin or type your street address below:'
+          : '📍 To calculate accurate site delivery fees and transport, please share your delivery address or location pin below:';
+      await whatsAppClientService.sendLocationRequestMessage(session.waId, locationPrompt);
       return;
     }
 
@@ -1298,10 +1301,15 @@ export class ConversationStateMachine {
       };
       addressName = message.location.name || message.location.address || `GPS Pin (${customerCoords.lat.toFixed(4)}, ${customerCoords.lng.toFixed(4)})`;
     } else if (message.text?.body) {
-      // If user typed an address string
       addressName = message.text.body;
-      // Coordinates approximating customer address
-      customerCoords = { lat: config.VENDOR_DEFAULT_LAT + 0.15, lng: config.VENDOR_DEFAULT_LNG + 0.11 };
+      const mapsMatch = addressName.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+      if (mapsMatch) {
+        customerCoords = { lat: parseFloat(mapsMatch[1]), lng: parseFloat(mapsMatch[2]) };
+        const cleanName = addressName.split('\n').filter((l) => !l.includes('http')).join(', ').trim();
+        if (cleanName) addressName = cleanName;
+      } else {
+        customerCoords = { lat: config.VENDOR_DEFAULT_LAT + 0.15, lng: config.VENDOR_DEFAULT_LNG + 0.11 };
+      }
     }
 
     // 1. Geofence & Proximity Query via PostGIS check_vendor_delivery_radius
@@ -1314,8 +1322,9 @@ export class ConversationStateMachine {
       vendor.max_delivery_radius_km
     );
 
-    // If customer pin exceeds vendor's maximum operating zone (>45km), send interactive out-of-zone alert
-    if (!spatialCheck.within_radius) {
+    // If customer pin exceeds vendor's maximum operating zone for heavy building supplies/tipper, send interactive alert
+    const isBuildingYard = vendor.slug?.includes('sand') || vendor.slug?.includes('aggregate') || vendor.id === 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+    if (isBuildingYard && !spatialCheck.within_radius) {
       await whatsAppClientService.sendOutOfDeliveryZoneButtons(session.waId, {
         addressName,
         distanceKm: spatialCheck.distance_km,
@@ -1334,7 +1343,7 @@ export class ConversationStateMachine {
       address: addressName,
     };
 
-    // 3. Road Routing & Haulage Calculation with Google Distance Matrix & tipper surcharge
+    // 3. Road Routing & Haulage Calculation with Google Distance Matrix
     const vendorCoords = {
       lat: vendor.base_location_lat,
       lng: vendor.base_location_lon,
@@ -1349,6 +1358,7 @@ export class ConversationStateMachine {
         baseDeliveryFee: vendor.base_delivery_fee,
         perKmRate: vendor.per_km_rate,
         freeDeliveryRadiusKm: vendor.free_delivery_radius_km ?? 15,
+        isRetailDelivery: vendor.business_type === 'retail_delivery',
       }
     );
     session.currentQuote = quote;
@@ -1427,21 +1437,31 @@ export class ConversationStateMachine {
       .map((i) => `• ${i.quantity}x ${i.name} = ${config.DEFAULT_CURRENCY} ${i.totalPrice.toFixed(2)}`)
       .join('\n');
 
-    let deliverySummary =
-      quote.totalFreightCost === 0
-        ? `• Local Delivery (${quote.distanceKm.toFixed(1)} km): *FREE (R 0.00)*`
-        : `• Tipper Transport Dispatch: ${config.DEFAULT_CURRENCY} ${(quote.baseFlagFall + (quote.mileageCost || 0)).toFixed(2)}`;
-    if (quote.tipperSurcharge && quote.tipperSurcharge > 0) {
-      deliverySummary += `\n• Bulk Load Tipper Surcharge (>6m³): ${config.DEFAULT_CURRENCY} ${quote.tipperSurcharge.toFixed(2)}`;
+    const isRetail = vendor.business_type === 'retail_delivery';
+    let deliverySummary: string;
+    if (isRetail) {
+      deliverySummary =
+        quote.totalFreightCost === 0
+          ? `• Door-to-Door Courier Delivery: *FREE (Orders R400+)*`
+          : `• Door-to-Door Courier Delivery: ${config.DEFAULT_CURRENCY} ${quote.totalFreightCost.toFixed(2)}`;
+    } else {
+      deliverySummary =
+        quote.totalFreightCost === 0
+          ? `• Local Delivery (${quote.distanceKm.toFixed(1)} km): *FREE (R 0.00)*`
+          : `• Tipper Transport Dispatch: ${config.DEFAULT_CURRENCY} ${(quote.baseFlagFall + (quote.mileageCost || 0)).toFixed(2)}`;
+      if (quote.tipperSurcharge && quote.tipperSurcharge > 0) {
+        deliverySummary += `\n• Bulk Load Tipper Surcharge (>6m³): ${config.DEFAULT_CURRENCY} ${quote.tipperSurcharge.toFixed(2)}`;
+      }
     }
 
     await whatsAppClientService.sendOrderQuoteInteractiveButtons(session.waId, orderRef, {
       deliveryAddress: addressName,
       distanceKm: quote.distanceKm,
-      yardName: vendor.business_name || 'Fonsi-Colquake Yard',
+      yardName: vendor.business_name || (isRetail ? 'Higiene Distribution Hub' : 'Fonsi-Colquake Yard'),
       materialsSummary,
       deliverySummary,
       totalFormatted: `${config.DEFAULT_CURRENCY} ${grandTotal.toFixed(2)}`,
+      isRetailDelivery: isRetail,
     });
   }
 
@@ -1662,16 +1682,23 @@ export class ConversationStateMachine {
     session.currentStage = 'CART_BUILDING';
     await conversationSessionStore.saveSession(session);
 
+    const isRetail = vendor.business_type === 'retail_delivery';
+    const subtotalLabel = isRetail ? 'Cart Subtotal' : 'Materials Subtotal';
+    const checkoutTitle = isRetail ? '🚚 Courier Checkout' : '🚚 Calculate Delivery';
+    const deliveryNote = isRetail
+      ? "Let's calculate fast door-to-door courier delivery across South Africa."
+      : "Heavy building supplies require freight transit calculation. Let's calculate delivery to your site.";
+
     const summary =
       `🛒 *Catalog Order Received!*\n\n` +
       session.cart
         .map((i) => `• ${i.quantity}x ${i.name} = ${config.DEFAULT_CURRENCY} ${i.totalPrice.toFixed(2)}`)
         .join('\n') +
-      `\n\n*Materials Subtotal*: ${config.DEFAULT_CURRENCY} ${subtotal.toFixed(2)}\n\n` +
-      `Heavy building supplies require freight transit calculation. Let's calculate delivery to your site.`;
+      `\n\n*${subtotalLabel}*: ${config.DEFAULT_CURRENCY} ${subtotal.toFixed(2)}\n\n` +
+      deliveryNote;
 
     await whatsAppClientService.sendInteractiveButtons(session.waId, summary, [
-      { id: 'btn_proceed_delivery', title: '🚚 Calculate Delivery' },
+      { id: 'btn_proceed_delivery', title: checkoutTitle },
       { id: 'btn_add_more', title: '➕ Add Items' },
     ]);
   }
@@ -1790,10 +1817,21 @@ export class ConversationStateMachine {
       return;
     }
 
+    if (matchedVendorProduct?.enhanced_image_url) {
+      await whatsAppClientService.sendImageMessage(
+        session.waId,
+        matchedVendorProduct.enhanced_image_url,
+        `🧴 *${matchedVendorProduct.title}*\n${matchedVendorProduct.description || ''}\n💰 *Price:* ${config.DEFAULT_CURRENCY} ${matchedVendorProduct.unit_price.toFixed(2)} (${matchedVendorProduct.unit_of_measure})`
+      );
+    }
+
     session.currentStage = 'CART_BUILDING';
     await conversationSessionStore.saveSession(session);
 
     const subtotal = session.cart.reduce((sum, i) => sum + i.totalPrice, 0);
+    const isRetail = vendor.business_type === 'retail_delivery';
+    const subtotalLabel = isRetail ? 'Cart Subtotal' : 'Materials Subtotal';
+    const checkoutTitle = isRetail ? '🚚 Courier Checkout' : '🚚 Calculate Delivery';
 
     const cartText =
       `✅ Added *${selectedItem.name}* to cart!\n\n` +
@@ -1801,10 +1839,10 @@ export class ConversationStateMachine {
       session.cart
         .map((i) => `• ${i.quantity}x ${i.name} = ${config.DEFAULT_CURRENCY} ${i.totalPrice.toFixed(2)}`)
         .join('\n') +
-      `\n\n*Materials Subtotal*: ${config.DEFAULT_CURRENCY} ${subtotal.toFixed(2)}`;
+      `\n\n*${subtotalLabel}*: ${config.DEFAULT_CURRENCY} ${subtotal.toFixed(2)}`;
 
     await whatsAppClientService.sendInteractiveButtons(session.waId, cartText, [
-      { id: 'btn_proceed_delivery', title: '🚚 Calculate Delivery' },
+      { id: 'btn_proceed_delivery', title: checkoutTitle },
       { id: 'btn_add_more', title: '➕ Add More Items' },
     ]);
   }
